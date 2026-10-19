@@ -63,18 +63,15 @@
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>'
   };
   const ic = (n, cls) => '<svg class="icon ' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[n] || '') + '</svg>';
-  const srcIc = s => { const src = D.SOURCES[s] || D.SOURCES.keeper; return '<span class="src-ic" style="--c:' + src.color + '">' + ic(s) + '</span>'; };
-  const srcTag = s => { const src = D.SOURCES[s] || D.SOURCES.keeper; return '<span class="src" style="--c:' + src.color + '">' + srcIc(s) + esc(src.label) + '</span>'; };
-  const AVC = ['#6E4BD8', '#D04F7C', '#2F8A63', '#C27C0E', '#2F6FD0', '#8A4FBF', '#0E8A7E', '#B4415E'];
+  /* colour is reserved for actions: sources, people and projects are neutral */
+  const srcLabel = s => (D.SOURCES[s] || D.SOURCES.keeper).label;
+  const srcIc = s => '<span class="src-ic" title="' + esc(srcLabel(s)) + '">' + ic(s) + '</span>';
+  const srcTag = s => '<span class="lab">' + srcIc(s) + esc(srcLabel(s)) + '</span>';
   const personName = k => (D.PEOPLE[k] ? D.PEOPLE[k].name : k) || '';
   const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  function av(k) {
-    const n = personName(k); if (!n) return '';
-    let h = 0; for (const c of n) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-    return '<span class="av" style="--c:' + AVC[h % AVC.length] + '" title="' + esc(n) + '">' + esc(initials(n)) + '</span>';
-  }
-  const projTag = p => { const pr = D.PROJECTS[p]; return pr ? '<span class="proj" style="--c:' + pr.color + '"><i></i>' + esc(pr.name) + '</span>' : ''; };
-  const COLC = { backlog: '#A39DB0', upnext: '#8B6CF0', inprogress: '#2F6FD0', blocked: '#D04F7C', done: '#2F9461' };
+  const av = k => { const n = personName(k); return n ? '<span class="av" title="' + esc(n) + '">' + esc(initials(n)) + '</span>' : ''; };
+  const projName = p => (D.PROJECTS[p] ? D.PROJECTS[p].name : '');
+  const projTag = p => esc(projName(p));
 
   /* ---------- state ---------- */
   let uid = 1;
@@ -89,16 +86,17 @@
   }
   const narrow = () => window.innerWidth < 720;
   function fresh() {
-    return { onboarded: false, step: 0, channels: ['gmail', 'slack', 'sms', 'zoom'], screen: 'board', mode: 'mobile',
-      tasks: D.SEED.map(t => mkTask(t)), incomingIdx: 0, live: true, filter: { text: '', tokens: [] } };
+    return { onboarded: false, step: 0, channels: ['gmail', 'slack', 'sms', 'zoom'], screen: 'board', mode: 'mobile', mstatus: 'upnext',
+      tasks: D.SEED.map(t => mkTask(t)), incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
   }
   function load() {
-    try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; return s; } } catch (e) {}
+    try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = s.mstatus || 'upnext'; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
     return null;
   }
   let S = load() || fresh();
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
-  const UI = { sheet: null, menu: null, ask: null, drag: null, suppressClick: false };
+  const UI = { sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
+  const filterOn = () => !!(S.filter.text.trim() || S.filter.tokens.length);
   const mode = () => (narrow() ? 'mobile' : S.mode);
   const task = id => S.tasks.find(t => t.id === id);
 
@@ -122,7 +120,7 @@
   ];
   const DUEWORDS = [['overdue', /\b(overdue|late|past due)\b/, 'Overdue'], ['today', /\btoday\b/, 'Due today'], ['tomorrow', /\btomorrow\b/, 'Due tomorrow'],
     ['thisweek', /\bthis week\b/, 'Due this week'], ['nextweek', /\bnext week\b/, 'Due next week'], ['nodate', /\bno (due )?date\b/, 'No date']];
-  const STOP = new Set('a an the all my me show find tasks task for from with due and or in on to of what is are that any by about please items things stuff need needs who'.split(' '));
+  const STOP = new Set('a an the all my me show find tasks task for from with due and or in on to of what is are that any by about please items things stuff need needs who anything everything something show'.split(' '));
   function parseFilter(text) {
     let t = ' ' + text.toLowerCase() + ' ';
     const out = [];
@@ -253,6 +251,15 @@
     device.classList.toggle('is-mobile', m === 'mobile');
     device.classList.toggle('is-desktop', m === 'desktop');
     $$('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+    fitDevice();
+  }
+  /* phone is laid out at a true 390×844 and scaled to fit the window, so nothing reflows or clips */
+  function fitDevice() {
+    if (mode() !== 'mobile' || narrow()) { device.style.transform = ''; UI.scale = 1; return; }
+    const st = $('#stage');
+    const s = Math.min(1, (st.clientWidth - 32) / 410, (st.clientHeight - 24) / 864);
+    UI.scale = s;
+    device.style.transform = 'translate(-50%,-50%) scale(' + s.toFixed(4) + ')';
   }
   function render() {
     setMode();
@@ -304,7 +311,8 @@
     const today = open.filter(t => t.due && daysOut(t.due) === 0).length;
     const over = open.filter(t => t.due && daysOut(t.due) < 0).length;
     const blocked = open.filter(t => t.status === 'blocked').length;
-    return `<span class="s-warn">${today} due today</span>${over ? `<span class="s-bad">${over} overdue</span>` : ''}${blocked ? `<span class="s-blk">${blocked} blocked</span>` : ''}<span>${open.length} open</span>`;
+    const sep = '<span class="sep">·</span>';
+    return `<b>${today}</b> due today${over ? sep + `<span class="bad"><b>${over}</b> overdue</span>` : ''}${blocked ? sep + `<b>${blocked}</b> blocked` : ''}${sep}<b>${open.length}</b> open`;
   }
   function greeting() {
     const h = new Date().getHours();
@@ -312,17 +320,20 @@
     const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     return `<div class="greet"><div class="date">${esc(date)}</div><h1>${g}, <em>Maya</em></h1><div class="sum" id="summary">${summary()}</div></div>`;
   }
+  const searchBtn = () => `<button type="button" class="icon-btn ${UI.search || filterOn() ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Search and filter" aria-expanded="${UI.search}">${ic('search')}</button>`;
+  /* collapsed to an icon by default; expands on demand */
   function filterBar() {
+    if (!UI.search) return '<div id="filter" hidden></div>';
     const quick = ['Communication', 'Deliverables', 'Scheduling', 'Purchasing', 'Coordination'];
     const on = v => S.filter.tokens.some(t => t.type === 'category' && t.value === v);
-    return `<div class="filter" id="filter">
-      <label class="fbox">${ic('spark')}<input id="fInput" type="text" autocomplete="off" placeholder="Filter: try “Slack tasks for Brightside” or “anything from Marcus”" value="${esc(S.filter.text)}" aria-label="Filter the board in plain language">
-      <button type="button" class="clr" data-action="f-clear" aria-label="Clear filter" ${S.filter.text || S.filter.tokens.length ? '' : 'hidden'}>${ic('x')}</button></label>
+    return `<div class="search" id="filter">
+      <label class="fbox">${ic('search')}<input id="fInput" type="text" autocomplete="off" placeholder="Try “Slack tasks for Brightside”" value="${esc(S.filter.text)}" aria-label="Filter the board in plain language">
+      <button type="button" class="clr" data-action="f-close" aria-label="Close search">${ic('x')}</button></label>
       <div class="chips">
-        ${quick.map(c => `<button type="button" class="chip ${on(c) ? 'on' : ''}" data-action="f-cat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}
         <button type="button" class="chip" data-action="f-menu" data-menu="project">Project <span class="caret">▾</span></button>
-        <button type="button" class="chip" data-action="f-menu" data-menu="person">Collaborators <span class="caret">▾</span></button>
+        <button type="button" class="chip" data-action="f-menu" data-menu="person">People <span class="caret">▾</span></button>
         <button type="button" class="chip" data-action="f-menu" data-menu="source">Channel <span class="caret">▾</span></button>
+        ${quick.map(c => `<button type="button" class="chip ${on(c) ? 'on' : ''}" data-action="f-cat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}
       </div>
       <div class="tokens" id="tokens">${tokensHTML()}</div>
     </div>`;
@@ -331,18 +342,20 @@
     const toks = activeTokens();
     if (!toks.length) return '';
     const n = S.tasks.filter(t => matches(t, toks)).length;
-    return `<span class="lbl">${n} match${n === 1 ? '' : 'es'}:</span>` + toks.map((t, i) =>
-      `<button type="button" class="tok ${t.auto ? 'auto' : ''}" data-action="tok-x" data-i="${i}" title="Remove">${esc(t.label)}<span class="x">×</span></button>`).join('')
-      + '<button type="button" class="clear-all" data-action="f-clear">Clear</button>';
+    return `<span class="lbl">${n} match${n === 1 ? '' : 'es'}</span>` + toks.map((t, i) =>
+      `<button type="button" class="tok" data-action="tok-x" data-i="${i}" title="Remove">${esc(t.label)}<span class="x">×</span></button>`).join('')
+      + '<button type="button" class="linkish" data-action="f-clear">Clear</button>';
   }
 
   function cardHTML(t) {
     const di = dueInfo(t.due, t.status);
-    const ppl = [t.requester && t.requester !== 'maya' ? t.requester : null].concat(t.collaborators).filter(Boolean);
-    return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
-      <div class="card-top">${srcTag(t.source)}<span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
+    const who = t.requester && t.requester !== 'maya' ? personName(t.requester) : 'You';
+    const where = [projName(t.project), who].filter(Boolean).join(' · ');
+    return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.status === 'blocked' ? 'blocked' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
       <div class="card-title">${esc(t.title)}</div>
-      <div class="card-meta">${projTag(t.project)}<span class="avs">${ppl.map(av).join('')}</span></div>
+      <div class="card-meta"><span class="where">${srcIc(t.source)}<span>${esc(where)}</span></span>
+        ${t.collaborators.length ? `<span class="avs">${t.collaborators.map(av).join('')}</span>` : ''}
+        <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
     </article>`;
   }
   function boardHTML() {
@@ -350,32 +363,38 @@
     return D.COLUMNS.map(c => {
       const list = S.tasks.filter(t => t.status === c.id && matches(t, toks));
       return `<section class="col" data-col="${c.id}">
-        <div class="col-h" style="--c:${COLC[c.id]}"><i></i>${esc(c.name)}<span class="n">${list.length}</span></div>
+        <div class="col-h ${c.id === 'blocked' && list.length ? 'bad' : ''}">${esc(c.name)}<span class="n">${list.length}</span></div>
         <div class="col-body">${list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks' : 'Drop tasks here'}</div>`}</div>
       </section>`;
     }).join('');
+  }
+  /* mobile: one status at a time, full-width cards */
+  function mTabsHTML() {
+    const toks = activeTokens();
+    return D.COLUMNS.map(c => {
+      const n = S.tasks.filter(t => t.status === c.id && matches(t, toks)).length;
+      return `<button type="button" class="mtab ${S.mstatus === c.id ? 'on' : ''}" data-action="mtab" data-tab="${c.id}">${esc(c.name)}<span class="n">${n}</span></button>`;
+    }).join('');
+  }
+  function mListHTML() {
+    const toks = activeTokens();
+    const list = S.tasks.filter(t => t.status === S.mstatus && matches(t, toks));
+    return list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`;
   }
   const incoming = () => S.tasks.filter(t => t.source !== 'keeper').sort((a, b) => b.captured - a.captured);
   function statusLabel(s) { const c = D.COLUMNS.find(c => c.id === s); return c ? c.name : s; }
   function feedRow(t, opts) {
     const di = dueInfo(t.due, t.status);
-    const req = t.requester && t.requester !== 'maya' ? 'from ' + esc(personName(t.requester)) : 'from you';
-    const proj = D.PROJECTS[t.project] ? esc(D.PROJECTS[t.project].name) : '';
+    const req = t.requester && t.requester !== 'maya' ? 'From ' + esc(personName(t.requester)) : 'From you';
+    const proj = projName(t.project);
     return `<button type="button" class="frow ${t.fresh ? 'new' : ''}" data-action="open" data-id="${t.id}">
       ${srcIc(t.source)}
       <span class="frow-txt"><span class="frow-title">${t.fresh ? '<span class="newtag">NEW</span> ' : ''}${esc(t.title)}</span>
-        <span class="frow-meta"><span>${req}</span>${proj ? `<span class="sep">•</span><span>${proj}</span>` : ''}<span class="due ${di.cls}">${esc(di.label)}</span>${t.collaborators.length ? `<span class="avs">${t.collaborators.map(av).join('')}</span>` : ''}</span>
-        ${opts && opts.snip ? `<span class="snip">“${esc(t.snippet)}”</span>` : ''}
+        <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''} · <span class="due ${di.cls}">${esc(di.label)}</span></span>
+        ${opts && opts.snip && t.snippet ? `<span class="snip">“${esc(t.snippet)}”</span>` : ''}
       </span>
-      <span class="when">${ago(t.captured)}${opts && opts.status ? `<br><span class="st">${esc(statusLabel(t.status))}</span>` : ''}</span>
+      <span class="when">${ago(t.captured)}${opts && opts.status ? `<span class="st">${esc(statusLabel(t.status))}</span>` : ''}</span>
     </button>`;
-  }
-  function feedPreviewHTML(n) {
-    const list = incoming().slice(0, n);
-    const newCount = S.tasks.filter(t => t.fresh).length;
-    return `<div class="fprev-h"><span class="live-dot ${S.live ? '' : 'off'}"></span><b>Incoming</b><span class="cnt">${S.live ? 'Live' : 'Paused'}${newCount ? ' · ' + newCount + ' new' : ''}</span>
-      <button type="button" class="see" data-action="go" data-screen="feed">See all ${ic('chev')}</button></div>
-      <div class="fprev-list">${list.map(t => feedRow(t)).join('')}</div>`;
   }
   function feedPageHTML() {
     const list = incoming();
@@ -400,26 +419,28 @@
       const s = D.SOURCES[k], on = S.channels.includes(k);
       const n = S.tasks.filter(t => t.source === k).length;
       return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
-        <span class="src-ic" style="--c:${s.color}">${ic(k)}</span>
+        ${srcIc(k)}
         <span class="chan-txt"><b>${esc(k === 'sms' ? 'Keeper business line' : s.label)}</b><span>${on ? n + ' tasks caught · listening' : esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
         <span class="tog" aria-hidden="true"></span></button>`;
     }).join('')}<p class="note">Prototype: connections are simulated. New incoming tasks only come from channels that are on.</p></div>`;
   }
+  const badge = id => `<span class="dot-badge" id="${id}" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span>`;
 
   function renderMobile() {
-    const newCount = S.tasks.filter(t => t.fresh).length;
     let body;
-    if (S.screen === 'feed') body = `<div class="page-h"><button class="back" data-action="go" data-screen="board" aria-label="Back">${ic('back')}</button><h1>Feed</h1></div><div id="feedPage">${feedPageHTML()}</div>`;
+    if (S.screen === 'feed') body = `<div class="page-h"><h1>Incoming</h1></div><div id="feedPage">${feedPageHTML()}</div>`;
     else if (S.screen === 'sources') body = `<div class="page-h"><h1>Channels</h1></div>${sourcesHTML()}`;
-    else body = `${greeting()}${filterBar()}<div class="fprev" id="feedPreview">${feedPreviewHTML(2)}</div>
-      <div class="board-h"><h2>Board</h2><span class="hint">Hold a card to drag · swipe for more</span></div>
-      <div class="board" id="board">${boardHTML()}</div>`;
+    else body = `${greeting()}${filterBar()}
+      <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
+      <div class="m-list col-body" id="mList" data-col="${S.mstatus}">${mListHTML()}</div>
+      <p class="m-hint">Tap to edit · hold and drag onto a tab to move</p>`;
     return `<div class="m-home">
-      <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div><button class="m-me" data-action="go" data-screen="sources" aria-label="Channels">M</button></div>
+      <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
+        ${S.screen === 'board' ? searchBtn() : ''}<span class="m-me" aria-label="Maya">M</span></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
-        <button class="${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed"><span class="navi">${ic('feed')}<span class="badge" id="navBadge" ${newCount ? '' : 'hidden'}>${newCount}</span></span>Feed</button>
+        <button class="${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed"><span class="navi">${ic('feed')}${badge('navBadge')}</span>Incoming</button>
         <button class="fab" data-action="ask" aria-label="Ask Keeper: add a task by typing or voice">${ic('plus')}</button>
         <button class="${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('plug')}Channels</button>
         <button data-action="ask-voice">${ic('mic')}Voice</button>
@@ -427,41 +448,40 @@
     </div>`;
   }
   function renderDesktop() {
-    const newCount = S.tasks.filter(t => t.fresh).length;
-    const projOn = p => S.filter.tokens.some(t => t.type === 'project' && t.value === p);
-    const projects = Object.keys(D.PROJECTS).map(p => `<button type="button" class="d-proj ${projOn(p) ? 'on' : ''}" data-action="f-proj" data-v="${p}" style="--c:${D.PROJECTS[p].color}"><i></i>${esc(D.PROJECTS[p].name)}<span class="n">${S.tasks.filter(t => t.project === p && t.status !== 'done').length}</span></button>`).join('');
     let main;
-    if (S.screen === 'feed') main = `<div class="d-content"><div class="page-h"><h1>Feed</h1></div><div id="feedPage">${feedPageHTML()}</div></div>`;
-    else if (S.screen === 'sources') main = `<div class="d-content"><div class="page-h"><h1>Channels</h1></div>${sourcesHTML()}</div>`;
-    else main = `<div class="d-head">${greeting()}<button class="btn-ask" data-action="ask">${ic('spark')} Ask Keeper <kbd>N</kbd></button></div>
-      ${filterBar()}<div class="fprev" id="feedPreview">${feedPreviewHTML(3)}</div><div class="board-h"><h2>Board</h2><span class="hint">Drag cards between columns · click to edit</span></div>
+    if (S.screen === 'feed') main = `<div class="screen"><div class="page-h"><h1>Incoming</h1></div><div id="feedPage">${feedPageHTML()}</div></div>`;
+    else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Channels</h1></div>${sourcesHTML()}</div>`;
+    else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
+        <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Incoming${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
+        <button class="btn-ask" data-action="ask">${ic('plus')} Add task <kbd>N</kbd></button></div></div>
+      ${filterBar()}
       <div class="board" id="board">${boardHTML()}</div>`;
     return `<div class="d-layout">
       <aside class="d-side">
         <div class="d-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
         <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
-        <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Feed<span class="badge" id="navBadge" ${newCount ? '' : 'hidden'}>${newCount}</span></button>
+        <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Incoming<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
         <button class="d-nav ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('plug')}Channels</button>
-        <div class="d-sh">Projects</div>${projects}
-        <div class="d-me"><span class="m-me" aria-hidden="true">M</span><span><b>Maya</b><span>Brand strategist</span></span></div>
+        <div class="d-me"><span class="m-me" aria-hidden="true">M</span><span><b>Maya</b><small>Brand strategist</small></span></div>
       </aside>
-      <section class="d-main">${main}</section>
+      <section class="d-main" id="dMain">${main}</section>
     </div>`;
   }
   /* refresh data-driven regions without touching inputs */
   function refresh() {
     if (!S.onboarded) return;
     if (UI.drag && UI.drag.active) { UI.pending = true; return; }
-    const b = $('#board'); if (b) { const sl = b.scrollLeft, st = b.scrollTop; b.innerHTML = boardHTML(); b.scrollLeft = sl; b.scrollTop = st; }
-    const fp = $('#feedPreview'); if (fp) fp.innerHTML = feedPreviewHTML(mode() === 'mobile' ? 2 : 3);
+    const b = $('#board'); if (b) { const sl = b.scrollLeft; b.innerHTML = boardHTML(); b.scrollLeft = sl; }
+    const mt = $('#mTabs'); if (mt) { const sl = mt.scrollLeft; mt.innerHTML = mTabsHTML(); mt.scrollLeft = sl; }
+    const ml = $('#mList'); if (ml) { ml.dataset.col = S.mstatus; ml.innerHTML = mListHTML(); }
     const fpg = $('#feedPage'); if (fpg) fpg.innerHTML = feedPageHTML();
     const sm = $('#summary'); if (sm) sm.innerHTML = summary();
     const tk = $('#tokens'); if (tk) tk.innerHTML = tokensHTML();
-    const clr = $('.fbox .clr'); if (clr) clr.hidden = !(S.filter.text || S.filter.tokens.length);
+    const sb = $('#searchBtn'); if (sb) sb.classList.toggle('on', UI.search || filterOn());
     $$('.chips .chip[data-action="f-cat"]').forEach(c => c.classList.toggle('on', S.filter.tokens.some(t => t.type === 'category' && t.value === c.dataset.v)));
-    $$('.d-proj').forEach(c => c.classList.toggle('on', S.filter.tokens.some(t => t.type === 'project' && t.value === c.dataset.v)));
-    const nb = $('#navBadge'); if (nb) { const n = S.tasks.filter(t => t.fresh).length; nb.textContent = n; nb.hidden = !n; }
-    if (UI.sheet && UI.sheet.type === 'task') renderLayer();
+    const nb = $('#navBadge'); if (nb) { nb.textContent = S.unseen; nb.hidden = !S.unseen; }
+    const ic2 = $('#incCount'); if (ic2) ic2.textContent = S.unseen ? S.unseen + ' new' : '';
+    if (UI.sheet && (UI.sheet.type === 'task' || UI.sheet.type === 'inc')) renderLayer(true);
   }
 
   /* ---------- sheets ---------- */
@@ -480,7 +500,7 @@
           <h2 class="sh-title">${esc(t.title)}</h2>
           ${t.snippet ? `<div class="quote"><span class="from">Caught ${ago(t.captured)} ago from ${esc((D.SOURCES[t.source] || {}).label)}</span>“${esc(t.snippet)}”</div>` : ''}
           <dl class="fields"><dt>Requested by</dt><dd>${req}</dd><dt>Collaborators</dt><dd>${collabs}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd><dt>Type</dt><dd>${esc(t.category)}</dd></dl>
-          <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}" style="--c:${COLC[c.id]}"><i></i>${esc(c.name)}</button>`).join('')}</div></div>
+          <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${esc(c.name)}</button>`).join('')}</div></div>
           <div><div class="fl">Due date</div><div class="duebox">
             <input type="date" id="dueInput" value="${t.due || ''}" aria-label="Due date">
             ${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
@@ -488,6 +508,14 @@
           </div></div>
         </div>
         <div class="sh-foot">${t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`}</div>
+      </div>`;
+    } else if (UI.sheet.type === 'inc') {
+      const list = incoming().slice(0, 12);
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Incoming">
+        <div class="grab"></div>
+        <div class="sh-h"><span class="live-dot ${S.live ? '' : 'off'}"></span><b>Incoming</b><span class="lab">${S.live ? 'Live' : 'Paused'}</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="inc-list"><div class="feed-list">${list.map(t => feedRow(t, { status: true })).join('')}</div></div>
+        <div class="sh-foot"><button class="btn-ghost" data-action="simulate">${ic('bolt')} Simulate</button><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
       </div>`;
     } else if (UI.sheet.type === 'ask') {
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask" role="dialog" aria-modal="true" aria-label="Ask Keeper">
@@ -630,7 +658,7 @@
       if (!manual && S.channels.length && !S.channels.includes(tpl.source)) continue;
       const t = mkTask(Object.assign({}, tpl, { status: 'backlog', ago: 0 }));
       t.fresh = true;
-      S.tasks.push(t); save(); refresh();
+      S.tasks.push(t); S.unseen = (S.unseen || 0) + 1; save(); refresh();
       toast(srcIc(t.source) + 'Caught from ' + esc(D.SOURCES[t.source].label) + ': ' + esc(t.title));
       setTimeout(() => { t.fresh = false; refresh(); }, 6000);
       return;
@@ -664,16 +692,23 @@
     menu.innerHTML = items.map(it => `<button type="button" class="${on(it) ? 'on' : ''}" data-action="menu-pick" data-type="${it.type}" data-v="${it.value}" data-label="${esc(it.label)}">${it.type === 'person' ? av(it.value) : it.type === 'source' ? srcIc(it.value) : projTag(it.value).replace(esc(it.label), '')}${esc(it.label)}${it.sub ? ` <span style="color:var(--faint);font-size:12px">· ${esc(it.sub)}</span>` : ''}${on(it) ? ' ✓' : ''}</button>`).join('');
     const host = $('#filter'); host.appendChild(menu);
     const hb = host.getBoundingClientRect(), bb = btn.getBoundingClientRect();
-    const z = 1;
+    const z = UI.scale || 1;
     menu.style.top = (bb.bottom - hb.top + 6) / z + 'px';
     menu.style.left = Math.max(8, Math.min(bb.left - hb.left, hb.width - 230)) / z + 'px';
     UI.menu = kind;
   }
   function closeMenu() { const m = $('#menu'); if (m) m.remove(); UI.menu = null; }
+  /* mobile shows one status at a time: when filtering, land on a status that has results */
+  function jumpToMatches() {
+    if (!$('#mList')) return;
+    const toks = activeTokens(); if (!toks.length) return;
+    const has = s => S.tasks.some(t => t.status === s && matches(t, toks));
+    if (!has(S.mstatus)) { const c = D.COLUMNS.find(c => has(c.id)); if (c) S.mstatus = c.id; }
+  }
   function toggleToken(tok) {
     const i = S.filter.tokens.findIndex(t => t.type === tok.type && t.value === tok.value);
     if (i >= 0) S.filter.tokens.splice(i, 1); else S.filter.tokens.push(tok);
-    save(); refresh();
+    jumpToMatches(); save(); refresh();
   }
 
   /* ---------- events ---------- */
@@ -708,7 +743,11 @@
         else { a.classList.toggle('on', i < 0); a.setAttribute('aria-pressed', String(i < 0)); toast(srcIc(k) + (i < 0 ? 'Listening to ' : 'Paused ') + esc(D.SOURCES[k].label)); const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); }
         break;
       }
-      case 'go': S.screen = a.dataset.screen; save(); closeMenu(); render(); if (S.screen === 'feed') setTimeout(() => { S.tasks.forEach(t => t.fresh = false); }, 5000); break;
+      case 'go': S.screen = a.dataset.screen; if (S.screen === 'feed') S.unseen = 0; UI.sheet = null; save(); closeMenu(); render(); if (S.screen === 'feed') setTimeout(() => { S.tasks.forEach(t => t.fresh = false); }, 5000); break;
+      case 'inc': S.unseen = 0; save(); refresh(); openSheet({ type: 'inc' }); break;
+      case 'mtab': S.mstatus = a.dataset.tab; save(); refresh(); { const mb = $('#mBody'), mt = $('#mTabs'); if (mb && mt && mb.scrollTop > mt.offsetTop) mb.scrollTop = mt.offsetTop; } break;
+      case 'search': UI.search = !UI.search; render(); if (UI.search) { const i = $('#fInput'); if (i) i.focus(); } break;
+      case 'f-close': UI.search = false; S.filter = { text: '', tokens: [] }; save(); render(); break;
       case 'open': openSheet({ type: 'task', id: a.dataset.id }); break;
       case 'close': closeSheet(); break;
       case 'set-status': { const t = task(UI.sheet.id); t.status = a.dataset.v; save(); refresh(); renderLayer(true); toast('Moved to ' + esc(statusLabel(t.status))); break; }
@@ -755,7 +794,7 @@
     return re ? text.replace(new RegExp(re.source, 'gi'), ' ') : text;
   }
   document.addEventListener('input', e => {
-    if (e.target.id === 'fInput') { S.filter.text = e.target.value; save(); refresh(); }
+    if (e.target.id === 'fInput') { S.filter.text = e.target.value; jumpToMatches(); save(); refresh(); }
   });
   document.addEventListener('change', e => {
     if (e.target.id === 'dueInput' && UI.sheet) { const t = task(UI.sheet.id); t.due = e.target.value || null; save(); refresh(); renderLayer(true); toast(t.due ? 'Due date updated' : 'Due date cleared'); }
@@ -802,26 +841,32 @@
   document.addEventListener('pointercancel', endPointer);
   function beginDrag(d) {
     d.active = true;
-    const r = d.card.getBoundingClientRect();
+    const r = d.card.getBoundingClientRect(), z = UI.scale || 1;
     d.dx = d.x0 - r.left; d.dy = d.y0 - r.top;
     const g = d.card.cloneNode(true);
     g.classList.add('ghost'); g.classList.remove('lp', 'fresh');
-    g.style.width = r.width + 'px'; g.style.left = r.left + 'px'; g.style.top = r.top + 'px';
+    g.style.width = (r.width / z) + 'px'; g.style.left = r.left + 'px'; g.style.top = r.top + 'px';
+    g.style.transformOrigin = '0 0'; g.style.transform = 'scale(' + z + ') rotate(2deg)';
     document.body.appendChild(g); d.ghost = g;
-    const ph = document.createElement('div'); ph.className = 'ph'; ph.style.height = r.height + 'px'; d.ph = ph;
+    const ph = document.createElement('div'); ph.className = 'ph'; ph.style.height = (r.height / z) + 'px'; d.ph = ph;
     d.card.after(ph);
     d.card.classList.add('dragging');
     $$('.empty').forEach(x => x.style.display = 'none');
     autoScroll(d);
   }
+  /* drop targets: desktop columns, the mobile list (reorder) or a mobile status tab (move) */
   function moveDrag(d) {
     d.ghost.style.left = (d.x - d.dx) + 'px'; d.ghost.style.top = (d.y - d.dy) + 'px';
     const el = document.elementFromPoint(d.x, d.y);
-    const col = el && el.closest('.col');
+    const tab = el && el.closest('.mtab');
+    $$('.mtab.drop').forEach(t => t !== tab && t.classList.remove('drop'));
+    d.tab = tab ? tab.dataset.tab : null;
+    if (tab) { tab.classList.add('drop'); $$('.col.over').forEach(c => c.classList.remove('over')); return; }
+    const col = el && el.closest('[data-col]');
     $$('.col.over').forEach(c => c !== col && c.classList.remove('over'));
     if (!col) return;
-    col.classList.add('over');
-    const body = $('.col-body', col);
+    if (col.classList.contains('col')) col.classList.add('over');
+    const body = col.classList.contains('col-body') ? col : $('.col-body', col);
     const cards = $$('.card:not(.dragging)', body);
     let before = null;
     for (const c of cards) { const r = c.getBoundingClientRect(); if (d.y < r.top + r.height / 2) { before = c; break; } }
@@ -835,35 +880,42 @@
       const r = board.getBoundingClientRect(), edge = 40;
       if (d.x < r.left + edge) board.scrollLeft -= 10; else if (d.x > r.right - edge) board.scrollLeft += 10;
     }
-    const over = $('.col.over .col-body');
-    if (over && over.scrollHeight > over.clientHeight) { const r = over.getBoundingClientRect(); if (d.y < r.top + 30) over.scrollTop -= 8; else if (d.y > r.bottom - 30) over.scrollTop += 8; }
-    const mb = $('#mBody');
-    if (mb) { const r = mb.getBoundingClientRect(); if (d.y < r.top + 40) mb.scrollTop -= 8; else if (d.y > r.bottom - 100) mb.scrollTop += 8; }
-    if (d.x !== d.lx || d.y !== d.ly) { d.lx = d.x; d.ly = d.y; }
+    const tabs = $('#mTabs');
+    if (tabs) { const r = tabs.getBoundingClientRect(); if (d.y > r.top - 10 && d.y < r.bottom + 10) { if (d.x < r.left + 36) tabs.scrollLeft -= 6; else if (d.x > r.right - 36) tabs.scrollLeft += 6; } }
+    const sc = $('#mBody') || $('#dMain');
+    if (sc) { const r = sc.getBoundingClientRect(); if (d.y < r.top + 40) sc.scrollTop -= 8; else if (d.y > r.bottom - (sc.id === 'mBody' ? 100 : 40)) sc.scrollTop += 8; }
     moveDrag(d);
     requestAnimationFrame(() => autoScroll(d));
   }
   function finishDrag(d, commit) {
     d.active = false;
-    const body = d.ph.parentNode, col = body && body.closest('.col');
-    if (commit && col) {
-      const t = task(d.id), from = t.status, to = col.dataset.col;
-      const next = d.ph.nextElementSibling && d.ph.nextElementSibling.classList.contains('card') ? d.ph.nextElementSibling.dataset.id : null;
+    const t = task(d.id), from = t.status;
+    if (commit && d.tab) {
       S.tasks.splice(S.tasks.indexOf(t), 1);
-      t.status = to;
-      if (next) S.tasks.splice(S.tasks.findIndex(x => x.id === next), 0, t);
-      else { let last = -1; S.tasks.forEach((x, i) => { if (x.status === to) last = i; }); S.tasks.splice(last + 1, 0, t); }
-      save();
-      if (from !== to) toast('Moved to ' + esc(statusLabel(to)));
+      t.status = d.tab; S.tasks.push(t); save();
+      if (from !== d.tab) toast('Moved to ' + esc(statusLabel(d.tab)));
+    } else if (commit) {
+      const body = d.ph.parentNode, col = body && body.closest('[data-col]');
+      if (col) {
+        const to = col.dataset.col;
+        const next = d.ph.nextElementSibling && d.ph.nextElementSibling.classList.contains('card') ? d.ph.nextElementSibling.dataset.id : null;
+        S.tasks.splice(S.tasks.indexOf(t), 1);
+        t.status = to;
+        if (next) S.tasks.splice(S.tasks.findIndex(x => x.id === next), 0, t);
+        else { let last = -1; S.tasks.forEach((x, i) => { if (x.status === to) last = i; }); S.tasks.splice(last + 1, 0, t); }
+        save();
+        if (from !== to) toast('Moved to ' + esc(statusLabel(to)));
+      }
     }
     d.ghost.remove(); d.ph.remove();
     d.card.classList.remove('dragging');
     $$('.col.over').forEach(c => c.classList.remove('over'));
+    $$('.mtab.drop').forEach(c => c.classList.remove('drop'));
     refresh();
   }
 
   /* ---------- boot ---------- */
-  window.addEventListener('resize', () => { const was = device.classList.contains('is-mobile') ? 'mobile' : 'desktop'; if (was !== mode()) render(); });
+  window.addEventListener('resize', () => { const was = device.classList.contains('is-mobile') ? 'mobile' : 'desktop'; if (was !== mode()) render(); else fitDevice(); });
   if (S.onboarded && S.step === 2) { S.onboarded = true; S.step = 3; }
   if (!S.onboarded && S.step === 2) S.step = 1;
   render();
