@@ -4,7 +4,7 @@ window.KEEPER_DATA = (function () {
     gmail:   { label: 'Gmail',   color: '#D6453D', desc: 'Emails you send and receive' },
     outlook: { label: 'Outlook', color: '#1C6FD1', desc: 'Microsoft 365 mail and calendar' },
     slack:   { label: 'Slack',   color: '#6B2C70', desc: 'DMs and channels in client workspaces' },
-    sms:     { label: 'Keeper Line', color: '#1F9254', desc: 'A business number clients can text or call' },
+    sms:     { label: 'Business texts', color: '#1F9254', desc: 'A business number your clients can text' },
     zoom:    { label: 'Zoom',    color: '#2D7FF9', desc: 'Commitments from meeting transcripts' },
     meet:    { label: 'Google Meet', color: '#0E8A7E', desc: 'Commitments from Meet transcripts' },
     keeper:  { label: 'Added by you', color: '#6E4BD8', desc: 'Tasks you add with the assistant' }

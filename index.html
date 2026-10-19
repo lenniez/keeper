@@ -41,13 +41,13 @@
       <table class="about-table">
         <thead><tr><th>Feature</th><th>In this prototype</th><th>Real product</th></tr></thead>
         <tbody>
-          <tr><td>Channel connections</td><td>Visual only</td><td>Gmail needs Google's paid security assessment; Outlook and Slack need app review</td></tr>
-          <tr><td>Keeper business number</td><td>Visual only</td><td>Feasible via a provider like Twilio: about $1–2/month per number plus per-message fees and carrier registration</td></tr>
+          <tr><td>Channel connections</td><td>Simulated permission screens</td><td>Gmail needs Google's paid security assessment; Outlook and Slack need app review</td></tr>
+          <tr><td>Business texts number</td><td>Visual only</td><td>Feasible via a provider like Twilio: about $1–2/month per number plus per-message fees and carrier registration</td></tr>
           <tr><td>Zoom &amp; Google Meet capture</td><td>Visual only</td><td>Needs paid Zoom / Workspace plans or a paid meeting-bot service</td></tr>
           <tr><td>Live incoming tasks</td><td>Simulated on a timer</td><td>Needs a backend and AI processing per message</td></tr>
           <tr><td>Natural-language input &amp; filter</td><td>Rule-based parsing</td><td>An LLM API (small per-use cost)</td></tr>
-          <tr><td>Voice entry</td><td>Real: browser speech recognition, and Keeper reads its follow-up questions aloud</td><td>Works in Chrome, Edge and Safari; not Firefox. A production app would use a paid speech-to-text API for accuracy</td></tr>
-          <tr><td>Link to the original message</td><td>Mock preview; “Open in…” goes to the app’s home page</td><td>Gmail, Outlook and Slack give each message its own link, so the button opens that exact message. Texts to the Keeper Line and call transcripts are stored by Keeper, so they open inside Keeper. iMessage can’t be linked into: Apple offers no way to read or open a specific message</td></tr>
+          <tr><td>Voice entry &amp; spoken replies</td><td>Real: browser speech recognition and the device’s own voices (pick one under Channels → Assistant voice)</td><td>Works in Chrome, Edge and Safari; not Firefox. Truly human-sounding voices need a paid voice service (e.g. OpenAI or ElevenLabs, roughly $0.01–0.03 per reply)</td></tr>
+          <tr><td>Link to the original message</td><td>Mock preview; “Open in…” goes to the app’s home page</td><td>Gmail, Outlook and Slack give each message its own link, so the button opens that exact message. Business texts and call transcripts are stored by Keeper, so they open inside Keeper. iMessage can’t be linked into: Apple offers no way to read or open a specific message</td></tr>
           <tr><td>Board, drag &amp; drop, due dates</td><td>Fully working</td><td>—</td></tr>
         </tbody>
       </table>

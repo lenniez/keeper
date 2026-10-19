@@ -62,6 +62,9 @@
     cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
+    lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    play: '<path d="M8 5l11 7-11 7z"/>',
+    wave: '<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>',
     ext: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'
   };
   const ic = (n, cls) => '<svg class="icon ' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[n] || '') + '</svg>';
@@ -73,7 +76,7 @@
   const srcTag = s => '<span class="lab">' + srcIc(s) + esc(srcLabel(s)) + '</span>';
   const personName = k => (D.PEOPLE[k] ? D.PEOPLE[k].name : k) || '';
   const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  const av = k => { const n = personName(k); return n ? '<span class="av" title="' + esc(n) + '">' + esc(initials(n)) + '</span>' : ''; };
+  const av = k => { if (k === 'maya') return '<img class="av" src="maya.svg" alt="Maya">'; const n = personName(k); return n ? '<span class="av" title="' + esc(n) + '">' + esc(initials(n)) + '</span>' : ''; };
   const projName = p => (D.PROJECTS[p] ? D.PROJECTS[p].name : '');
   const projTag = p => esc(projName(p));
 
@@ -119,7 +122,7 @@
   ];
   const SRCWORDS = [
     ['email', /\b(e-?mails?|inbox)\b/, 'Email'], ['gmail', /\bgmail\b/, 'Gmail'], ['outlook', /\boutlook\b/, 'Outlook'],
-    ['slack', /\bslack\b/, 'Slack'], ['sms', /\b(texts?|sms|keeper line)\b/, 'Texts'],
+    ['slack', /\bslack\b/, 'Slack'], ['sms', /\b(texts?|sms|business texts?)\b/, 'Business texts'],
     ['zoom', /\bzoom\b/, 'Zoom'], ['meet', /\b(google meet|meet)\b/, 'Google Meet'], ['calls', /\bcalls?\b/, 'Calls']
   ];
   const DUEWORDS = [['overdue', /\b(overdue|late|past due)\b/, 'Overdue'], ['today', /\btoday\b/, 'Due today'], ['tomorrow', /\btomorrow\b/, 'Due tomorrow'],
@@ -147,7 +150,7 @@
     return ok('source', v => v === 'email' ? /gmail|outlook/.test(tk.source) : v === 'calls' ? /zoom|meet/.test(tk.source) : tk.source === v)
       && ok('category', v => tk.category === v)
       && ok('project', v => tk.project === v)
-      && ok('person', v => tk.requester === v || tk.collaborators.includes(v))
+      && ok('person', v => tk.requester === v || new RegExp('\\b' + personName(v).split(' ')[0] + '\\b', 'i').test(tk.title))
       && ok('due', v => {
         if (v === 'nodate') return !tk.due;
         if (!tk.due) return false;
@@ -240,10 +243,10 @@
     let due = null;
     if (dr) { due = dr.days; w = w.slice(0, dr.start) + ' ' + w.slice(dr.end); }
     let collaborators = [];
-    w = w.replace(/\bwith\s+([a-z]+(?:\s*(?:,|and|&)\s*[a-z]+)*)/i, (m, names) => {
-      const keys = names.split(/\s*(?:,|and|&)\s*/i).map(n => FIRST[n.toLowerCase()]).filter(Boolean);
-      if (!keys.length) return m;
-      collaborators = keys; return ' ';
+    w = w.replace(/\bwith\s+([a-z]+)\b/i, (m, n) => {
+      const k = FIRST[n.toLowerCase()];
+      if (!k || D.PEOPLE[k].role !== 'client') return m;   /* keep "with Leo" in the title; a client becomes the requester */
+      collaborators = [k]; return ' ';
     });
     let requester = null;
     w = w.replace(/\b(?:for|from)\s+([a-z]+)\b/i, (m, n) => {
@@ -301,7 +304,7 @@
       <div class="onb-hero"><span class="logo-mark" aria-hidden="true"></span>
       <h1>Every commitment, <em>kept.</em></h1>
       <p class="lead">Keeper listens across your inboxes, chats, texts and calls, catches every promise you make, and keeps it on one simple board.</p></div>
-      <div class="onb-me"><span class="m-me" aria-hidden="true">M</span><span><b>Maya</b> · Independent brand strategist · 5 clients</span></div>
+      <div class="onb-me"><img class="m-me" src="maya.svg" alt=""><span><b>Maya</b> · Independent brand strategist · 5 clients</span></div>
       <div class="onb-foot"><button class="btn-primary" data-action="onb-next">Get started</button><span class="small">Takes about a minute</span></div>
     </div></div>`;
     if (S.step === 1) {
@@ -311,7 +314,7 @@
         const extra = k === 'sms' ? '<span class="num">New number: (917) 555-0142</span>' : '';
         return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
           <span class="src-ic" style="--c:${s.color}">${ic(k)}</span>
-          <span class="chan-txt"><b>${esc(k === 'sms' ? 'Keeper business line (texts)' : s.label)}</b><span>${esc(s.desc)}</span>${extra}</span>
+          <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${extra}</span>
           <span class="tog" aria-hidden="true"></span></button>`;
       }).join('');
       return `<div class="onb"><div class="onb-inner">${steps(1)}
@@ -404,7 +407,7 @@
     const list = S.tasks.filter(t => t.status === S.mstatus && matches(t, toks));
     return list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`;
   }
-  const incoming = () => S.tasks.filter(t => t.source !== 'keeper').sort((a, b) => b.captured - a.captured);
+  const incoming = () => S.tasks.filter(t => t.source !== 'keeper' && S.channels.includes(t.source)).sort((a, b) => b.captured - a.captured);
   function statusLabel(s) { const c = D.COLUMNS.find(c => c.id === s); return c ? c.name : s; }
   function feedRow(t, opts) {
     const di = dueInfo(t.due, t.status);
@@ -434,7 +437,7 @@
     const on = S.channels.filter(k => D.SOURCES[k]);
     const chanRow = `<button type="button" class="chan-link" data-action="go" data-screen="sources">
         <span class="chan-ics">${on.map(srcIc).join('')}</span>
-        <span class="o-txt"><b>${on.length} channel${on.length === 1 ? '' : 's'} on</b><span>${on.length ? esc(on.map(k => k === 'sms' ? 'Keeper Line' : D.SOURCES[k].label).join(', ')) : 'Turn on a channel to catch tasks'}</span></span>
+        <span class="o-txt"><b>${on.length} channel${on.length === 1 ? '' : 's'} on</b><span>${on.length ? esc(on.map(k => D.SOURCES[k].label).join(', ')) : 'Turn on a channel to catch tasks'}</span></span>
         <span class="manage">Manage ${ic('chev')}</span></button>`;
     return chanRow + `<div class="feed-tools">
         <span class="live-pill"><span class="live-dot"></span>Live</span>
@@ -448,9 +451,11 @@
       const n = S.tasks.filter(t => t.source === k).length;
       return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
         ${srcIc(k)}
-        <span class="chan-txt"><b>${esc(k === 'sms' ? 'Keeper business line' : s.label)}</b><span>${on ? n + ' tasks caught · listening' : esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
+        <span class="chan-txt"><b>${esc(s.label)}</b><span>${on ? n + ' tasks caught · listening' : esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
         <span class="tog" aria-hidden="true"></span></button>`;
-    }).join('')}<p class="note">Prototype: connections are simulated. New incoming tasks only come from channels that are on.</p></div>`;
+    }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p>
+      <h2 class="sec-h">Assistant</h2>
+      <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>Assistant voice</b><span>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</span></span>${ic('chev')}</button></div>`;
   }
   const badge = id => `<span class="dot-badge" id="${id}" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span>`;
 
@@ -464,7 +469,7 @@
       <p class="m-hint">Tap to edit · hold and drag onto a tab to move</p>`;
     return `<div class="m-home">
       <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
-        ${S.screen === 'board' ? searchBtn() : ''}<span class="m-me" aria-label="Maya">M</span></div>
+        ${S.screen === 'board' ? searchBtn() : ''}<img class="m-me" src="maya.svg" alt="Maya"></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
@@ -488,7 +493,7 @@
         <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
         <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Task Feed<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
         <button class="d-nav ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('plug')}Channels</button>
-        <div class="d-me"><span class="m-me" aria-hidden="true">M</span><span><b>Maya</b><small>Brand strategist</small></span></div>
+        <div class="d-me"><img class="m-me" src="maya.svg" alt=""><span><b>Maya</b><small>Brand strategist</small></span></div>
       </aside>
       <section class="d-main" id="dMain">${main}</section>
     </div>`;
@@ -516,7 +521,7 @@
     gmail: { noun: 'email', cta: 'Open in Gmail', url: 'https://mail.google.com/mail/u/0/#inbox', note: 'In the real product this button opens this exact email (Gmail links each message by its ID). Gmail’s phone app can’t open a single message from a link, so on mobile it opens Gmail on the web.' },
     outlook: { noun: 'email', cta: 'Open in Outlook', url: 'https://outlook.office.com/mail/', note: 'In the real product this button uses the link Microsoft provides for each message, so it opens this exact email in Outlook.' },
     slack: { noun: 'Slack message', cta: 'Open in Slack', url: 'https://app.slack.com/client', note: 'In the real product this button uses the message’s Slack permalink: it opens the Slack app at this message on phones and desktop.' },
-    sms: { noun: 'text thread', note: 'Clients text your Keeper Line, a business number Keeper owns, so the thread lives here in Keeper rather than in Messages. Replies go out from the same number, keeping your personal number private.' },
+    sms: { noun: 'text thread', note: 'Clients text your business number, which Keeper provides, so the thread lives here in Keeper rather than in Messages. Replies go out from the same number, keeping your personal number private.' },
     zoom: { noun: 'call transcript', cta: 'Open recording in Zoom', url: 'https://zoom.us/recording', note: 'Keeper keeps the transcript and jumps to the moment the commitment was made. The button opens the full cloud recording in Zoom.' },
     meet: { noun: 'call transcript', cta: 'Open recording in Drive', url: 'https://drive.google.com/drive/my-drive', note: 'Google Meet saves recordings and transcripts to Google Drive. Keeper jumps to the moment the commitment was made; the button opens the recording.' }
   };
@@ -529,11 +534,15 @@
     const fromName = speaker ? (key ? personName(key) : speaker) : personName(t.requester) || 'Unknown';
     return { text, fromKey, fromName, mine: fromKey === 'maya' };
   }
-  function origRow(t) {
+  function origBlock(t) {
     if (t.source === 'keeper' || !t.snippet) return '';
-    const o = origin(t), meta = ORIGIN[t.source] || {};
-    return `<button type="button" class="orig" data-action="src" data-id="${t.id}">${srcIc(t.source)}
-      <span class="o-txt"><b>View original ${esc(meta.noun || 'message')}</b><span>${esc(o.mine ? 'You' : o.fromName)} · ${esc(srcLabel(t.source))} · ${ago(t.captured)} ago</span></span>${ic('chev')}</button>`;
+    const o = origin(t), meta = ORIGIN[t.source] || {}, open = UI.sheet && UI.sheet.expand;
+    return `<div class="orig-b ${open ? 'open' : ''}">
+      <div class="orig-h">${srcIc(t.source)}<span>${esc(o.mine ? 'You' : o.fromName)} · ${esc(srcLabel(t.source))} · ${ago(t.captured)} ago</span></div>
+      ${open ? sourceView(t) : `<button type="button" class="orig-snip" data-action="expand" aria-expanded="false">“${esc(o.text)}”</button>`}
+      <div class="orig-acts"><button type="button" class="linkish" data-action="expand">${open ? 'Show less' : 'Show full ' + esc(meta.noun || 'message')}</button>
+        ${meta.url ? `<a class="open-app" href="${meta.url}" target="_blank" rel="noopener">${esc(meta.cta)} ${ic('ext')}</a>` : ''}</div>
+    </div>`;
   }
   function sourceView(t) {
     const o = origin(t), when = new Date(t.captured);
@@ -562,7 +571,7 @@
     }
     if (t.source === 'sms') {
       const inb = o.mine ? 'out' : 'in';
-      return `<div class="sv"><div class="sv-bar">${srcIc('sms')}${esc(otherName)} · Keeper Line (917) 555-0142<small>${esc(date)}</small></div><div class="sv-pad"><div class="tx">
+      return `<div class="sv"><div class="sv-bar">${srcIc('sms')}${esc(otherName)} · Business texts (917) 555-0142<small>${esc(date)}</small></div><div class="sv-pad"><div class="tx">
         <span class="ts">${esc(date)} · ${esc(time)}</span>
         <div class="b ${inb === 'in' ? 'out' : 'in'}">Hi ${o.mine ? '' : esc(first(otherName))}, quick check-in on ${esc(proj)}.</div>
         <div class="b ${inb}">${quote}</div>
@@ -577,23 +586,114 @@
     </div></div>`;
   }
 
+  /* ---------- connecting a channel: simulated permission screens ---------- */
+  const CONNECT = {
+    gmail: { host: 'accounts.google.com', who: 'Google', perms: ['Read your email messages', 'See your primary email address'], allow: 'Allow' },
+    outlook: { host: 'login.microsoftonline.com', who: 'Microsoft', perms: ['Read your mail', 'Keep access to data you’ve given it access to'], allow: 'Accept' },
+    slack: { host: 'slack.com/oauth', who: 'Slack', perms: ['View messages in channels and DMs you’re part of', 'View basic info about people in the workspace'], allow: 'Allow', workspaces: ['Northwind Coffee', 'Halcyon Health', 'Brightside Studio'] },
+    zoom: { host: 'zoom.us/oauth', who: 'Zoom', perms: ['View your cloud recordings and transcripts', 'View your scheduled meetings'], allow: 'Allow' },
+    meet: { host: 'accounts.google.com', who: 'Google', perms: ['See Google Meet recordings and transcripts in your Drive', 'See your calendar events'], allow: 'Allow' }
+  };
+  const NUMBERS = ['(917) 555-0142', '(646) 555-0198', '(212) 555-0117'];
+  function connectHTML(k) {
+    const st = UI.sheet.step, src = D.SOURCES[k], c = CONNECT[k];
+    const close = `<button class="x" data-action="connect-cancel" aria-label="Cancel">${ic('x')}</button>`;
+    if (st === 'loading') return `<div class="cx-load">${srcIc(k)}<b>Opening ${esc(c ? c.who : 'setup')}…</b><span class="spin dark"></span></div>`;
+    if (st === 'done') return `<div class="cx-load">${srcIc(k)}<b>${esc(src.label)} connected</b><span class="cx-ok">${ic('check')}</span></div>`;
+    if (k === 'sms') return `<div class="sh-h"><span class="lab">${srcIc(k)}Business texts</span>${close}</div>
+      <div class="sh-body cx">
+        <h2 class="sh-title">Pick your business number</h2>
+        <p class="cx-p">Clients text this number and Keeper turns their requests into tasks. Your replies come from it too, so your personal number stays private.</p>
+        <div class="cx-list">${NUMBERS.map((n, i) => `<button type="button" class="cx-num ${(UI.sheet.pick || 0) === i ? 'on' : ''}" data-action="cx-pick" data-i="${i}"><span class="radio"></span><b>${n}</b><span>New York</span></button>`).join('')}</div>
+        <p class="cx-note">Simulated. In the real product Keeper buys this number from a texting provider for about $1–2 a month.</p>
+      </div>
+      <div class="sh-foot"><button class="btn-ghost" data-action="connect-cancel">Not now</button><button class="btn-primary" data-action="connect-allow">Use this number</button></div>`;
+    return `<div class="cx-bar"><span class="lock">${ic('lock')}</span>${esc(c.host)}<span class="sim">Simulated</span>${close}</div>
+      <div class="sh-body cx">
+        <div class="cx-who">${srcIc(k)}<span>Sign in with ${esc(c.who)}</span></div>
+        <h2 class="sh-title">Keeper wants to access your ${esc(c.who)} account</h2>
+        <div class="cx-acct">${av('maya')}<span><b>Maya</b>maya@mayastudio.co</span></div>
+        ${c.workspaces ? `<div><div class="fl">Workspaces</div><div class="cx-list">${c.workspaces.map(w => `<label class="cx-ws"><input type="checkbox" checked> ${esc(w)}</label>`).join('')}</div></div>` : ''}
+        <div><div class="fl">This will let Keeper:</div><ul class="cx-perms">${c.perms.map(x => `<li>${ic('check')}${esc(x)}</li>`).join('')}</ul></div>
+        <p class="cx-note">This stands in for ${esc(c.who)}’s own permission page, which opens in the real product. Keeper only reads; it never sends or deletes anything.</p>
+      </div>
+      <div class="sh-foot"><button class="btn-ghost" data-action="connect-cancel">Cancel</button><button class="btn-primary" data-action="connect-allow">${esc(c.allow)}</button></div>`;
+  }
+  function startConnect(k) {
+    openSheet({ type: 'connect', k, step: 'loading', pick: 0 });
+    setTimeout(() => { if (UI.sheet && UI.sheet.type === 'connect' && UI.sheet.k === k) { UI.sheet.step = 'consent'; renderLayer(true); } }, 900);
+  }
+  function finishConnect() {
+    const k = UI.sheet.k;
+    if (k === 'sms') D.SOURCES.sms.number = NUMBERS[UI.sheet.pick || 0];
+    UI.sheet.step = 'done'; renderLayer(true);
+    if (!S.channels.includes(k)) S.channels.push(k);
+    save();
+    setTimeout(() => {
+      closeSheet();
+      if (!S.onboarded) render(); else { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); refresh(); toast(srcIc(k) + 'Keeper is now listening to ' + esc(D.SOURCES[k].label)); }
+    }, 900);
+  }
+
+  /* ---------- assistant voice: best voice on this device, with a picker ---------- */
+  const synth = window.speechSynthesis;
+  const BAD = /compact|espeak|albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley/i;
+  function voiceScore(v) {
+    let n = 0;
+    if (/natural|neural/i.test(v.name)) n += 60;
+    if (/premium/i.test(v.name)) n += 55;
+    if (/enhanced/i.test(v.name)) n += 45;
+    if (/google us english|google uk english female/i.test(v.name)) n += 30;
+    if (/(ava|zoe|samantha|allison|susan|nicky|jenny|aria|michelle|emma|serena|evan|nathan|tom|joelle|noelle|libby|sonia)\b/i.test(v.name)) n += 20;
+    if (/en[-_]US/i.test(v.lang)) n += 6; else if (/en[-_](GB|AU|IE|CA)/i.test(v.lang)) n += 3;
+    if (BAD.test(v.name)) n -= 200;
+    return n;
+  }
+  function voiceList() { if (!synth) return []; return synth.getVoices().filter(v => /^en/i.test(v.lang) && !BAD.test(v.name)).sort((a, b) => voiceScore(b) - voiceScore(a)); }
+  function currentVoice() { const l = voiceList(); return l.find(v => v.name === S.voice) || l[0] || null; }
+  const voiceQuality = v => /natural|neural/i.test(v.name) ? 'Natural' : /premium/i.test(v.name) ? 'Premium' : /enhanced/i.test(v.name) ? 'Enhanced' : /google/i.test(v.name) ? 'Online' : 'Standard';
+  const voiceName = v => v.name.replace(/^Microsoft\s+/i, '').replace(/\s*Online\s*/i, ' ').replace(/\s*\((natural|premium|enhanced)\)/i, '').replace(/\s+-\s+English.*$/i, '').trim();
+  const SAMPLE = 'Hi Maya! I just caught a new task from Jen at Northwind. She needs the final logo files by Friday. Want me to add it to Up Next?';
+  function speakWith(text, v, onend) {
+    if (!synth) return;
+    try {
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      if (v) { u.voice = v; u.lang = v.lang; }
+      u.rate = 1; u.pitch = 1;
+      if (onend) u.onend = onend;
+      synth.speak(u);
+    } catch (e) {}
+  }
+  function voiceSheetHTML() {
+    const list = voiceList(), cur = currentVoice();
+    const rows = list.slice(0, 14).map((v, i) => `<div class="vrow ${cur && v.name === cur.name ? 'on' : ''}">
+        <button type="button" class="vpick" data-action="voice-pick" data-i="${i}"><span class="radio"></span><span class="vt"><b>${esc(voiceName(v))}</b><span>${esc(voiceQuality(v))} · ${esc(v.lang)}</span></span></button>
+        <button type="button" class="vplay" data-action="voice-play" data-i="${i}" aria-label="Play a sample of ${esc(voiceName(v))}">${ic('play')}</button></div>`).join('');
+    return `<div class="sh-h"><span class="lab">${ic('wave')}Assistant voice</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+      <div class="sh-body">
+        <p class="cx-p">Tap play to hear each voice, then pick one. These are the voices on this device, best first.</p>
+        ${rows || '<div class="empty">No English voices found on this device. Try Chrome, Edge or Safari.</div>'}
+        <p class="cx-note">Most natural options: Microsoft Edge’s “Natural” voices, Chrome’s “Google US English”, or on iPhone and Mac a free Premium voice (Settings → Accessibility → Spoken Content → Voices, then download Ava or Zoe Premium). Voices as lifelike as ChatGPT’s need a paid voice service.</p>
+      </div>`;
+  }
+  if (synth && 'onvoiceschanged' in synth) synth.onvoiceschanged = () => { if (UI.sheet && UI.sheet.type === 'voice') renderLayer(true); };
+
   /* ---------- sheets ---------- */
   function renderLayer(instant) {
     const layer = $('#layer'); if (!layer) return;
     if (!UI.sheet) { layer.classList.remove('open'); layer.innerHTML = ''; return; }
     if (UI.sheet.type === 'task') {
       const t = task(UI.sheet.id); if (!t) { UI.sheet = null; return renderLayer(); }
-      const req = t.requester && t.requester !== 'maya' ? `<span class="person">${av(t.requester)}${esc(personName(t.requester))} <small>${esc((D.PEOPLE[t.requester] || {}).title || '')}</small></span>` : '<span class="person">You</span>';
-      const collabs = t.collaborators.length ? t.collaborators.map(c => `<span class="person">${av(c)}${esc(personName(c))}</span>`).join('') : '<span style="color:var(--faint)">None</span>';
+      const req = t.requester && t.requester !== 'maya' ? `<span class="person">${av(t.requester)}${esc(personName(t.requester))}</span>` : `<span class="person">${av('maya')}You</span>`;
       const quick = [['Today', 0], ['Tomorrow', 1], ['Friday', daysToDow(5, true)], ['Next Mon', daysToDow(1, false)]];
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task details">
         <div class="grab"></div>
-        <div class="sh-h">${srcTag(t.source)}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h">${spill(t.status)}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="sh-body">
+          ${origBlock(t)}
           <h2 class="sh-title">${esc(t.title)}</h2>
-          ${t.snippet ? `<div class="quote"><span class="from">Caught ${ago(t.captured)} ago from ${esc(srcLabel(t.source))}</span>“${esc(t.snippet)}”</div>` : ''}
-          ${origRow(t)}
-          <dl class="fields"><dt>Requested by</dt><dd>${req}</dd><dt>Collaborators</dt><dd>${collabs}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd><dt>Type</dt><dd>${esc(t.category)}</dd></dl>
+          <dl class="fields"><dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
           <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="s-${c.id} ${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${sdot(c.id)}${esc(c.name)}</button>`).join('')}</div></div>
           <div><div class="fl">Due date</div><div class="duebox">
             <input type="date" id="dueInput" value="${t.due || ''}" aria-label="Due date">
@@ -612,6 +712,10 @@
         <div class="sh-body">${sourceView(t)}<p class="sv-note">${esc(o.note || '')}</p></div>
         ${o.url ? `<div class="sh-foot"><a class="btn-primary" href="${o.url}" target="_blank" rel="noopener">${esc(o.cta)} ${ic('ext')}</a></div>` : ''}
       </div>`;
+    } else if (UI.sheet.type === 'connect') {
+      layer.innerHTML = `<div class="scrim"></div><div class="sheet connect" role="dialog" aria-modal="true" aria-label="Connect ${esc(D.SOURCES[UI.sheet.k].label)}">${connectHTML(UI.sheet.k)}</div>`;
+    } else if (UI.sheet.type === 'voice') {
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Assistant voice"><div class="grab"></div>${voiceSheetHTML()}</div>`;
     } else if (UI.sheet.type === 'inc') {
       const list = incoming().slice(0, 12);
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task Feed">
@@ -623,7 +727,7 @@
     } else if (UI.sheet.type === 'ask') {
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask" role="dialog" aria-modal="true" aria-label="Add a task">
         <div class="grab"></div>
-        <div class="sh-h"><span class="logo-mark" aria-hidden="true"></span><b>New task</b><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h"><span class="logo-mark" aria-hidden="true"></span><b>New task</b><button type="button" class="vbtn" data-action="voice" aria-label="Choose assistant voice">${ic('wave')}Voice</button><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="ask-msgs" id="askMsgs">${askMsgsHTML()}</div>
         <div class="vstage ${UI.ask.msgs.length ? 'compact' : ''}" id="vstage">${vstageHTML()}</div>
         <form class="ask-in" id="askForm">
@@ -676,7 +780,6 @@
     return `<div class="draft"><h3 class="sh-title">${esc(d.title)}</h3>
       <dl class="fields"><dt>Requested by</dt><dd>${d.requester && d.requester !== 'maya' ? av(d.requester) + esc(personName(d.requester)) : 'You'}</dd>
       <dt>Due</dt><dd>${live ? `<input type="date" id="draftDue" value="${d.due == null ? '' : iso(addDays(d.due))}" aria-label="Due date">` : ''}${live ? '' : d.due == null ? 'No date' : esc(dueInfo(iso(addDays(d.due)), 'upnext').label + (Math.abs(d.due) < 7 ? ' · ' + shortDate(addDays(d.due)) : ''))}</dd>
-      <dt>Collaborators</dt><dd>${d.collaborators.length ? d.collaborators.map(c => av(c) + esc(personName(c))).join(' ') : 'None'}</dd>
       <dt>Project</dt><dd>${projTag(d.project) || 'None'}</dd>${live ? '' : `<dt>Column</dt><dd>${esc(statusLabel(d.col))}</dd>`}</dl>
       ${live ? `<div><div class="fl">Add to</div><div class="statuses">${ADDCOLS.map(c => `<button type="button" class="s-${c} ${d.col === c ? 'on' : ''}" data-action="draft-col" data-v="${c}">${sdot(c)}${esc(statusLabel(c))}</button>`).join('')}</div></div>
       <div class="draft-acts"><button type="button" class="btn-primary" data-action="draft-add">Add to ${esc(statusLabel(d.col))}</button><button type="button" class="btn-ghost" data-action="draft-redo">Start over</button></div>` : ''}</div>`;
@@ -689,10 +792,7 @@
     const A = UI.ask;
     if (!A || !A.voice || !window.speechSynthesis) { if (listenAfter && A && A.listenBack && SR) setTimeout(() => { if (UI.ask === A && !A.listening) startListening(); }, 300); return; }
     try {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text); u.rate = 1.05;
-      u.onend = () => { if (listenAfter && A.listenBack && UI.ask === A && UI.sheet && UI.sheet.type === 'ask' && !A.listening) startListening(); };
-      speechSynthesis.speak(u);
+      speakWith(text, currentVoice(), () => { if (listenAfter && A.listenBack && UI.ask === A && UI.sheet && UI.sheet.type === 'ask' && !A.listening) startListening(); });
     } catch (e) {}
   }
   const fn = k => personName(k).split(' ')[0];
@@ -701,7 +801,6 @@
     const bits = [];
     if (d.requesterSet) bits.push(d.requester === 'maya' ? 'for you' : 'for ' + (D.PEOPLE[d.requester] ? fn(d.requester) : d.requester));
     if (d.dueSet) bits.push(spokenDue(d.due));
-    if (d.collaborators.length) bits.push('with ' + d.collaborators.map(fn).join(' and '));
     bits.push('in ' + statusLabel(d.col));
     return '“' + d.title + '”, ' + bits.join(', ') + '.';
   }
@@ -712,7 +811,8 @@
     const line = (updated ? 'Updated: ' : 'New task: ') + summaryLine(d);
     const q = updated ? 'Anything else to change?' : 'Anything you want to change?';
     pushMsg({ from: 'k', text: line + ' ' + q, draft: d, chips: ['Looks good', 'Change the date', 'Change the column'] });
-    say(line + ' ' + q, true);
+    const spoken = summaryLine(d).replace(/[“”]/g, '');
+    say(updated ? 'Sure, done. It’s now ' + spoken + ' Anything else?' : 'Okay, I’ve got ' + spoken + ' Want to change anything?', true);
     setAskPlaceholder();
   }
   /* step 2: ask only for what is still missing, then add */
@@ -721,10 +821,10 @@
     if (!d.requesterSet) {
       A.awaiting = 'requester';
       const clients = Object.keys(D.PEOPLE).filter(k => D.PEOPLE[k].role === 'client').map(fn);
-      pushMsg({ from: 'k', text: 'Who is this for?', chips: clients.concat('Just me') }); say('Who is this for?', true);
+      pushMsg({ from: 'k', text: 'Who is this for?', chips: clients.concat('Just me') }); say('Got it. Who’s this one for?', true);
     } else if (!d.dueSet) {
       A.awaiting = 'due';
-      pushMsg({ from: 'k', text: 'When is it due?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('When is it due?', true);
+      pushMsg({ from: 'k', text: 'When is it due?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('And when’s it due?', true);
     } else addDraft();
     setAskPlaceholder();
   }
@@ -739,11 +839,7 @@
     if (cr) { d.col = cr.id; changed = true; }
     if (/\bno (due )?date\b|\bno deadline\b|remove the (due )?date/i.test(text)) { d.due = null; d.dueSet = true; changed = true; }
     else { const r = parseDue(text); if (r) { d.due = r.days; d.dueSet = true; changed = true; } }
-    if (/\b(no|remove( the)?) collaborators?\b/i.test(text)) { d.collaborators = []; changed = true; }
-    const w = text.match(/\b(?:with|add)\s+([a-z]+(?:\s*(?:,|and|&)\s*[a-z]+)*)/i);
-    if (w) { const ks = w[1].split(/\s*(?:,|and|&)\s*/i).map(n => FIRST[n.toLowerCase()]).filter(Boolean).filter(k => D.PEOPLE[k].role !== 'client'); if (ks.length) { d.collaborators = Array.from(new Set(d.collaborators.concat(ks))); changed = true; } }
-    const rm = text.match(/\bremove\s+([a-z]+)/i);
-    if (rm && FIRST[rm[1].toLowerCase()]) { d.collaborators = d.collaborators.filter(k => k !== FIRST[rm[1].toLowerCase()]); changed = true; }
+    const w = null;
     if (/\b(for|it'?s for)\s+(me|myself)\b|\bjust me\b/i.test(text)) { d.requester = 'maya'; d.requesterSet = true; changed = true; }
     else {
       const f = text.match(/\b(?:for|from|it'?s for|requester is)\s+([a-z]+)/i);
@@ -798,7 +894,7 @@
     UI.ask.awaiting = null; UI.ask.draft = null;
     paintMsgs();
     pushMsg({ from: 'k', text: 'Added to ' + statusLabel(d.col) + '. Tap the mic to add another, or close.', chips: ['Done for now'] });
-    say('Done. I added it to ' + statusLabel(d.col) + '.', false);
+    say('Great, it’s in ' + statusLabel(d.col) + '.', false);
     setAskPlaceholder();
     setTimeout(() => { t.fresh = false; }, 4000);
   }
@@ -830,11 +926,11 @@
     const total = D.INCOMING.length;
     while (S.incomingIdx < total) {
       const tpl = D.INCOMING[S.incomingIdx++];
-      if (!manual && S.channels.length && !S.channels.includes(tpl.source)) continue;
+      if (!S.channels.includes(tpl.source)) continue;
       const t = mkTask(Object.assign({}, tpl, { status: 'backlog', ago: 0 }));
       t.fresh = true;
       S.tasks.push(t); S.unseen = (S.unseen || 0) + 1; save(); refresh();
-      toast(srcIc(t.source) + 'Caught from ' + esc(D.SOURCES[t.source].label) + ': ' + esc(t.title));
+      toast(esc(t.title), { title: 'New task kept', id: t.id, sub: srcIc(t.source) + 'From ' + esc(personName(t.requester) || 'you') + ' · ' + esc(D.SOURCES[t.source].label) });
       setTimeout(() => { t.fresh = false; refresh(); }, 6000);
       return;
     }
@@ -847,11 +943,23 @@
   }
 
   /* ---------- toasts ---------- */
-  function toast(html) {
-    const w = $('#toasts'); const el = document.createElement('div');
-    el.className = 'toast'; el.innerHTML = html; w.appendChild(el);
-    while (w.children.length > 3) w.firstChild.remove();
-    setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, 3400);
+  /* notification banners: inside the phone on mobile (like iOS), bottom-right on desktop */
+  function toastHost() {
+    if (mode() !== 'mobile') return $('#toasts');
+    let w = $('#devToasts'); if (!w) { w = document.createElement('div'); w.id = 'devToasts'; w.className = 'dev-toasts'; w.setAttribute('aria-live', 'polite'); device.appendChild(w); }
+    return w;
+  }
+  function toast(html, opt) {
+    opt = opt || {};
+    const w = toastHost(); const el = document.createElement(opt.id ? 'button' : 'div');
+    el.className = 'toast' + (opt.title ? ' note' : '');
+    if (opt.id) { el.type = 'button'; el.dataset.action = 'open'; el.dataset.id = opt.id; }
+    el.innerHTML = opt.title
+      ? `<span class="logo-mark t-ic" aria-hidden="true"></span><span class="t-txt"><span class="t-top"><b>${esc(opt.title)}</b><span>now</span></span><span class="t-body">${html}</span>${opt.sub ? `<span class="t-sub">${opt.sub}</span>` : ''}</span>`
+      : html;
+    w.appendChild(el);
+    while (w.children.length > 2) w.firstChild.remove();
+    setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, opt.title ? 5000 : 3000);
   }
 
   /* ---------- menus ---------- */
@@ -859,7 +967,7 @@
     closeMenu();
     let items = [];
     if (kind === 'project') items = Object.keys(D.PROJECTS).map(k => ({ type: 'project', value: k, label: D.PROJECTS[k].name }));
-    if (kind === 'person') items = Object.keys(D.PEOPLE).filter(k => k !== 'maya').map(k => ({ type: 'person', value: k, label: D.PEOPLE[k].name, sub: D.PEOPLE[k].title }));
+    if (kind === 'person') items = Object.keys(D.PEOPLE).filter(k => D.PEOPLE[k].role === 'client').map(k => ({ type: 'person', value: k, label: D.PEOPLE[k].name }));
     if (kind === 'source') items = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'].map(k => ({ type: 'source', value: k, label: D.SOURCES[k].label }));
     const on = it => S.filter.tokens.some(t => t.type === it.type && t.value === it.value);
     const menu = document.createElement('div');
@@ -906,17 +1014,18 @@
         if (S.step === 2) setTimeout(() => {
           if (S.step !== 2) return;
           S.onboarded = true; S.step = 3; S.screen = 'board'; save(); render();
-          const n = S.tasks.filter(t => t.status !== 'done').length;
-          toast(srcIc('keeper') + `Keeper caught ${n} open tasks across ${S.channels.length} channels`);
+          const n = S.tasks.filter(t => t.status !== 'done' && (S.channels.includes(t.source) || t.source === 'keeper')).length;
+          toast(`${n} open tasks caught across ${S.channels.length} channels`, { title: 'You’re all set' });
           scheduleLive();
         }, 2600);
         break;
       case 'chan': {
         const k = a.dataset.k, i = S.channels.indexOf(k);
-        if (i >= 0) S.channels.splice(i, 1); else S.channels.push(k);
+        if (i < 0) { startConnect(k); break; }
+        S.channels.splice(i, 1);
         save();
         if (!S.onboarded) render();
-        else { a.classList.toggle('on', i < 0); a.setAttribute('aria-pressed', String(i < 0)); toast(srcIc(k) + (i < 0 ? 'Listening to ' : 'Paused ') + esc(D.SOURCES[k].label)); const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); }
+        else { a.classList.toggle('on', i < 0); a.setAttribute('aria-pressed', String(i < 0)); toast(srcIc(k) + 'Stopped listening to ' + esc(D.SOURCES[k].label)); const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); refresh(); }
         break;
       }
       case 'go': S.screen = a.dataset.screen; if (S.screen === 'feed') S.unseen = 0; UI.sheet = null; save(); closeMenu(); render(); if (S.screen === 'feed') setTimeout(() => { S.tasks.forEach(t => t.fresh = false); }, 5000); break;
@@ -925,12 +1034,19 @@
       case 'search': UI.search = !UI.search; render(); if (UI.search) { const i = $('#fInput'); if (i) i.focus(); } break;
       case 'f-close': UI.search = false; save(); render(); break;
       case 'open': openSheet({ type: 'task', id: a.dataset.id }); break;
-      case 'close': closeSheet(); break;
+      case 'close': if (UI.sheet && UI.sheet.type === 'voice' && UI.prevAsk && UI.ask) { UI.prevAsk = false; UI.sheet = { type: 'ask' }; renderLayer(true); break; } closeSheet(); break;
       case 'set-status': { const t = task(UI.sheet.id); t.status = a.dataset.v; save(); refresh(); renderLayer(true); toast('Moved to ' + esc(statusLabel(t.status))); break; }
       case 'set-due': { const t = task(UI.sheet.id); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); save(); refresh(); renderLayer(true); toast(t.due ? 'Due ' + esc(dueInfo(t.due, t.status).label.toLowerCase()) : 'Due date cleared'); break; }
       case 'f-clear': S.filter = { text: '', tokens: [] }; save(); render(); break;
       case 'f-clear-text': S.filter.text = ''; save(); { const i = $('#fInput'); if (i) { i.value = ''; i.focus(); } a.hidden = true; } refresh(); break;
       case 'src': openSheet({ type: 'src', id: a.dataset.id }); break;
+      case 'expand': if (UI.sheet) { UI.sheet.expand = !UI.sheet.expand; renderLayer(true); } break;
+      case 'connect-allow': finishConnect(); break;
+      case 'connect-cancel': closeSheet(); break;
+      case 'cx-pick': UI.sheet.pick = +a.dataset.i; renderLayer(true); break;
+      case 'voice': if (UI.ask) stopListening(); UI.prevAsk = UI.sheet && UI.sheet.type === 'ask'; openSheet({ type: 'voice' }); break;
+      case 'voice-play': { const v = voiceList()[+a.dataset.i]; speakWith(SAMPLE, v); break; }
+      case 'voice-pick': { const v = voiceList()[+a.dataset.i]; S.voice = v.name; save(); renderLayer(true); speakWith('Hi Maya, I’ll sound like this from now on.', v); const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); break; }
       case 'draft-col': if (UI.ask && UI.ask.draft) { UI.ask.draft.col = a.dataset.v; paintMsgs(); } break;
       case 'f-proj': toggleToken({ type: 'project', value: a.dataset.v, label: D.PROJECTS[a.dataset.v].name }); break;
       case 'f-menu': if (UI.menu === a.dataset.menu) closeMenu(); else openMenu(a, a.dataset.menu); break;
@@ -1104,7 +1220,7 @@
   if (mode() === 'mobile') {
     const sp = document.createElement('div');
     sp.className = 'splash'; sp.setAttribute('aria-hidden', 'true');
-    sp.innerHTML = '<span class="logo-mark"></span><span class="wordmark">keeper</span><span class="spin"></span>';
+    sp.innerHTML = '<span class="logo-mark"></span>';
     device.appendChild(sp);
     setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); }, 1600);
   }
