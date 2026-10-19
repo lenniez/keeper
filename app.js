@@ -420,12 +420,20 @@
         <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
     </article>`;
   }
+  /* Backlog sorts by due date (no date last) until the user reorders it by hand */
+  const byDue = (x, y) => (x.due ? fromISO(x.due).getTime() : Infinity) - (y.due ? fromISO(y.due).getTime() : Infinity);
+  function colTasks(id, toks) {
+    const list = S.tasks.filter(t => t.status === id && matches(t, toks || []));
+    return id === 'backlog' && !(S.manual && S.manual.backlog) ? list.slice().sort(byDue) : list;
+  }
+  const sortNote = id => id !== 'backlog' ? '' : S.manual && S.manual.backlog
+    ? `<button type="button" class="sort-note" data-action="sort-due">Sort by due date</button>` : `<span class="sort-note">By due date</span>`;
   function boardHTML() {
     const toks = activeTokens();
     return D.COLUMNS.map(c => {
-      const list = S.tasks.filter(t => t.status === c.id && matches(t, toks));
+      const list = colTasks(c.id, toks);
       return `<section class="col" data-col="${c.id}">
-        <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span></div>
+        <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span>${sortNote(c.id)}</div>
         <div class="col-body">${list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks' : 'Drop tasks here'}</div>`}</div>
       </section>`;
     }).join('');
@@ -440,8 +448,8 @@
   }
   function mListHTML() {
     const toks = activeTokens();
-    const list = S.tasks.filter(t => t.status === S.mstatus && matches(t, toks));
-    return list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`;
+    const list = colTasks(S.mstatus, toks);
+    return (list.length && S.mstatus === 'backlog' ? `<div class="m-sort">${sortNote('backlog')}</div>` : '') + (list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`);
   }
   const incoming = () => S.tasks.filter(t => t.source !== 'keeper' && S.channels.includes(t.source)).sort((a, b) => b.captured - a.captured);
   function statusLabel(s) { const c = D.COLUMNS.find(c => c.id === s); return c ? c.name : s; }
@@ -758,7 +766,7 @@
         <div class="sh-foot"><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
       </div>`;
     } else if (UI.sheet.type === 'ask') {
-      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask" role="dialog" aria-modal="true" aria-label="Add a task">
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask ${UI.ask.msgs.length ? '' : 'empty'}" role="dialog" aria-modal="true" aria-label="Add a task">
         <div class="grab"></div>
         <div class="sh-h"><span class="logo-mark" aria-hidden="true"></span><b>New task</b><button type="button" class="vbtn" data-action="voice" aria-label="Choose assistant voice">${ic('wave')}Voice</button><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="ask-msgs" id="askMsgs">${askMsgsHTML()}</div>
@@ -795,13 +803,13 @@
   function vstageHTML() {
     const A = UI.ask;
     const cap = A.listening || A.handsFree ? (A.speaking ? 'Keeper is talking…' : 'Listening… keep talking') : SR ? (A.msgs.length ? 'Tap to answer' : 'Tap to talk') : 'Voice needs Chrome, Edge or Safari. Type below.';
-    return `<button type="button" class="orb ${A.listening || A.handsFree ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}>${ic('mic')}</button>
+    return (A.msgs.length ? '' : `<div class="ask-empty">What do you need to keep track of?<small>Say it like you’d tell an assistant: “Send Jen the logo files by the 30th.”</small></div>`) + `<button type="button" class="orb ${A.listening || A.handsFree ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}>${ic('mic')}</button>
       ${A.listening && A.interim ? `<div class="vlive" id="vlive">${esc(A.interim)}</div>` : `<div class="vcap">${cap}</div>`}`;
   }
-  function paintVoice() { const v = $('#vstage'); if (v) { v.innerHTML = vstageHTML(); v.classList.toggle('compact', UI.ask.msgs.length > 0); } }
+  function paintVoice() { const v = $('#vstage'); if (v) { v.innerHTML = vstageHTML(); v.classList.toggle('compact', UI.ask.msgs.length > 0); const sh = v.closest('.sheet'); if (sh) sh.classList.toggle('empty', !UI.ask.msgs.length); } }
   function askMsgsHTML() {
     const A = UI.ask; const last = A.msgs.length - 1;
-    if (!A.msgs.length) return `<div class="ask-empty">What do you need to keep track of?<small>Say it like you’d tell an assistant: “Send Jen the logo by the 30th with Leo.”</small></div>`;
+    if (!A.msgs.length) return '';
     return A.msgs.map((m, i) => {
       if (m.from === 'me') return `<div class="msg me ${i === last ? 'nw' : ''}"><div class="bub">${esc(m.text)}</div></div>`;
       let h = `<div class="msg ${i === last ? 'nw' : ''}"><span class="logo-mark k" aria-hidden="true"></span><div class="bub">${esc(m.text)}</div></div>`;
@@ -1079,6 +1087,7 @@
     if (!a) return;
     const act = a.dataset.action;
     switch (act) {
+      case 'sort-due': S.manual = Object.assign({}, S.manual, { backlog: false }); save(); refresh(); break;
       case 'mode': S.mode = a.dataset.mode; save(); render(); break;
       case 'scope': $$('.seg-scope button').forEach(b => b.setAttribute('aria-pressed', String(b === a))); break;
       case 'about': $('#about').hidden = false; break;
@@ -1272,6 +1281,13 @@
       const body = d.ph.parentNode, col = body && body.closest('[data-col]');
       if (col) {
         const to = col.dataset.col;
+        if (from === 'backlog' && to === 'backlog' && !(S.manual && S.manual.backlog)) {
+          /* first manual reorder: lock in the due-date order, then apply the move */
+          const sorted = S.tasks.filter(x => x.status === 'backlog').sort(byDue);
+          const slots = []; S.tasks.forEach((x, i) => { if (x.status === 'backlog') slots.push(i); });
+          slots.forEach((slot, k) => { S.tasks[slot] = sorted[k]; });
+          S.manual = Object.assign({}, S.manual, { backlog: true });
+        }
         const next = d.ph.nextElementSibling && d.ph.nextElementSibling.classList.contains('card') ? d.ph.nextElementSibling.dataset.id : null;
         S.tasks.splice(S.tasks.indexOf(t), 1);
         t.status = to;

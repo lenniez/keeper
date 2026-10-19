@@ -602,3 +602,13 @@ img.av{object-fit:cover;padding:0;background:#EDE6FD}
 .device.is-mobile .onb p.lead{font-size:17px}
 .device.is-mobile .m-nav button{font-size:15px}
 .orig-acts{flex-wrap:wrap}.orig-acts .linkish,.open-app{white-space:nowrap}
+/* empty add-task screen: prompt and mic centred together */
+.sheet.ask.empty .ask-msgs{display:none}
+.sheet.ask.empty .vstage{flex:1;justify-content:center;gap:16px}
+.sheet.ask.empty .ask-empty{margin:0 0 20px}
+.sort-note{margin-left:auto;font-size:14px;color:var(--faint);font-weight:500;border:0;background:none;padding:0}
+button.sort-note{color:var(--brand-ink);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.m-sort{display:flex;justify-content:flex-end;margin-bottom:-2px}
+.device.is-mobile .sort-note{font-size:15px}
+.shell-btn{white-space:nowrap}
+@media (max-width:719px){.shell-bar{gap:6px;padding-inline:10px}.shell-ctrls{gap:6px}.shell-btn{padding:7px 10px}.seg-scope button{padding:6px 10px}}
