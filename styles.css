@@ -559,3 +559,46 @@ img.av{object-fit:cover;padding:0;background:#EDE6FD}
 @media (max-width:719px){.manage-btn .chan-ics{display:none}}
 .device.is-mobile .manage-btn .chan-ics{display:none}
 .device.is-desktop .dev-toasts{display:none}
+
+/* feed rows: one column, status · due · age on a footer line */
+.frow{padding:14px 16px;gap:12px}
+.frow-txt{gap:4px}
+.frow-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px}
+.frow-foot .ago{color:var(--faint);margin-left:auto}
+.frow-foot .spill{font-size:15px;padding:2px 9px}
+.snip{font-style:normal;color:var(--ink-2);border-left:3px solid var(--line-2);padding-left:10px}
+
+/* ---------- iOS type scale on phones (Dynamic Type "Large" defaults) ----------
+   Large title 34 · Title 1 28 · Title 2 22 · Title 3 20 · Headline/Body 17 · Callout 16 · Subhead 15 (floor) */
+.device.is-mobile{font-size:17px}
+.device.is-mobile .greet h1,.device.is-mobile .page-h h1{font-size:28px;line-height:1.15}
+.device.is-mobile .greet .date,.device.is-mobile .sum{font-size:15px}
+.device.is-mobile .card-title,.device.is-mobile .frow-title,.device.is-mobile .chan-txt b,.device.is-mobile .vt b,.device.is-mobile .cx-num b{font-size:17px;line-height:1.3}
+.device.is-mobile .card-meta,.device.is-mobile .frow-meta,.device.is-mobile .due,.device.is-mobile .frow-foot,.device.is-mobile .chan-txt span,.device.is-mobile .vt span,.device.is-mobile .orig-h{font-size:15px}
+.device.is-mobile .snip,.device.is-mobile .orig-snip,.device.is-mobile .quote{font-size:17px;line-height:1.4}
+.device.is-mobile .feed-sec h3{font-size:17px;font-weight:600;color:var(--ink);margin:14px 0 8px}
+.device.is-mobile .sh-title{font-size:22px}
+.device.is-mobile .draft .sh-title{font-size:20px}
+.device.is-mobile .fields{font-size:17px;grid-template-columns:132px 1fr}
+.device.is-mobile .fields dt{font-size:15px}
+.device.is-mobile .fl{font-size:15px}
+.device.is-mobile .msg .bub{font-size:17px;line-height:1.4}
+.device.is-mobile .ask-empty{font-size:28px}
+.device.is-mobile .ask-empty small{font-size:17px}
+.device.is-mobile .vcap,.device.is-mobile .vlive{font-size:17px}
+.device.is-mobile input,.device.is-mobile .fbox input,.device.is-mobile .ask-in input{font-size:17px}
+.device.is-mobile .btn-primary,.device.is-mobile .btn-ghost,.device.is-mobile .open-app{font-size:17px}
+.device.is-mobile .mtab,.device.is-mobile .chip,.device.is-mobile .statuses button,.device.is-mobile .manage-btn,.device.is-mobile .live-pill,.device.is-mobile .linkish,.device.is-mobile .menu button{font-size:16px}
+.device.is-mobile .mtab .n{font-size:15px}
+.device.is-mobile .em-subj{font-size:20px}
+.device.is-mobile .sv-pad,.device.is-mobile .tx .b,.device.is-mobile .tr-row{font-size:17px}
+.device.is-mobile .em-from,.device.is-mobile .tr-row b,.device.is-mobile .tr-row .ts,.device.is-mobile .sl-msg .who small{font-size:15px}
+.device.is-mobile .cx-p,.device.is-mobile .cx-perms li,.device.is-mobile .cx-ws{font-size:17px}
+.device.is-mobile .cx-note,.device.is-mobile .note,.device.is-mobile .m-hint,.device.is-mobile .empty{font-size:15px}
+.device.is-mobile .toast{font-size:15px}
+.device.is-mobile .sec-h{font-size:20px}
+.device.is-mobile .onb h1{font-size:34px}
+.device.is-mobile .onb h2{font-size:28px}
+.device.is-mobile .onb p.lead{font-size:17px}
+.device.is-mobile .m-nav button{font-size:15px}
+.orig-acts{flex-wrap:wrap}.orig-acts .linkish,.open-app{white-space:nowrap}

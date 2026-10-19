@@ -29,6 +29,7 @@
     if (n < 7) return { label: d.toLocaleDateString('en-US', { weekday: 'short' }), cls: 'soon' };
     return { label: shortDate(d), cls: '' };
   }
+  const agoText = ts => { const s = ago(ts); return s === 'now' ? 'just now' : s + ' ago'; };
   function ago(ts) {
     const m = Math.max(0, Math.round((Date.now() - ts) / 60000));
     if (m < 1) return 'now';
@@ -238,16 +239,23 @@
   /* turn a rambling request into a short task title */
   const FILLER = /^\s*(?:(?:ok(?:ay)?|so|um+|uh+|hey keeper|keeper|please|hey|alright|right)[,\s]+)*(?:(?:can|could) you\s+|i(?:'ll| will)? (?:need|have|want|got) to\s+|i(?:'ve| have)? got(?:ta| to)\s+|i gotta\s+|i should\s+|i must\s+|need to\s+|have to\s+|(?:please\s+)?remind me to\s+|remember to\s+|(?:make sure|be sure) (?:to|that i)\s+|don'?t forget to\s+|let'?s\s+|go ahead and\s+|add (?:a )?task (?:to\s+)?|todo:?\s*|to-do:?\s*|new task:?\s*)+/i;
   const REWRITES = [
-    [/^get back to\b/i, 'Reply to'], [/^respond to\b/i, 'Reply to'], [/^write back to\b/i, 'Reply to'],
+    /* messages become the thing to deliver: "reply to Jen about the logo colors" → "Send Jen the logo colors" */
+    [/^(?:reply|respond|write back|get back|answer|email|e-mail|text|message|ping|slack|dm|follow up|circle back|check in)(?: to| with)? (\w+)(?:['’]s)? (?:about|re|regarding|on|with|for) (?:the |her |his |their |our |my )?(.+)$/i, (m, who, what) => 'Send ' + who + ' the ' + what],
+    [/^(?:email|e-mail|text|message|ping|slack|dm) (\w+) (the|a|an|our|my|her|his|their) /i, 'Send $1 $2 '],
     [/^shoot (?:over|across)?\b/i, 'Send'], [/^send over\b/i, 'Send'], [/^get (\w+) (the|a|an)\b/i, 'Send $1 $2'],
-    [/^touch base with\b/i, 'Check in with'], [/^circle back (?:with|to)\b/i, 'Follow up with'], [/^ping\b/i, 'Message'],
+
     [/^take a look at\b/i, 'Review'], [/^have a look at\b/i, 'Review'], [/^look over\b/i, 'Review'], [/^go over\b/i, 'Review'],
     [/^put together\b/i, 'Draft'], [/^come up with\b/i, 'Draft'], [/^work on\b/i, 'Work on'], [/^figure out\b/i, 'Decide'],
     [/^(?:set up|schedule|book) a (call|meeting)(?: with (\w+))? to (?:go over|discuss|talk about|review)\b/i, (m, k, who) => 'Schedule ' + k + (who ? ' with ' + who : '') + ' about'], [/^set up a (call|meeting) with\b/i, 'Schedule a $1 with'], [/^hop on a call with\b/i, 'Call'], [/^give (\w+) a call\b/i, 'Call $1'],
     [/^pick up\b/i, 'Buy'], [/^grab\b/i, 'Get']
   ];
+  const VAGUE = /^(?:reply|respond|write back|get back|answer|email|e-mail|text|message|ping|slack|dm|follow up|circle back|check in|touch base|call back|get in touch|reach out|talk to|chat with)\b/i;
+  function stripDates(t) {
+    for (let i = 0; i < 3; i++) { const r = parseDue(t); if (!r) break; t = t.slice(0, r.start) + ' ' + t.slice(r.end); }
+    return t.replace(/\s+(?:by|before|until|on|due|for|at)\s*$/i, ' ');
+  }
   function simplifyTitle(w) {
-    let t = ' ' + w.replace(/\s+/g, ' ').trim() + ' ';
+    let t = ' ' + stripDates(w.replace(/\s+/g, ' ').trim()) + ' ';
     t = t.replace(FILLER, ' ');
     t = t.replace(/^\s*(i|we)\s+/i, ' ');
     /* keep the main clause only */
@@ -444,10 +452,10 @@
     return `<button type="button" class="frow ${t.fresh ? 'new' : ''}" data-action="open" data-id="${t.id}">
       ${srcIc(t.source)}
       <span class="frow-txt"><span class="frow-title">${t.fresh ? '<span class="newtag">NEW</span> ' : ''}${esc(t.title)}</span>
-        <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''} · <span class="due ${di.cls}">${esc(di.label)}</span></span>
+        <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''}</span>
         ${opts && opts.snip && t.snippet ? `<span class="snip">“${esc(t.snippet)}”</span>` : ''}
+        <span class="frow-foot">${opts && opts.status ? spill(t.status) : ''}<span class="due ${di.cls}">${esc(di.label)}</span><span class="ago">${agoText(t.captured)}</span></span>
       </span>
-      <span class="when">${ago(t.captured)}${opts && opts.status ? spill(t.status) : ''}</span>
     </button>`;
   }
   function feedPageHTML() {
@@ -563,7 +571,7 @@
     if (t.source === 'keeper' || !t.snippet) return '';
     const o = origin(t), meta = ORIGIN[t.source] || {}, open = UI.sheet && UI.sheet.expand;
     return `<div class="orig-b ${open ? 'open' : ''}">
-      <div class="orig-h">${srcIc(t.source)}<span>${esc(o.mine ? 'You' : o.fromName)} · ${esc(srcLabel(t.source))} · ${ago(t.captured)} ago</span></div>
+      <div class="orig-h">${srcIc(t.source)}<span>${esc(o.mine ? 'You' : o.fromName)} · ${esc(srcLabel(t.source))} · ${agoText(t.captured)}</span></div>
       ${open ? sourceView(t) : `<button type="button" class="orig-snip" data-action="expand" aria-expanded="false">“${esc(o.text)}”</button>`}
       <div class="orig-acts"><button type="button" class="linkish" data-action="expand">${open ? 'Show less' : 'Show full ' + esc(meta.noun || 'message')}</button>
         ${meta.url ? `<a class="open-app" href="${meta.url}" target="_blank" rel="noopener">${esc(meta.cta)} ${ic('ext')}</a>` : ''}</div>
@@ -837,6 +845,13 @@
   /* step 1: read back what was understood and ask for changes */
   function askReview(updated) {
     const A = UI.ask, d = A.draft;
+    if (VAGUE.test(d.title)) {
+      A.awaiting = 'what';
+      const who = d.requesterSet && d.requester !== 'maya' ? ' ' + fn(d.requester) : '';
+      pushMsg({ from: 'k', text: 'Keeper tracks things you owe people, not messages to answer. What do you need to deliver' + (who ? ' to' + who : '') + '? For example, “send the logo files”.' });
+      say('Got it. What do you need to deliver' + (who ? ' to' + who : '') + '? Like, send the logo files.', true);
+      setAskPlaceholder(); return;
+    }
     A.awaiting = 'review';
     const line = (updated ? 'Updated: ' : 'New task: ') + summaryLine(d);
     const q = updated ? 'Anything else to change?' : 'Anything you want to change?';
@@ -890,6 +905,14 @@
     pushMsg({ from: 'me', text });
     const d = A.draft;
     const ADDWORDS = /^(add|add it|save|save it|yes,? add it|that'?s it,? add it|go ahead|create it)\b/i;
+    if (A.awaiting === 'what') {
+      const p = parseTask(text);
+      d.title = p.title;
+      if (p.dueSet) { d.due = p.due; d.dueSet = true; }
+      if (VAGUE.test(d.title)) d.title = 'Send ' + d.title.replace(VAGUE, '').replace(/^\s*(to|with)\s+/i, '').trim();
+      if (d.requesterSet && D.PEOPLE[d.requester] && d.requester !== 'maya' && /^(send|share|deliver) (the|a|an|our|my|some) /i.test(d.title)) d.title = d.title.replace(/^(\w+) /, '$1 ' + fn(d.requester) + ' ');
+      return setTimeout(() => askReview(true), 300);
+    }
     if (A.awaiting === 'ready') {
       if (ADDWORDS.test(text) || NOCHANGE.test(text) || /^(yes|yeah|yep|sure)\b/i.test(text)) return addDraft();
       if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
