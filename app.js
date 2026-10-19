@@ -223,7 +223,7 @@
     Object.keys(FIRST).forEach(f => { const m = text.match(new RegExp('\\b' + f + '\\b', 'i')); if (m) out.push({ key: FIRST[f], index: m.index }); });
     return out.sort((a, b) => a.index - b.index);
   }
-  const COLWORDS = [['upnext', 'up next|next up'], ['backlog', 'backlog|later|someday'], ['inprogress', 'in progress|doing|working on'], ['blocked', 'blocked|waiting'], ['done', 'done|completed']];
+  const COLWORDS = [['upnext', 'up next|next up'], ['backlog', 'backlog|later|someday'], ['inprogress', 'in progress|doing|working on'], ['blocked', 'blocked|waiting']];
   function parseCol(text) {
     for (const [id, words] of COLWORDS) {
       const m = text.match(new RegExp('\\s*(?:,|\\band\\b|\\bthen\\b)?\\s*\\b(?:(?:add|put|move|file|drop)(?: (?:it|this))? )?(?:to|in|into|on|under)\\s+(?:the\\s+|my\\s+)?(?:' + words + ')(?:\\s+(?:column|list|lane))?\\b', 'i'));
@@ -274,7 +274,7 @@
     const m = mode();
     device.classList.toggle('is-mobile', m === 'mobile');
     device.classList.toggle('is-desktop', m === 'desktop');
-    $$('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+    $$('.seg-view button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
     fitDevice();
   }
   /* phone is laid out at a true 390×844 and scaled to fit the window, so nothing reflows or clips */
@@ -378,7 +378,6 @@
     return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.status === 'blocked' ? 'blocked' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
       <div class="card-title">${esc(t.title)}</div>
       <div class="card-meta"><span class="where">${srcIc(t.source)}<span>${esc(where)}</span></span>
-        ${t.collaborators.length ? `<span class="avs">${t.collaborators.map(av).join('')}</span>` : ''}
         <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
     </article>`;
   }
@@ -432,9 +431,14 @@
       return `<div class="feed-sec"><h3>${name === 'Live now' ? '<span class="live-dot"></span>' : ''}${name}</h3><div class="feed-list">${items.map(t => feedRow(t, { snip: true, status: true })).join('')}</div></div>`;
     }).join('');
     const left = D.INCOMING.length - S.incomingIdx;
-    return `<div class="feed-tools">
+    const on = S.channels.filter(k => D.SOURCES[k]);
+    const chanRow = `<button type="button" class="chan-link" data-action="go" data-screen="sources">
+        <span class="chan-ics">${on.map(srcIc).join('')}</span>
+        <span class="o-txt"><b>${on.length} channel${on.length === 1 ? '' : 's'} on</b><span>${on.length ? esc(on.map(k => k === 'sms' ? 'Keeper Line' : D.SOURCES[k].label).join(', ')) : 'Turn on a channel to catch tasks'}</span></span>
+        <span class="manage">Manage ${ic('chev')}</span></button>`;
+    return chanRow + `<div class="feed-tools">
         <span class="live-pill"><span class="live-dot"></span>Live</span>
-        <button type="button" class="btn-ghost" data-action="simulate" ${left > 0 ? '' : 'disabled'}>${ic('bolt')} ${left > 0 ? 'Simulate incoming task' : 'All caught up'}</button>
+        <button type="button" class="btn-ghost" data-action="simulate" ${left > 0 ? '' : 'disabled'}>${ic('bolt')} ${left > 0 ? 'Simulate a new task' : 'All caught up'}</button>
       </div>${secs}`;
   }
   function sourcesHTML() {
@@ -452,29 +456,29 @@
 
   function renderMobile() {
     let body;
-    if (S.screen === 'feed') body = `<div class="page-h"><h1>Incoming</h1></div><div id="feedPage">${feedPageHTML()}</div>`;
-    else if (S.screen === 'sources') body = `<div class="page-h"><h1>Channels</h1></div>${sourcesHTML()}`;
+    if (S.screen === 'feed') body = `<div class="page-h"><h1>Task Feed</h1></div><div id="feedPage">${feedPageHTML()}</div>`;
+    else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Task Feed">${ic('back')}</button><h1>Channels</h1></div>${sourcesHTML()}`;
     else body = `${greeting()}${filterBar()}
       <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
       <div class="m-list col-body" id="mList" data-col="${S.mstatus}">${mListHTML()}</div>
       <p class="m-hint">Tap to edit · hold and drag onto a tab to move</p>`;
     return `<div class="m-home">
       <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
-        ${S.screen === 'board' ? searchBtn() : ''}<button class="m-me" data-action="go" data-screen="sources" aria-label="Maya · channels and settings">M</button></div>
+        ${S.screen === 'board' ? searchBtn() : ''}<span class="m-me" aria-label="Maya">M</span></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
         <button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>
-        <button class="${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed"><span class="navi">${ic('feed')}${badge('navBadge')}</span>Incoming</button>
+        <button class="${S.screen === 'feed' || S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="feed" ${S.screen === 'sources' ? 'data-sub="1"' : ''}><span class="navi">${ic('feed')}${badge('navBadge')}</span>Task Feed</button>
       </nav>
     </div>`;
   }
   function renderDesktop() {
     let main;
-    if (S.screen === 'feed') main = `<div class="screen"><div class="page-h"><h1>Incoming</h1></div><div id="feedPage">${feedPageHTML()}</div></div>`;
+    if (S.screen === 'feed') main = `<div class="screen"><div class="page-h"><h1>Task Feed</h1></div><div id="feedPage">${feedPageHTML()}</div></div>`;
     else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Channels</h1></div>${sourcesHTML()}</div>`;
     else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
-        <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Incoming${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
+        <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Task Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
         <button class="btn-ask" data-action="ask">${ic('plus')} Add task <kbd>N</kbd></button></div></div>
       ${filterBar()}
       <div class="board" id="board">${boardHTML()}</div>`;
@@ -482,7 +486,7 @@
       <aside class="d-side">
         <div class="d-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
         <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
-        <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Incoming<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
+        <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Task Feed<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
         <button class="d-nav ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('plug')}Channels</button>
         <div class="d-me"><span class="m-me" aria-hidden="true">M</span><span><b>Maya</b><small>Brand strategist</small></span></div>
       </aside>
@@ -610,9 +614,9 @@
       </div>`;
     } else if (UI.sheet.type === 'inc') {
       const list = incoming().slice(0, 12);
-      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Incoming">
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task Feed">
         <div class="grab"></div>
-        <div class="sh-h"><span class="live-dot"></span><b>Incoming</b><span class="lab">Live</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h"><span class="live-dot"></span><b>Task Feed</b><span class="lab">Live</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="inc-list"><div class="feed-list">${list.map(t => feedRow(t, { status: true })).join('')}</div></div>
         <div class="sh-foot"><button class="btn-ghost" data-action="simulate">${ic('bolt')} Simulate</button><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
       </div>`;
@@ -643,13 +647,13 @@
 
   /* ---------- assistant: voice first, type as fallback ---------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const ADDCOLS = ['upnext', 'backlog', 'inprogress', 'blocked', 'done'];
+  const ADDCOLS = ['upnext', 'backlog', 'inprogress', 'blocked'];
   function startAsk(voice) {
-    UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice, interim: '' };
+    UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice || mode() === 'mobile', listenBack: !!voice, interim: '' };
     openSheet({ type: 'ask' });
     setTimeout(() => { if (voice && SR) startListening(); else { const i = $('#askInput'); if (i && mode() === 'desktop') i.focus(); } }, 380);
   }
-  const askPlaceholder = () => !UI.ask ? '' : UI.ask.awaiting === 'requester' ? 'Type a name…' : UI.ask.awaiting === 'due' ? 'Any date: “in 2 weeks”, “Nov 14”, “the 30th”' : 'Or type it here';
+  const askPlaceholder = () => !UI.ask ? '' : UI.ask.awaiting === 'requester' ? 'Or type a name' : /due/.test(UI.ask.awaiting || '') ? 'Or type any date' : UI.ask.awaiting === 'review' ? 'Or type a change' : 'Or type it here';
   function vstageHTML() {
     const A = UI.ask;
     const cap = A.listening ? 'Listening… tap to stop' : SR ? (A.msgs.length ? 'Tap to answer' : 'Tap to talk') : 'Voice needs Chrome, Edge or Safari. Type below.';
@@ -673,9 +677,9 @@
       <dl class="fields"><dt>Requested by</dt><dd>${d.requester && d.requester !== 'maya' ? av(d.requester) + esc(personName(d.requester)) : 'You'}</dd>
       <dt>Due</dt><dd>${live ? `<input type="date" id="draftDue" value="${d.due == null ? '' : iso(addDays(d.due))}" aria-label="Due date">` : ''}${live ? '' : d.due == null ? 'No date' : esc(dueInfo(iso(addDays(d.due)), 'upnext').label + (Math.abs(d.due) < 7 ? ' · ' + shortDate(addDays(d.due)) : ''))}</dd>
       <dt>Collaborators</dt><dd>${d.collaborators.length ? d.collaborators.map(c => av(c) + esc(personName(c))).join(' ') : 'None'}</dd>
-      <dt>Project</dt><dd>${projTag(d.project) || 'None'}</dd></dl>
+      <dt>Project</dt><dd>${projTag(d.project) || 'None'}</dd>${live ? '' : `<dt>Column</dt><dd>${esc(statusLabel(d.col))}</dd>`}</dl>
       ${live ? `<div><div class="fl">Add to</div><div class="statuses">${ADDCOLS.map(c => `<button type="button" class="s-${c} ${d.col === c ? 'on' : ''}" data-action="draft-col" data-v="${c}">${sdot(c)}${esc(statusLabel(c))}</button>`).join('')}</div></div>
-      <div class="draft-acts"><button type="button" class="btn-primary" data-action="draft-add">Add to ${esc(statusLabel(d.col))}</button><button type="button" class="btn-ghost" data-action="draft-redo">Start over</button></div>` : `<div class="fl" style="margin:0">Added to ${esc(statusLabel(d.col))}</div>`}</div>`;
+      <div class="draft-acts"><button type="button" class="btn-primary" data-action="draft-add">Add to ${esc(statusLabel(d.col))}</button><button type="button" class="btn-ghost" data-action="draft-redo">Start over</button></div>` : ''}</div>`;
   }
   function paintMsgs() { const el = $('#askMsgs'); if (el) { el.innerHTML = askMsgsHTML(); el.scrollTop = el.scrollHeight; } paintVoice(); }
   function pushMsg(m) { UI.ask.msgs.push(m); paintMsgs(); }
@@ -683,61 +687,106 @@
   /* in voice mode Keeper reads its question aloud, then listens for the answer */
   function say(text, listenAfter) {
     const A = UI.ask;
-    if (!A || !A.voice || !window.speechSynthesis) { return; }
+    if (!A || !A.voice || !window.speechSynthesis) { if (listenAfter && A && A.listenBack && SR) setTimeout(() => { if (UI.ask === A && !A.listening) startListening(); }, 300); return; }
     try {
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text); u.rate = 1.05;
-      u.onend = () => { if (listenAfter && UI.ask === A && UI.sheet && UI.sheet.type === 'ask' && !A.listening) startListening(); };
+      u.onend = () => { if (listenAfter && A.listenBack && UI.ask === A && UI.sheet && UI.sheet.type === 'ask' && !A.listening) startListening(); };
       speechSynthesis.speak(u);
     } catch (e) {}
   }
-  function askNext() {
+  const fn = k => personName(k).split(' ')[0];
+  function spokenDue(days) { if (days == null) return 'no due date'; const l = dueInfo(iso(addDays(days)), 'upnext').label; return 'due ' + (l === 'Today' || l === 'Tomorrow' ? l.toLowerCase() : Math.abs(days) < 7 ? l.replace(/^(\w{3})$/, m => ({ Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' })[m] || m) : addDays(days).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })); }
+  function summaryLine(d) {
+    const bits = [];
+    if (d.requesterSet) bits.push(d.requester === 'maya' ? 'for you' : 'for ' + (D.PEOPLE[d.requester] ? fn(d.requester) : d.requester));
+    if (d.dueSet) bits.push(spokenDue(d.due));
+    if (d.collaborators.length) bits.push('with ' + d.collaborators.map(fn).join(' and '));
+    bits.push('in ' + statusLabel(d.col));
+    return '“' + d.title + '”, ' + bits.join(', ') + '.';
+  }
+  /* step 1: read back what was understood and ask for changes */
+  function askReview(updated) {
+    const A = UI.ask, d = A.draft;
+    A.awaiting = 'review';
+    const line = (updated ? 'Updated: ' : 'New task: ') + summaryLine(d);
+    const q = updated ? 'Anything else to change?' : 'Anything you want to change?';
+    pushMsg({ from: 'k', text: line + ' ' + q, draft: d, chips: ['Looks good', 'Change the date', 'Change the column'] });
+    say(line + ' ' + q, true);
+    setAskPlaceholder();
+  }
+  /* step 2: ask only for what is still missing, then add */
+  function askMissing() {
     const A = UI.ask, d = A.draft;
     if (!d.requesterSet) {
       A.awaiting = 'requester';
-      const clients = Object.keys(D.PEOPLE).filter(k => D.PEOPLE[k].role === 'client').map(k => D.PEOPLE[k].name.split(' ')[0]);
+      const clients = Object.keys(D.PEOPLE).filter(k => D.PEOPLE[k].role === 'client').map(fn);
       pushMsg({ from: 'k', text: 'Who is this for?', chips: clients.concat('Just me') }); say('Who is this for?', true);
     } else if (!d.dueSet) {
       A.awaiting = 'due';
       pushMsg({ from: 'k', text: 'When is it due?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('When is it due?', true);
-    } else {
-      A.awaiting = 'confirm';
-      const proj = d.project && D.PROJECTS[d.project] ? ` I filed it under ${D.PROJECTS[d.project].name}.` : '';
-      pushMsg({ from: 'k', text: 'Here’s the task.' + proj + ' Pick a column or add it to ' + statusLabel(d.col) + '.', draft: d });
-      say('Got it. Say “add it” to put it in ' + statusLabel(d.col) + ', or name another column.', true);
-    }
+    } else addDraft();
     setAskPlaceholder();
+  }
+  const NOCHANGE = /^(no|nope|nah|nothing|looks good|look(s)? great|all good|good|fine|it'?s fine|that'?s (it|right|good|fine|all)|perfect|correct|all set|we'?re good|sounds good|great|ok(ay)?|add it|save it|done)\b/i;
+  /* apply spoken or typed edits: dates, people, collaborators, column, title */
+  function applyChanges(text, d) {
+    let changed = false;
+    const t = ' ' + text + ' ';
+    const ren = text.match(/\b(?:call it|rename (?:it )?(?:to)?|change the (?:title|name) to|title (?:it|is)?)\s+[“"]?(.+?)[”"]?\s*$/i);
+    if (ren) { d.title = ren[1].charAt(0).toUpperCase() + ren[1].slice(1); return true; }
+    const cr = parseCol(t) || (() => { const m = COLWORDS.find(([, w]) => new RegExp('\\b(' + w + ')\\b', 'i').test(text)); return m ? { id: m[0] } : null; })();
+    if (cr) { d.col = cr.id; changed = true; }
+    if (/\bno (due )?date\b|\bno deadline\b|remove the (due )?date/i.test(text)) { d.due = null; d.dueSet = true; changed = true; }
+    else { const r = parseDue(text); if (r) { d.due = r.days; d.dueSet = true; changed = true; } }
+    if (/\b(no|remove( the)?) collaborators?\b/i.test(text)) { d.collaborators = []; changed = true; }
+    const w = text.match(/\b(?:with|add)\s+([a-z]+(?:\s*(?:,|and|&)\s*[a-z]+)*)/i);
+    if (w) { const ks = w[1].split(/\s*(?:,|and|&)\s*/i).map(n => FIRST[n.toLowerCase()]).filter(Boolean).filter(k => D.PEOPLE[k].role !== 'client'); if (ks.length) { d.collaborators = Array.from(new Set(d.collaborators.concat(ks))); changed = true; } }
+    const rm = text.match(/\bremove\s+([a-z]+)/i);
+    if (rm && FIRST[rm[1].toLowerCase()]) { d.collaborators = d.collaborators.filter(k => k !== FIRST[rm[1].toLowerCase()]); changed = true; }
+    if (/\b(for|it'?s for)\s+(me|myself)\b|\bjust me\b/i.test(text)) { d.requester = 'maya'; d.requesterSet = true; changed = true; }
+    else {
+      const f = text.match(/\b(?:for|from|it'?s for|requester is)\s+([a-z]+)/i);
+      const k = f && FIRST[f[1].toLowerCase()];
+      const bare = !k && findPeople(text).find(p => D.PEOPLE[p.key].role === 'client' && !(w && new RegExp(personName(p.key).split(' ')[0], 'i').test(w[1])));
+      const who = k || (bare && bare.key);
+      if (who) { d.requester = who; d.requesterSet = true; if (D.PEOPLE[who].project) d.project = D.PEOPLE[who].project; changed = true; }
+    }
+    return changed;
   }
   function askSubmit(text, viaVoice) {
     text = (text || '').trim(); if (!text || !UI.ask) return;
-    const A = UI.ask; A.voice = !!viaVoice;
+    const A = UI.ask; A.listenBack = !!viaVoice;
     pushMsg({ from: 'me', text });
+    const d = A.draft;
+    if (A.awaiting === 'review') {
+      if (/^change the date$/i.test(text)) { A.awaiting = 'due-edit'; pushMsg({ from: 'k', text: 'What’s the new due date?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('What’s the new due date?', true); return; }
+      if (/^change the column$/i.test(text)) { A.awaiting = 'col-edit'; pushMsg({ from: 'k', text: 'Which column?', chips: ADDCOLS.map(statusLabel) }); say('Which column? Up next, backlog, in progress, or blocked?', true); return; }
+      if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
+      if (NOCHANGE.test(text) || /^yes,? (it'?s|that'?s|looks)/i.test(text)) return setTimeout(askMissing, 300);
+      if (/^(yes|yeah|yep|sure)\b/i.test(text)) { pushMsg({ from: 'k', text: 'What should I change? Say a new date, a person, a column, or “call it…” for a new title.' }); say('What should I change?', true); return; }
+      pushMsg({ from: 'k', text: 'Sorry, I didn’t catch a change. Try “due next Tuesday”, “for Marcus”, “put it in backlog” or “call it…”.', chips: ['Looks good'] }); say('Sorry, what should I change?', true); return;
+    }
+    if (A.awaiting === 'due-edit' || A.awaiting === 'col-edit') {
+      if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
+      pushMsg({ from: 'k', text: 'I didn’t catch that. Try again or pick one.', chips: A.awaiting === 'col-edit' ? ADDCOLS.map(statusLabel) : ['Today', 'Tomorrow', 'Next week', 'No due date'], datePick: A.awaiting === 'due-edit' }); say('Sorry, try again?', true); return;
+    }
     if (A.awaiting === 'requester') {
       const s = text.toLowerCase();
-      if (/^(just )?(me|myself)|no one|nobody|none|^mine/.test(s)) A.draft.requester = 'maya';
-      else { const p = findPeople(text)[0]; A.draft.requester = p ? p.key : text.replace(/^(it'?s )?(for )?/i, '').replace(/\b\w/g, c => c.toUpperCase()); }
-      if (!A.draft.project && D.PEOPLE[A.draft.requester] && D.PEOPLE[A.draft.requester].project) A.draft.project = D.PEOPLE[A.draft.requester].project;
-      A.draft.requesterSet = true;
-      return setTimeout(askNext, 350);
+      if (/^(just )?(me|myself)|no one|nobody|none|^mine/.test(s)) d.requester = 'maya';
+      else { const p = findPeople(text)[0]; d.requester = p ? p.key : text.replace(/^(it'?s )?(for )?/i, '').replace(/\b\w/g, c => c.toUpperCase()); }
+      if (!d.project && D.PEOPLE[d.requester] && D.PEOPLE[d.requester].project) d.project = D.PEOPLE[d.requester].project;
+      d.requesterSet = true;
+      return setTimeout(askMissing, 300);
     }
     if (A.awaiting === 'due') {
-      if (/\bno( due)?( date)?\b|none|whenever|no rush|no deadline/i.test(text)) { A.draft.due = null; A.draft.dueSet = true; }
-      else { const r = parseDue(text); if (r) { A.draft.due = r.days; A.draft.dueSet = true; } else { pushMsg({ from: 'k', text: 'I didn’t catch a date. Try “in 2 weeks”, “Nov 14” or “the 30th”, or pick one.', chips: ['Today', 'Tomorrow', 'Next week', 'No due date'], datePick: true }); say('Sorry, what date?', true); return; } }
-      return setTimeout(askNext, 350);
-    }
-    if (A.awaiting === 'confirm') {
-      const cr = parseCol(' ' + text + ' ') || (() => { const m = COLWORDS.find(([, w]) => new RegExp('^\\s*(' + w + ')\\s*$', 'i').test(text)); return m ? { id: m[0] } : null; })();
-      if (cr) { A.draft.col = cr.id; return addDraft(); }
-      if (/^(yes|yeah|yep|sure|ok(ay)?|add( it)?|do it|sounds good|confirm|perfect|great)\b/i.test(text)) return addDraft();
-      if (/^(no|nope|start over|cancel)\b/i.test(text)) { A.draft = null; A.awaiting = null; pushMsg({ from: 'k', text: 'No problem. What’s the task?' }); setAskPlaceholder(); return; }
+      if (/\bno( due)?( date)?\b|none|whenever|no rush|no deadline/i.test(text)) { d.due = null; d.dueSet = true; }
+      else { const r = parseDue(text); if (r) { d.due = r.days; d.dueSet = true; } else { pushMsg({ from: 'k', text: 'I didn’t catch a date. Try “in 2 weeks”, “Nov 14” or “the 30th”, or pick one.', chips: ['Today', 'Tomorrow', 'Next week', 'No due date'], datePick: true }); say('Sorry, what date?', true); return; } }
+      return setTimeout(askMissing, 300);
     }
     A.draft = parseTask(text);
-    const bits = [];
-    if (A.draft.requesterSet) bits.push('for ' + personName(A.draft.requester).split(' ')[0]);
-    if (A.draft.dueSet) bits.push('due ' + dueInfo(iso(addDays(A.draft.due)), 'upnext').label.toLowerCase());
-    if (A.draft.collaborators.length) bits.push('with ' + A.draft.collaborators.map(c => personName(c).split(' ')[0]).join(' and '));
-    pushMsg({ from: 'k', text: 'Got it: “' + A.draft.title + '”' + (bits.length ? ', ' + bits.join(', ') : '') + '.' });
-    setTimeout(askNext, 450);
+    if (A.draft.col === 'done') A.draft.col = 'upnext';
+    setTimeout(() => askReview(false), 350);
   }
   function addDraft() {
     const d = UI.ask.draft; if (!d) return;
@@ -748,8 +797,8 @@
     toast(srcIc('keeper') + 'Added to ' + esc(statusLabel(d.col)) + ': ' + esc(d.title));
     UI.ask.awaiting = null; UI.ask.draft = null;
     paintMsgs();
-    pushMsg({ from: 'k', text: 'Added to ' + statusLabel(d.col) + '. Anything else?', chips: ['Done for now'] });
-    say('Added.', false);
+    pushMsg({ from: 'k', text: 'Added to ' + statusLabel(d.col) + '. Tap the mic to add another, or close.', chips: ['Done for now'] });
+    say('Done. I added it to ' + statusLabel(d.col) + '.', false);
     setAskPlaceholder();
     setTimeout(() => { t.fresh = false; }, 4000);
   }
@@ -815,7 +864,7 @@
     const on = it => S.filter.tokens.some(t => t.type === it.type && t.value === it.value);
     const menu = document.createElement('div');
     menu.className = 'menu'; menu.id = 'menu';
-    menu.innerHTML = items.map(it => `<button type="button" class="${on(it) ? 'on' : ''}" data-action="menu-pick" data-type="${it.type}" data-v="${it.value}" data-label="${esc(it.label)}">${it.type === 'person' ? av(it.value) : it.type === 'source' ? srcIc(it.value) : projTag(it.value).replace(esc(it.label), '')}${esc(it.label)}${it.sub ? ` <span style="color:var(--faint);font-size:12px">· ${esc(it.sub)}</span>` : ''}${on(it) ? ' ✓' : ''}</button>`).join('');
+    menu.innerHTML = items.map(it => `<button type="button" class="${on(it) ? 'on' : ''}" data-action="menu-pick" data-type="${it.type}" data-v="${it.value}" data-label="${esc(it.label)}">${it.type === 'person' ? av(it.value) : it.type === 'source' ? srcIc(it.value) : projTag(it.value).replace(esc(it.label), '')}${esc(it.label)}${it.sub ? ` <span style="color:var(--faint)">· ${esc(it.sub)}</span>` : ''}${on(it) ? ' ✓' : ''}</button>`).join('');
     const host = $('#filter'); host.appendChild(menu);
     const hb = host.getBoundingClientRect(), bb = btn.getBoundingClientRect();
     const z = UI.scale || 1;
@@ -848,6 +897,7 @@
     const act = a.dataset.action;
     switch (act) {
       case 'mode': S.mode = a.dataset.mode; save(); render(); break;
+      case 'scope': $$('.seg-scope button').forEach(b => b.setAttribute('aria-pressed', String(b === a))); toast(a.dataset.scope === 'vision' ? 'Vision view is coming soon' : 'Showing the MVP'); break;
       case 'about': $('#about').hidden = false; break;
       case 'about-close': $('#about').hidden = true; break;
       case 'reset': try { localStorage.removeItem(STORE); } catch (err) {} S = fresh(); UI.sheet = null; render(); toast('Demo reset'); break;
@@ -904,6 +954,7 @@
         const v = a.dataset.v;
         if (v === 'Done for now') { closeSheet(); break; }
         if (v === 'Just me') { askSubmit('Just me'); break; }
+        if (UI.ask && UI.ask.awaiting === 'col-edit') { const c = ADDCOLS.find(c => statusLabel(c) === v); if (c) { UI.ask.draft.col = c; pushMsg({ from: 'me', text: v }); setTimeout(() => askReview(true), 300); break; } }
         askSubmit(v); break;
       }
       case 'draft-add': addDraft(); break;
@@ -924,6 +975,7 @@
     if (e.target.id === 'fInput') { S.filter.text = e.target.value; jumpToMatches(); save(); refresh(); const c = $('.fbox .clr'); if (c) c.hidden = !S.filter.text; }
   });
   document.addEventListener('change', e => {
+    if (e.target.id === 'askDate' && e.target.value && UI.ask && UI.ask.awaiting === 'due-edit') { const d = fromISO(e.target.value); UI.ask.draft.due = daysOut(e.target.value); UI.ask.draft.dueSet = true; pushMsg({ from: 'me', text: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) }); setTimeout(() => askReview(true), 300); return; }
     if (e.target.id === 'askDate' && e.target.value && UI.ask) { const d = fromISO(e.target.value); askSubmit(d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), false); return; }
     if (e.target.id === 'draftDue' && UI.ask && UI.ask.draft) { UI.ask.draft.due = e.target.value ? daysOut(e.target.value) : null; paintMsgs(); return; }
     if (e.target.id === 'dueInput' && UI.sheet) { const t = task(UI.sheet.id); t.due = e.target.value || null; save(); refresh(); renderLayer(true); toast(t.due ? 'Due date updated' : 'Due date cleared'); }
@@ -1048,6 +1100,14 @@
   if (S.onboarded && S.step === 2) { S.onboarded = true; S.step = 3; }
   if (!S.onboarded && S.step === 2) S.step = 1;
   render();
+  /* app-style launch screen on phones */
+  if (mode() === 'mobile') {
+    const sp = document.createElement('div');
+    sp.className = 'splash'; sp.setAttribute('aria-hidden', 'true');
+    sp.innerHTML = '<span class="logo-mark"></span><span class="wordmark">keeper</span><span class="spin"></span>';
+    device.appendChild(sp);
+    setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); }, 1600);
+  }
   if (S.onboarded) scheduleLive();
   setInterval(() => { if (S.onboarded && !(UI.drag && UI.drag.active)) { const sm = $('#summary'); if (sm) sm.innerHTML = summary(); } }, 60000);
 })();
