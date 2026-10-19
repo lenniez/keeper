@@ -523,3 +523,16 @@ img.av{object-fit:cover;padding:0;background:#EDE6FD}
 .sec-h{margin:12px 0 0;font-size:17px;font-weight:600}
 
 .orig-b .sv-bar{display:none}
+
+/* filter panel sits above the board, tinted so it reads as its own layer */
+.search{z-index:20;background:var(--brand-soft);border:1px solid #DED3FB;border-radius:16px;padding:12px}
+.search .fbox{background:#fff}
+.search .chip:not(.on){background:#fff}
+.search .menu{z-index:40}
+.m-me,.d-me{cursor:default;pointer-events:none}
+
+/* add-task actions */
+.ask-acts{display:flex;gap:8px;padding:0 14px 4px}
+.ask-acts:empty{display:none}
+.ask-acts .btn-ghost,.ask-acts .btn-primary{flex:1;justify-content:center;height:48px;font-size:16px}
+.m-body > *{flex-shrink:0}

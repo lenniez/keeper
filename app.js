@@ -168,7 +168,7 @@
   const future = d => { if (d < today0()) d.setFullYear(d.getFullYear() + 1); return d; };
   /* understands most ways people say a date: weekdays, relative spans, month names, the 25th, 10/30, 2026-11-04 … */
   function parseDue(text) {
-    const s = text.toLowerCase().replace(/[’']/g, '');
+    const s = text.toLowerCase().replace(/’/g, "'");
     const pre = '(?:\\b(?:by|on|due|before|until|for|at)\\s+)?(?:the\\s+)?';
     const N = '(\\d+|a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|couple of|few)';
     const MONTHS = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\.?';
@@ -234,11 +234,38 @@
     }
     return null;
   }
+  /* turn a rambling request into a short task title */
+  const FILLER = /^\s*(?:(?:ok(?:ay)?|so|um+|uh+|hey keeper|keeper|please|hey|alright|right)[,\s]+)*(?:(?:can|could) you\s+|i(?:'ll| will)? (?:need|have|want|got) to\s+|i(?:'ve| have)? got(?:ta| to)\s+|i gotta\s+|i should\s+|i must\s+|need to\s+|have to\s+|(?:please\s+)?remind me to\s+|remember to\s+|(?:make sure|be sure) (?:to|that i)\s+|don'?t forget to\s+|let'?s\s+|go ahead and\s+|add (?:a )?task (?:to\s+)?|todo:?\s*|to-do:?\s*|new task:?\s*)+/i;
+  const REWRITES = [
+    [/^get back to\b/i, 'Reply to'], [/^respond to\b/i, 'Reply to'], [/^write back to\b/i, 'Reply to'],
+    [/^shoot (?:over|across)?\b/i, 'Send'], [/^send over\b/i, 'Send'], [/^get (\w+) (the|a|an)\b/i, 'Send $1 $2'],
+    [/^touch base with\b/i, 'Check in with'], [/^circle back (?:with|to)\b/i, 'Follow up with'], [/^ping\b/i, 'Message'],
+    [/^take a look at\b/i, 'Review'], [/^have a look at\b/i, 'Review'], [/^look over\b/i, 'Review'], [/^go over\b/i, 'Review'],
+    [/^put together\b/i, 'Draft'], [/^come up with\b/i, 'Draft'], [/^work on\b/i, 'Work on'], [/^figure out\b/i, 'Decide'],
+    [/^(?:set up|schedule|book) a (call|meeting)(?: with (\w+))? to (?:go over|discuss|talk about|review)\b/i, (m, k, who) => 'Schedule ' + k + (who ? ' with ' + who : '') + ' about'], [/^set up a (call|meeting) with\b/i, 'Schedule a $1 with'], [/^hop on a call with\b/i, 'Call'], [/^give (\w+) a call\b/i, 'Call $1'],
+    [/^pick up\b/i, 'Buy'], [/^grab\b/i, 'Get']
+  ];
+  function simplifyTitle(w) {
+    let t = ' ' + w.replace(/\s+/g, ' ').trim() + ' ';
+    t = t.replace(FILLER, ' ');
+    t = t.replace(/^\s*(i|we)\s+/i, ' ');
+    /* keep the main clause only */
+    t = t.split(/\s(?:so that|so she|so he|so they|so we|so i|because|since|which|cause|’cause|'cause|as soon as|once|in case|otherwise|and then|and also|plus|but)\s|[.;!?]|,\s(?:and|so|but|then)\s/i)[0];
+    t = t.replace(/\s(?:before|after|ahead of|during|at|in) (?:our|the|my|their|her|his|next|this) (?:call|meeting|review|sync|chat|catch-?up|kickoff)\b.*$/i, '');
+    t = t.replace(/\s(?:when|if) (?:i|you|we|she|he|they) (?:can|get a chance|have time)\b.*$/i, '');
+    t = t.replace(/\s(?:as well|too|for me|real quick|quickly|asap|if possible|please|okay|ok)\s*$/i, ' ');
+    t = t.replace(/\s+(?:and|then|or|to|for|with|about|on|of|the|a|an)\s*$/i, ' ');
+    t = t.replace(/\s+/g, ' ').replace(/\s+([,.!?])/g, '$1').replace(/^[\s,.-]+|[\s,.-]+$/g, '').trim();
+    for (const [re, to] of REWRITES) if (re.test(t)) { t = t.replace(re, to); break; }
+    const words = t.split(' ');
+    if (words.length > 10) { t = words.slice(0, 10).join(' ').replace(/\s+(?:and|then|or|to|for|with|about|on|of|the|a|an|so|that)$/i, ''); }
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
   function parseTask(text) {
     let w = ' ' + text.trim() + ' ';
     const cr = parseCol(w); let col = 'upnext';
     if (cr) { col = cr.id; w = w.slice(0, cr.start) + ' ' + w.slice(cr.end); }
-    w = w.replace(/^\s*(please\s+)?(can you\s+)?(remind me to|i need to|i have to|need to|i should|add (a )?task (to )?|todo:?|to-do:?)\s+/i, ' ');
+    w = w.replace(FILLER, ' ');
     const dr = parseDue(w);
     let due = null;
     if (dr) { due = dr.days; w = w.slice(0, dr.start) + ' ' + w.slice(dr.end); }
@@ -267,8 +294,7 @@
     let project = null;
     Object.keys(PROJKEYS).forEach(k => { if (new RegExp('\\b' + k, 'i').test(text)) project = PROJKEYS[k]; });
     if (!project && requester && D.PEOPLE[requester].project) project = D.PEOPLE[requester].project;
-    let title = w.replace(/\s+(and|then)\s*$/i, ' ').replace(/\s+/g, ' ').replace(/\s+([,.!?])/g, '$1').replace(/^[\s,.-]+|[\s,.-]+$/g, '').trim();
-    title = title.charAt(0).toUpperCase() + title.slice(1);
+    let title = simplifyTitle(w);
     return { title: title || text.trim(), due, dueSet: due != null, requester, requesterSet: !!requester, collaborators, project, category: guessCategory(text), col };
   }
 
@@ -730,6 +756,7 @@
         <div class="sh-h"><span class="logo-mark" aria-hidden="true"></span><b>New task</b><button type="button" class="vbtn" data-action="voice" aria-label="Choose assistant voice">${ic('wave')}Voice</button><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="ask-msgs" id="askMsgs">${askMsgsHTML()}</div>
         <div class="vstage ${UI.ask.msgs.length ? 'compact' : ''}" id="vstage">${vstageHTML()}</div>
+        <div class="ask-acts" id="askActs">${askActsHTML()}</div>
         <form class="ask-in" id="askForm">
           <input id="askInput" type="text" autocomplete="off" placeholder="${askPlaceholder()}" aria-label="Type a task">
           <button type="submit" class="send" aria-label="Send">${ic('send')}</button>
@@ -753,15 +780,15 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const ADDCOLS = ['upnext', 'backlog', 'inprogress', 'blocked'];
   function startAsk(voice) {
-    UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice || mode() === 'mobile', listenBack: !!voice, interim: '' };
+    UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice || mode() === 'mobile', handsFree: !!voice, interim: '' };
     openSheet({ type: 'ask' });
     setTimeout(() => { if (voice && SR) startListening(); else { const i = $('#askInput'); if (i && mode() === 'desktop') i.focus(); } }, 380);
   }
   const askPlaceholder = () => !UI.ask ? '' : UI.ask.awaiting === 'requester' ? 'Or type a name' : /due/.test(UI.ask.awaiting || '') ? 'Or type any date' : UI.ask.awaiting === 'review' ? 'Or type a change' : 'Or type it here';
   function vstageHTML() {
     const A = UI.ask;
-    const cap = A.listening ? 'Listening… tap to stop' : SR ? (A.msgs.length ? 'Tap to answer' : 'Tap to talk') : 'Voice needs Chrome, Edge or Safari. Type below.';
-    return `<button type="button" class="orb ${A.listening ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}>${ic('mic')}</button>
+    const cap = A.listening || A.handsFree ? (A.speaking ? 'Keeper is talking…' : 'Listening… keep talking') : SR ? (A.msgs.length ? 'Tap to answer' : 'Tap to talk') : 'Voice needs Chrome, Edge or Safari. Type below.';
+    return `<button type="button" class="orb ${A.listening || A.handsFree ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}>${ic('mic')}</button>
       ${A.listening && A.interim ? `<div class="vlive" id="vlive">${esc(A.interim)}</div>` : `<div class="vcap">${cap}</div>`}`;
   }
   function paintVoice() { const v = $('#vstage'); if (v) { v.innerHTML = vstageHTML(); v.classList.toggle('compact', UI.ask.msgs.length > 0); } }
@@ -782,18 +809,22 @@
       <dt>Due</dt><dd>${live ? `<input type="date" id="draftDue" value="${d.due == null ? '' : iso(addDays(d.due))}" aria-label="Due date">` : ''}${live ? '' : d.due == null ? 'No date' : esc(dueInfo(iso(addDays(d.due)), 'upnext').label + (Math.abs(d.due) < 7 ? ' · ' + shortDate(addDays(d.due)) : ''))}</dd>
       <dt>Project</dt><dd>${projTag(d.project) || 'None'}</dd>${live ? '' : `<dt>Column</dt><dd>${esc(statusLabel(d.col))}</dd>`}</dl>
       ${live ? `<div><div class="fl">Add to</div><div class="statuses">${ADDCOLS.map(c => `<button type="button" class="s-${c} ${d.col === c ? 'on' : ''}" data-action="draft-col" data-v="${c}">${sdot(c)}${esc(statusLabel(c))}</button>`).join('')}</div></div>
-      <div class="draft-acts"><button type="button" class="btn-primary" data-action="draft-add">Add to ${esc(statusLabel(d.col))}</button><button type="button" class="btn-ghost" data-action="draft-redo">Start over</button></div>` : ''}</div>`;
+` : ''}</div>`;
   }
-  function paintMsgs() { const el = $('#askMsgs'); if (el) { el.innerHTML = askMsgsHTML(); el.scrollTop = el.scrollHeight; } paintVoice(); }
+  const askActsHTML = () => UI.ask && UI.ask.draft ? `<button type="button" class="btn-ghost" data-action="ask-cancel">Cancel</button><button type="button" class="btn-primary" data-action="draft-add">Add</button>` : '';
+  function paintMsgs() { const el = $('#askMsgs'); if (el) { el.innerHTML = askMsgsHTML(); el.scrollTop = el.scrollHeight; } const ac = $('#askActs'); if (ac) ac.innerHTML = askActsHTML(); paintVoice(); }
   function pushMsg(m) { UI.ask.msgs.push(m); paintMsgs(); }
   function setAskPlaceholder() { const i = $('#askInput'); if (i) i.placeholder = askPlaceholder(); }
   /* in voice mode Keeper reads its question aloud, then listens for the answer */
+  /* Keeper talks, pauses the mic while it speaks, then keeps listening until Add, Cancel or typing */
   function say(text, listenAfter) {
-    const A = UI.ask;
-    if (!A || !A.voice || !window.speechSynthesis) { if (listenAfter && A && A.listenBack && SR) setTimeout(() => { if (UI.ask === A && !A.listening) startListening(); }, 300); return; }
-    try {
-      speakWith(text, currentVoice(), () => { if (listenAfter && A.listenBack && UI.ask === A && UI.sheet && UI.sheet.type === 'ask' && !A.listening) startListening(); });
-    } catch (e) {}
+    const A = UI.ask; if (!A) return;
+    const resume = () => { A.speaking = false; if (A.handsFree && UI.ask === A && UI.sheet && UI.sheet.type === 'ask' && !A.listening) startListening(); };
+    if (!A.voice || !synth) { resume(); return; }
+    A.speaking = true;
+    if (rec && A.listening) { try { rec.abort(); } catch (e) {} }
+    speakWith(text, currentVoice(), resume);
+    setTimeout(() => { if (A.speaking && !synth.speaking) resume(); }, 8000);
   }
   const fn = k => personName(k).split(' ')[0];
   function spokenDue(days) { if (days == null) return 'no due date'; const l = dueInfo(iso(addDays(days)), 'upnext').label; return 'due ' + (l === 'Today' || l === 'Tomorrow' ? l.toLowerCase() : Math.abs(days) < 7 ? l.replace(/^(\w{3})$/, m => ({ Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' })[m] || m) : addDays(days).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })); }
@@ -810,7 +841,7 @@
     A.awaiting = 'review';
     const line = (updated ? 'Updated: ' : 'New task: ') + summaryLine(d);
     const q = updated ? 'Anything else to change?' : 'Anything you want to change?';
-    pushMsg({ from: 'k', text: line + ' ' + q, draft: d, chips: ['Looks good', 'Change the date', 'Change the column'] });
+    pushMsg({ from: 'k', text: line + ' ' + q, draft: d });
     const spoken = summaryLine(d).replace(/[“”]/g, '');
     say(updated ? 'Sure, done. It’s now ' + spoken + ' Anything else?' : 'Okay, I’ve got ' + spoken + ' Want to change anything?', true);
     setAskPlaceholder();
@@ -825,7 +856,11 @@
     } else if (!d.dueSet) {
       A.awaiting = 'due';
       pushMsg({ from: 'k', text: 'When is it due?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('And when’s it due?', true);
-    } else addDraft();
+    } else {
+      A.awaiting = 'ready';
+      pushMsg({ from: 'k', text: 'All set: ' + summaryLine(d) + ' Tap Add, or tell me what to change.', draft: d });
+      say('All set. Say “add it”, or tell me what to change.', true);
+    }
     setAskPlaceholder();
   }
   const NOCHANGE = /^(no|nope|nah|nothing|looks good|look(s)? great|all good|good|fine|it'?s fine|that'?s (it|right|good|fine|all)|perfect|correct|all set|we'?re good|sounds good|great|ok(ay)?|add it|save it|done)\b/i;
@@ -834,7 +869,7 @@
     let changed = false;
     const t = ' ' + text + ' ';
     const ren = text.match(/\b(?:call it|rename (?:it )?(?:to)?|change the (?:title|name) to|title (?:it|is)?)\s+[“"]?(.+?)[”"]?\s*$/i);
-    if (ren) { d.title = ren[1].charAt(0).toUpperCase() + ren[1].slice(1); return true; }
+    if (ren) { d.title = simplifyTitle(ren[1]); return true; }
     const cr = parseCol(t) || (() => { const m = COLWORDS.find(([, w]) => new RegExp('\\b(' + w + ')\\b', 'i').test(text)); return m ? { id: m[0] } : null; })();
     if (cr) { d.col = cr.id; changed = true; }
     if (/\bno (due )?date\b|\bno deadline\b|remove the (due )?date/i.test(text)) { d.due = null; d.dueSet = true; changed = true; }
@@ -852,16 +887,23 @@
   }
   function askSubmit(text, viaVoice) {
     text = (text || '').trim(); if (!text || !UI.ask) return;
-    const A = UI.ask; A.listenBack = !!viaVoice;
+    const A = UI.ask;
     pushMsg({ from: 'me', text });
     const d = A.draft;
+    const ADDWORDS = /^(add|add it|save|save it|yes,? add it|that'?s it,? add it|go ahead|create it)\b/i;
+    if (A.awaiting === 'ready') {
+      if (ADDWORDS.test(text) || NOCHANGE.test(text) || /^(yes|yeah|yep|sure)\b/i.test(text)) return addDraft();
+      if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
+      pushMsg({ from: 'k', text: 'Say “add it”, or tell me what to change: a date, a person, a column, or “call it…”.' }); say('Sorry, should I add it, or change something?', true); return;
+    }
     if (A.awaiting === 'review') {
+      if (ADDWORDS.test(text)) return setTimeout(() => (d.requesterSet && d.dueSet ? addDraft() : askMissing()), 200);
       if (/^change the date$/i.test(text)) { A.awaiting = 'due-edit'; pushMsg({ from: 'k', text: 'What’s the new due date?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('What’s the new due date?', true); return; }
       if (/^change the column$/i.test(text)) { A.awaiting = 'col-edit'; pushMsg({ from: 'k', text: 'Which column?', chips: ADDCOLS.map(statusLabel) }); say('Which column? Up next, backlog, in progress, or blocked?', true); return; }
       if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
       if (NOCHANGE.test(text) || /^yes,? (it'?s|that'?s|looks)/i.test(text)) return setTimeout(askMissing, 300);
       if (/^(yes|yeah|yep|sure)\b/i.test(text)) { pushMsg({ from: 'k', text: 'What should I change? Say a new date, a person, a column, or “call it…” for a new title.' }); say('What should I change?', true); return; }
-      pushMsg({ from: 'k', text: 'Sorry, I didn’t catch a change. Try “due next Tuesday”, “for Marcus”, “put it in backlog” or “call it…”.', chips: ['Looks good'] }); say('Sorry, what should I change?', true); return;
+      pushMsg({ from: 'k', text: 'Sorry, I didn’t catch a change. Try “due next Tuesday”, “for Marcus”, “put it in backlog” or “call it…”.' }); say('Sorry, what should I change?', true); return;
     }
     if (A.awaiting === 'due-edit' || A.awaiting === 'col-edit') {
       if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
@@ -892,32 +934,43 @@
     refresh();
     toast(srcIc('keeper') + 'Added to ' + esc(statusLabel(d.col)) + ': ' + esc(d.title));
     UI.ask.awaiting = null; UI.ask.draft = null;
-    paintMsgs();
-    pushMsg({ from: 'k', text: 'Added to ' + statusLabel(d.col) + '. Tap the mic to add another, or close.', chips: ['Done for now'] });
-    say('Great, it’s in ' + statusLabel(d.col) + '.', false);
-    setAskPlaceholder();
+    const v = UI.ask.voice; stopListening();
+    if (v) speakWith('Great, it’s in ' + statusLabel(d.col) + '.', currentVoice());
+    closeSheet();
     setTimeout(() => { t.fresh = false; }, 4000);
   }
   /* voice */
   let rec = null;
   function startListening() {
-    if (!SR) { paintVoice(); return; }
-    if (window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
+    const A = UI.ask;
+    if (!SR || !A) { paintVoice(); return; }
+    if (A.speaking) return;
     try {
-      rec = new SR(); rec.lang = 'en-US'; rec.interimResults = true; rec.maxAlternatives = 1;
-      let finalText = '';
-      rec.onresult = e => {
+      const r = rec = new SR(); r.lang = 'en-US'; r.interimResults = true; r.continuous = true; r.maxAlternatives = 1;
+      r.onresult = e => {
         let interim = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript; }
-        UI.ask.interim = (finalText + ' ' + interim).trim();
-        const v = $('#vlive'); if (v) v.textContent = UI.ask.interim; else paintVoice();
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const res = e.results[i];
+          if (res.isFinal) { const t = res[0].transcript.trim(); A.interim = ''; if (t) askSubmit(t, true); }
+          else interim += res[0].transcript;
+        }
+        if (interim) { A.interim = interim.trim(); const v = $('#vlive'); if (v) v.textContent = A.interim; else paintVoice(); }
       };
-      rec.onerror = e => { setListening(false); if (e.error === 'not-allowed' || e.error === 'service-not-allowed') pushMsg({ from: 'k', text: 'I need microphone permission to listen. Allow it in your browser, or type below.' }); };
-      rec.onend = () => { const v = (finalText || UI.ask.interim || '').trim(); UI.ask.interim = ''; setListening(false); if (v) askSubmit(v, true); };
-      rec.start(); setListening(true);
+      r.onerror = e => { if (/not-allowed|service-not-allowed|audio-capture/.test(e.error)) { A.handsFree = false; pushMsg({ from: 'k', text: 'I need microphone permission to listen. Allow it in your browser, or type below.' }); } };
+      r.onend = () => {
+        if (rec !== r) return;
+        A.interim = ''; setListening(false);
+        if (A.handsFree && !A.speaking && UI.ask === A && UI.sheet && UI.sheet.type === 'ask') setTimeout(() => { if (!A.listening && !A.speaking && A.handsFree) startListening(); }, 250);
+      };
+      r.start(); setListening(true);
     } catch (e) { setListening(false); }
   }
-  function stopListening() { if (rec) { try { rec.stop(); } catch (e) {} } if (window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {} }
+  function stopListening() {
+    if (UI.ask) { UI.ask.handsFree = false; UI.ask.speaking = false; }
+    if (rec) { const r = rec; rec = null; try { r.abort(); } catch (e) {} }
+    if (synth) try { synth.cancel(); } catch (e) {}
+    if (UI.ask) setListening(false);
+  }
   function setListening(on) { if (!UI.ask) return; UI.ask.listening = on; paintVoice(); }
 
   /* ---------- live arrivals ---------- */
@@ -939,7 +992,7 @@
   let liveTimer = null;
   function scheduleLive() {
     clearTimeout(liveTimer);
-    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 11000);
+    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 11000);
   }
 
   /* ---------- toasts ---------- */
@@ -1005,7 +1058,7 @@
     const act = a.dataset.action;
     switch (act) {
       case 'mode': S.mode = a.dataset.mode; save(); render(); break;
-      case 'scope': $$('.seg-scope button').forEach(b => b.setAttribute('aria-pressed', String(b === a))); toast(a.dataset.scope === 'vision' ? 'Vision view is coming soon' : 'Showing the MVP'); break;
+      case 'scope': $$('.seg-scope button').forEach(b => b.setAttribute('aria-pressed', String(b === a))); break;
       case 'about': $('#about').hidden = false; break;
       case 'about-close': $('#about').hidden = true; break;
       case 'reset': try { localStorage.removeItem(STORE); } catch (err) {} S = fresh(); UI.sheet = null; render(); toast('Demo reset'); break;
@@ -1065,7 +1118,8 @@
       }
       case 'ask': startAsk(false); break;
       case 'ask-voice': startAsk(true); break;
-      case 'mic': if (UI.ask && UI.ask.listening) { if (rec) try { rec.stop(); } catch (err) {} } else startListening(); break;
+      case 'mic': if (!UI.ask) break; if (UI.ask.listening || UI.ask.handsFree) stopListening(); else { UI.ask.handsFree = true; UI.ask.voice = true; startListening(); } break;
+      case 'ask-cancel': stopListening(); closeSheet(); break;
       case 'qchip': {
         const v = a.dataset.v;
         if (v === 'Done for now') { closeSheet(); break; }
@@ -1088,6 +1142,7 @@
     return re ? text.replace(new RegExp(re.source, 'gi'), ' ') : text;
   }
   document.addEventListener('input', e => {
+    if (e.target.id === 'askInput' && UI.ask && (UI.ask.handsFree || UI.ask.listening)) stopListening();
     if (e.target.id === 'fInput') { S.filter.text = e.target.value; jumpToMatches(); save(); refresh(); const c = $('.fbox .clr'); if (c) c.hidden = !S.filter.text; }
   });
   document.addEventListener('change', e => {
