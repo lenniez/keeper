@@ -62,6 +62,7 @@
     cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
     lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
     play: '<path d="M8 5l11 7-11 7z"/>',
     wave: '<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>',
@@ -305,6 +306,7 @@
     device.classList.toggle('is-desktop', m === 'desktop');
     $$('.seg-view button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
     fitDevice();
+    const dt = $('#devToasts'); if (dt && m !== 'mobile') dt.innerHTML = '';
   }
   /* phone is laid out at a true 390×844 and scaled to fit the window, so nothing reflows or clips */
   function fitDevice() {
@@ -374,7 +376,7 @@
     return `<div class="greet"><div class="date">${esc(date)}</div><h1>${g}, <em>Maya</em></h1><div class="sum" id="summary">${summary()}</div></div>`;
   }
   const searchBtn = () => { const n = S.filter.tokens.length + (S.filter.text.trim() ? 1 : 0);
-    return `<button type="button" class="icon-btn ${UI.search || n ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Filters" aria-expanded="${UI.search}">${ic('filter')}${n && !UI.search ? `<span class="dot-badge">${n}</span>` : ''}</button>`; };
+    return `<button type="button" class="icon-btn ${mode() === 'desktop' ? 'labeled' : ''} ${UI.search || n ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Filters" aria-expanded="${UI.search}">${ic('filter')}${mode() === 'desktop' ? 'Filter' : ''}${n && !UI.search ? `<span class="dot-badge">${n}</span>` : ''}</button>`; };
   function filterChips() {
     const cnt = type => S.filter.tokens.filter(t => t.type === type).length;
     const chip = (menu, label) => `<button type="button" class="chip ${cnt(menu) ? 'on' : ''}" data-action="f-menu" data-menu="${menu}">${label}${cnt(menu) ? ' · ' + cnt(menu) : ''} <span class="caret">▾</span></button>`;
@@ -451,28 +453,25 @@
   function feedPageHTML() {
     const list = incoming();
     const now = Date.now(), t0 = today0().getTime();
-    const groups = [['Live now', t => now - t.captured < 20 * 60000], ['Earlier today', t => t.captured >= t0], ['Yesterday', t => t.captured >= t0 - DAY], ['Earlier this week', () => true]];
+    const groups = [['Just now', t => now - t.captured < 20 * 60000], ['Earlier today', t => t.captured >= t0], ['Yesterday', t => t.captured >= t0 - DAY], ['Earlier this week', () => true]];
     const used = new Set();
     const secs = groups.map(([name, fn]) => {
       const items = list.filter(t => !used.has(t.id) && fn(t));
       items.forEach(t => used.add(t.id));
       if (!items.length) return '';
-      return `<div class="feed-sec"><h3>${name === 'Live now' ? '<span class="live-dot"></span>' : ''}${name}</h3><div class="feed-list">${items.map(t => feedRow(t, { snip: true, status: true })).join('')}</div></div>`;
+      return `<div class="feed-sec"><h3>${name}</h3><div class="feed-list">${items.map(t => feedRow(t, { snip: true, status: true })).join('')}</div></div>`;
     }).join('');
-    const left = D.INCOMING.length - S.incomingIdx;
+    return secs || '<div class="empty">No tasks yet from your connected channels.</div>';
+  }
+  /* title row for the Task Feed: live indicator plus a small link to channel settings */
+  function feedHead() {
     const on = S.channels.filter(k => D.SOURCES[k]);
-    const chanRow = `<button type="button" class="chan-link" data-action="go" data-screen="sources">
-        <span class="chan-ics">${on.map(srcIc).join('')}</span>
-        <span class="o-txt"><b>${on.length} channel${on.length === 1 ? '' : 's'} on</b><span>${on.length ? esc(on.map(k => D.SOURCES[k].label).join(', ')) : 'Turn on a channel to catch tasks'}</span></span>
-        <span class="manage">Manage ${ic('chev')}</span></button>`;
-    return chanRow + `<div class="feed-tools">
-        <span class="live-pill"><span class="live-dot"></span>Live</span>
-        <button type="button" class="btn-ghost" data-action="simulate" ${left > 0 ? '' : 'disabled'}>${ic('bolt')} ${left > 0 ? 'Simulate a new task' : 'All caught up'}</button>
-      </div>${secs}`;
+    return `<div class="page-h"><h1>Task Feed</h1><span class="live-pill"><span class="live-dot"></span>Live</span>
+      <button type="button" class="manage-btn" data-action="go" data-screen="sources"><span class="chan-ics">${on.map(srcIc).join('')}</span>Manage channels</button></div>`;
   }
   function sourcesHTML() {
     const keys = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'];
-    return `<div class="src-page">${keys.map(k => {
+    return `<div class="src-page"><h2 class="sec-h first">Channels</h2>${keys.map(k => {
       const s = D.SOURCES[k], on = S.channels.includes(k);
       const n = S.tasks.filter(t => t.source === k).length;
       return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
@@ -487,8 +486,8 @@
 
   function renderMobile() {
     let body;
-    if (S.screen === 'feed') body = `<div class="page-h"><h1>Task Feed</h1></div><div id="feedPage">${feedPageHTML()}</div>`;
-    else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Task Feed">${ic('back')}</button><h1>Channels</h1></div>${sourcesHTML()}`;
+    if (S.screen === 'feed') body = `${feedHead()}<div id="feedPage">${feedPageHTML()}</div>`;
+    else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Task Feed">${ic('back')}</button><h1>Settings</h1></div>${sourcesHTML()}`;
     else body = `${greeting()}${filterBar()}
       <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
       <div class="m-list col-body" id="mList" data-col="${S.mstatus}">${mListHTML()}</div>
@@ -506,8 +505,8 @@
   }
   function renderDesktop() {
     let main;
-    if (S.screen === 'feed') main = `<div class="screen"><div class="page-h"><h1>Task Feed</h1></div><div id="feedPage">${feedPageHTML()}</div></div>`;
-    else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Channels</h1></div>${sourcesHTML()}</div>`;
+    if (S.screen === 'feed') main = `<div class="screen">${feedHead()}<div id="feedPage">${feedPageHTML()}</div></div>`;
+    else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Settings</h1></div>${sourcesHTML()}</div>`;
     else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
         <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Task Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
         <button class="btn-ask" data-action="ask">${ic('plus')} Add task <kbd>N</kbd></button></div></div>
@@ -518,8 +517,8 @@
         <div class="d-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
         <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
         <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Task Feed<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
-        <button class="d-nav ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('plug')}Channels</button>
-        <div class="d-me"><img class="m-me" src="maya.svg" alt=""><span><b>Maya</b><small>Brand strategist</small></span></div>
+        <button class="d-nav ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('gear')}Settings</button>
+        <div class="d-me"><img class="m-me" src="maya.svg" alt=""><span><b>Maya</b></span></div>
       </aside>
       <section class="d-main" id="dMain">${main}</section>
     </div>`;
@@ -748,7 +747,7 @@
         <div class="grab"></div>
         <div class="sh-h"><span class="live-dot"></span><b>Task Feed</b><span class="lab">Live</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="inc-list"><div class="feed-list">${list.map(t => feedRow(t, { status: true })).join('')}</div></div>
-        <div class="sh-foot"><button class="btn-ghost" data-action="simulate">${ic('bolt')} Simulate</button><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
+        <div class="sh-foot"><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
       </div>`;
     } else if (UI.sheet.type === 'ask') {
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask" role="dialog" aria-modal="true" aria-label="Add a task">

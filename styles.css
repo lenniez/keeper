@@ -174,7 +174,8 @@ button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px so
 .card-meta .where{display:flex;align-items:center;gap:6px;min-width:0;flex:1}
 .card-meta .where span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card.done .card-title{color:var(--faint);text-decoration:line-through;text-decoration-color:var(--line-2)}
-.s-backlog{--sd:#B9B3C5;--sb:#F1EFF4;--st:#5F596D}
+.s-backlog{--sd:#B9B3C5;--sb:#F8F7FA;--st:#5F596D}
+.spill.s-backlog{box-shadow:inset 0 0 0 1px #E6E3EC}
 .s-upnext{--sd:#B49CF5;--sb:#F0EBFD;--st:#5B3CC4}
 .s-inprogress{--sd:#6E4BD8;--sb:#E2D8FC;--st:#4426A8}
 .s-blocked{--sd:#3A1E8C;--sb:#3A1E8C;--st:#FFFFFF}
@@ -536,3 +537,25 @@ img.av{object-fit:cover;padding:0;background:#EDE6FD}
 .ask-acts:empty{display:none}
 .ask-acts .btn-ghost,.ask-acts .btn-primary{flex:1;justify-content:center;height:48px;font-size:16px}
 .m-body > *{flex-shrink:0}
+
+/* desktop board: tighter type */
+.device.is-desktop .board .card{padding:10px 11px;gap:5px}
+.device.is-desktop .board .card-title{font-size:15px;line-height:1.3}
+.device.is-desktop .board .card-meta,.device.is-desktop .board .due{font-size:14px}
+.device.is-desktop .board .col-h .spill{font-size:14px;padding:2px 8px}
+.device.is-desktop .board .col-h .n{font-size:14px}
+.device.is-desktop .greet h1{font-size:26px}
+.icon-btn.labeled{width:auto;padding:0 12px;gap:6px;display:inline-flex;align-items:center;font-weight:600;font-size:15px}
+/* Task Feed header */
+.page-h .live-pill{padding:0;margin-right:auto}
+.page-h h1{flex:0 1 auto}
+.manage-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:5px 12px 5px 6px;font-weight:600;font-size:15px;color:var(--ink-2);white-space:nowrap}
+.manage-btn:hover{background:var(--sunk)}
+.manage-btn .chan-ics{display:flex}
+.manage-btn .src-ic{width:22px;height:22px;border-radius:7px;border:2px solid #fff}
+.manage-btn .src-ic + .src-ic{margin-left:-7px}
+.manage-btn .src-ic .icon{width:11px;height:11px}
+.sec-h.first{margin-top:0}
+@media (max-width:719px){.manage-btn .chan-ics{display:none}}
+.device.is-mobile .manage-btn .chan-ics{display:none}
+.device.is-desktop .dev-toasts{display:none}
