@@ -104,7 +104,7 @@
   }
   let S = load() || fresh();
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
-  const UI = { sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
+  const UI = { expand: {}, feedSel: null, sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
   const filterOn = () => !!(S.filter.text.trim() || S.filter.tokens.length);
   const mode = () => (narrow() ? 'mobile' : S.mode);
   const task = id => S.tasks.find(t => t.id === id);
@@ -432,8 +432,11 @@
     const toks = activeTokens();
     return D.COLUMNS.map(c => {
       const list = colTasks(c.id, toks);
+      if (c.id === 'done' && !S.doneOpen) return `<section class="col collapsed" data-col="done">
+        <button type="button" class="col-toggle" data-action="done-toggle" aria-expanded="false" aria-label="Show Done (${list.length})">${ic('chev')}<span class="spill s-done">Done</span><span class="n">${list.length}</span></button>
+        <div class="col-body" hidden>${list.map(cardHTML).join('')}</div></section>`;
       return `<section class="col" data-col="${c.id}">
-        <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span>${sortNote(c.id)}</div>
+        <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span>${sortNote(c.id)}${c.id === 'done' ? `<button type="button" class="col-x" data-action="done-toggle" aria-label="Collapse Done">${ic('x')}</button>` : ''}</div>
         <div class="col-body">${list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks' : 'Drop tasks here'}</div>`}</div>
       </section>`;
     }).join('');
@@ -457,7 +460,7 @@
     const di = dueInfo(t.due, t.status);
     const req = t.requester && t.requester !== 'maya' ? 'From ' + esc(personName(t.requester)) : 'From you';
     const proj = projName(t.project);
-    return `<button type="button" class="frow ${t.fresh ? 'new' : ''}" data-action="open" data-id="${t.id}">
+    return `<button type="button" class="frow ${t.fresh ? 'new' : ''} ${mode() === 'desktop' && UI.feedSel === t.id ? 'sel' : ''}" data-action="open" data-id="${t.id}">
       ${srcIc(t.source)}
       <span class="frow-txt"><span class="frow-title">${t.fresh ? '<span class="newtag">NEW</span> ' : ''}${esc(t.title)}</span>
         <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''}</span>
@@ -477,26 +480,34 @@
       if (!items.length) return '';
       return `<div class="feed-sec"><h3>${name}</h3><div class="feed-list">${items.map(t => feedRow(t, { snip: true, status: true })).join('')}</div></div>`;
     }).join('');
-    return secs || '<div class="empty">No tasks yet from your connected channels.</div>';
+    const body = secs || '<div class="empty">No tasks yet from your connected channels.</div>';
+    if (mode() !== 'desktop') return body;
+    const sel = task(UI.feedSel) && list.some(t => t.id === UI.feedSel) ? task(UI.feedSel) : list[0];
+    if (sel) UI.feedSel = sel.id;
+    const d = sel && taskDetail(sel);
+    return `<div class="feed-split"><div class="feed-col">${body}</div>
+      <aside class="feed-detail" data-tid="${sel ? sel.id : ''}">${sel ? `<div class="fd-h">${spill(sel.status)}</div><div class="fd-body">${d.body}</div><div class="fd-foot">${d.foot}</div>` : '<div class="empty">Select a task to see details</div>'}</aside></div>`;
   }
   /* title row for the Task Feed: live indicator plus a small link to channel settings */
   function feedHead() {
     const on = S.channels.filter(k => D.SOURCES[k]);
-    return `<div class="page-h"><h1>Task Feed</h1><span class="live-pill"><span class="live-dot"></span>Live</span>
-      <button type="button" class="manage-btn" data-action="go" data-screen="sources"><span class="chan-ics">${on.map(srcIc).join('')}</span>Manage channels</button></div>`;
+    return `<div class="page-h feed-h"><h1>Task Feed</h1><div class="feed-sub"><span class="live-pill"><span class="live-dot"></span>Live</span>
+      <button type="button" class="manage-btn" data-action="go" data-screen="sources"><span class="chan-ics">${on.map(srcIc).join('')}</span>Manage channels</button></div></div>`;
   }
   function sourcesHTML() {
     const keys = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'];
-    return `<div class="src-page"><h2 class="sec-h first">Channels</h2>${keys.map(k => {
+    return `<div class="src-page"><section class="set-col"><h2 class="sec-h first">Channels</h2>${keys.map(k => {
       const s = D.SOURCES[k], on = S.channels.includes(k);
       const n = S.tasks.filter(t => t.source === k).length;
       return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
         ${srcIc(k)}
         <span class="chan-txt"><b>${esc(s.label)}</b><span>${on ? n + ' tasks caught · listening' : esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
         <span class="tog" aria-hidden="true"></span></button>`;
-    }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p>
-      <h2 class="sec-h">Assistant</h2>
-      <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>Assistant voice</b><span>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</span></span>${ic('chev')}</button></div>`;
+    }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p></section>
+      <section class="set-col"><h2 class="sec-h first">Assistant</h2>
+      <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>Assistant voice</b><span>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</span></span>${ic('chev')}</button>
+      <h2 class="sec-h">Account</h2>
+      <div class="chan acct"><img class="m-me" src="maya.svg" alt=""><span class="chan-txt"><b>Maya</b><span>maya@mayastudio.co</span></span></div></section></div>`;
   }
   const badge = id => `<span class="dot-badge" id="${id}" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span>`;
 
@@ -525,9 +536,9 @@
     else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Settings</h1></div>${sourcesHTML()}</div>`;
     else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
         <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Task Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
-        <button class="btn-ask" data-action="ask">${ic('plus')} Add task <kbd>N</kbd></button></div></div>
+        <button class="btn-ask" data-action="ask">${ic('plus')} Add task</button></div></div>
       ${filterBar()}
-      <div class="board" id="board">${boardHTML()}</div>`;
+      <div class="board ${S.doneOpen ? '' : 'done-collapsed'}" id="board">${boardHTML()}</div>`;
     return `<div class="d-layout">
       <aside class="d-side">
         <div class="d-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
@@ -543,7 +554,7 @@
   function refresh() {
     if (!S.onboarded) return;
     if (UI.drag && UI.drag.active) { UI.pending = true; return; }
-    const b = $('#board'); if (b) { const sl = b.scrollLeft; b.innerHTML = boardHTML(); b.scrollLeft = sl; }
+    const b = $('#board'); if (b) b.classList.toggle('done-collapsed', !S.doneOpen); if (b) { const sl = b.scrollLeft; b.innerHTML = boardHTML(); b.scrollLeft = sl; }
     const mt = $('#mTabs'); if (mt) { const sl = mt.scrollLeft; mt.innerHTML = mTabsHTML(); mt.scrollLeft = sl; }
     const ml = $('#mList'); if (ml) { ml.dataset.col = S.mstatus; ml.innerHTML = mListHTML(); }
     const fpg = $('#feedPage'); if (fpg) fpg.innerHTML = feedPageHTML();
@@ -577,7 +588,7 @@
   }
   function origBlock(t) {
     if (t.source === 'keeper' || !t.snippet) return '';
-    const o = origin(t), meta = ORIGIN[t.source] || {}, open = UI.sheet && UI.sheet.expand;
+    const o = origin(t), meta = ORIGIN[t.source] || {}, open = !!UI.expand[t.id];
     return `<div class="orig-b ${open ? 'open' : ''}">
       <div class="orig-h">${srcIc(t.source)}<span>${esc(o.mine ? 'You' : o.fromName)} · ${esc(srcLabel(t.source))} · ${agoText(t.captured)}</span></div>
       ${open ? sourceView(t) : `<button type="button" class="orig-snip" data-action="expand" aria-expanded="false">“${esc(o.text)}”</button>`}
@@ -720,29 +731,34 @@
   }
   if (synth && 'onvoiceschanged' in synth) synth.onvoiceschanged = () => { if (UI.sheet && UI.sheet.type === 'voice') renderLayer(true); };
 
+  function taskDetail(t) {
+    const req = t.requester && t.requester !== 'maya' ? `<span class="person">${av(t.requester)}${esc(personName(t.requester))}</span>` : `<span class="person">${av('maya')}You</span>`;
+    const quick = [['Today', 0], ['Tomorrow', 1], ['Friday', daysToDow(5, true)], ['Next Mon', daysToDow(1, false)]];
+    return {
+      body: `${origBlock(t)}
+          <h2 class="sh-title">${esc(t.title)}</h2>
+          <dl class="fields"><dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
+          <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="s-${c.id} ${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${sdot(c.id)}${esc(c.name)}</button>`).join('')}</div></div>
+          <div><div class="fl">Due date</div><div class="duebox">
+            <input type="date" class="dueInput" value="${t.due || ''}" aria-label="Due date">
+            ${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
+            <button type="button" class="chip ${!t.due ? 'on' : ''}" data-action="set-due" data-n="none">No date</button>
+          </div></div>`,
+      foot: t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`
+    };
+  }
   /* ---------- sheets ---------- */
   function renderLayer(instant) {
     const layer = $('#layer'); if (!layer) return;
     if (!UI.sheet) { layer.classList.remove('open'); layer.innerHTML = ''; return; }
     if (UI.sheet.type === 'task') {
       const t = task(UI.sheet.id); if (!t) { UI.sheet = null; return renderLayer(); }
-      const req = t.requester && t.requester !== 'maya' ? `<span class="person">${av(t.requester)}${esc(personName(t.requester))}</span>` : `<span class="person">${av('maya')}You</span>`;
-      const quick = [['Today', 0], ['Tomorrow', 1], ['Friday', daysToDow(5, true)], ['Next Mon', daysToDow(1, false)]];
-      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task details">
+      const d = taskDetail(t);
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task details" data-tid="${t.id}">
         <div class="grab"></div>
         <div class="sh-h">${spill(t.status)}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
-        <div class="sh-body">
-          ${origBlock(t)}
-          <h2 class="sh-title">${esc(t.title)}</h2>
-          <dl class="fields"><dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
-          <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="s-${c.id} ${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${sdot(c.id)}${esc(c.name)}</button>`).join('')}</div></div>
-          <div><div class="fl">Due date</div><div class="duebox">
-            <input type="date" id="dueInput" value="${t.due || ''}" aria-label="Due date">
-            ${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
-            <button type="button" class="chip ${!t.due ? 'on' : ''}" data-action="set-due" data-n="none">No date</button>
-          </div></div>
-        </div>
-        <div class="sh-foot">${t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`}</div>
+        <div class="sh-body">${d.body}</div>
+        <div class="sh-foot">${d.foot}</div>
       </div>`;
     } else if (UI.sheet.type === 'src') {
       const t = task(UI.sheet.id); if (!t) { UI.sheet = null; return renderLayer(); }
@@ -782,6 +798,7 @@
     else requestAnimationFrame(() => layer.classList.add('open'));
     if (UI.sheet.type === 'ask') { const m = $('#askMsgs'); if (m) m.scrollTop = m.scrollHeight; }
   }
+  const tidOf = el => { const h = el.closest('[data-tid]'); return h ? h.dataset.tid : UI.sheet && UI.sheet.id; };
   function openSheet(s) { UI.sheet = s; const l = $('#layer'); if (l) l.classList.remove('open'); renderLayer(); }
   function closeSheet() {
     stopListening();
@@ -1117,14 +1134,17 @@
       case 'mtab': S.mstatus = a.dataset.tab; save(); refresh(); { const mb = $('#mBody'), mt = $('#mTabs'); if (mb && mt && mb.scrollTop > mt.offsetTop) mb.scrollTop = mt.offsetTop; } break;
       case 'search': UI.search = !UI.search; render(); if (UI.search) { const i = $('#fInput'); if (i) i.focus(); } break;
       case 'f-close': UI.search = false; save(); render(); break;
-      case 'open': openSheet({ type: 'task', id: a.dataset.id }); break;
+      case 'open':
+        if (mode() === 'desktop' && a.closest('#feedPage')) { UI.feedSel = a.dataset.id; refresh(); break; }
+        openSheet({ type: 'task', id: a.dataset.id }); break;
+      case 'done-toggle': S.doneOpen = !S.doneOpen; save(); refresh(); break;
       case 'close': if (UI.sheet && UI.sheet.type === 'voice' && UI.prevAsk && UI.ask) { UI.prevAsk = false; UI.sheet = { type: 'ask' }; renderLayer(true); break; } closeSheet(); break;
-      case 'set-status': { const t = task(UI.sheet.id); t.status = a.dataset.v; save(); refresh(); renderLayer(true); toast('Moved to ' + esc(statusLabel(t.status))); break; }
-      case 'set-due': { const t = task(UI.sheet.id); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); save(); refresh(); renderLayer(true); toast(t.due ? 'Due ' + esc(dueInfo(t.due, t.status).label.toLowerCase()) : 'Due date cleared'); break; }
+      case 'set-status': { const t = task(tidOf(a)); t.status = a.dataset.v; save(); refresh(); renderLayer(true); toast('Moved to ' + esc(statusLabel(t.status))); break; }
+      case 'set-due': { const t = task(tidOf(a)); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); save(); refresh(); renderLayer(true); toast(t.due ? 'Due ' + esc(dueInfo(t.due, t.status).label.toLowerCase()) : 'Due date cleared'); break; }
       case 'f-clear': S.filter = { text: '', tokens: [] }; save(); render(); break;
       case 'f-clear-text': S.filter.text = ''; save(); { const i = $('#fInput'); if (i) { i.value = ''; i.focus(); } a.hidden = true; } refresh(); break;
       case 'src': openSheet({ type: 'src', id: a.dataset.id }); break;
-      case 'expand': if (UI.sheet) { UI.sheet.expand = !UI.sheet.expand; renderLayer(true); } break;
+      case 'expand': { const id = tidOf(a); UI.expand[id] = !UI.expand[id]; if (UI.sheet) renderLayer(true); refresh(); break; }
       case 'connect-allow': finishConnect(); break;
       case 'connect-cancel': closeSheet(); break;
       case 'cx-pick': UI.sheet.pick = +a.dataset.i; renderLayer(true); break;
@@ -1180,7 +1200,7 @@
     if (e.target.id === 'askDate' && e.target.value && UI.ask && UI.ask.awaiting === 'due-edit') { const d = fromISO(e.target.value); UI.ask.draft.due = daysOut(e.target.value); UI.ask.draft.dueSet = true; pushMsg({ from: 'me', text: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) }); setTimeout(() => askReview(true), 300); return; }
     if (e.target.id === 'askDate' && e.target.value && UI.ask) { const d = fromISO(e.target.value); askSubmit(d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), false); return; }
     if (e.target.id === 'draftDue' && UI.ask && UI.ask.draft) { UI.ask.draft.due = e.target.value ? daysOut(e.target.value) : null; paintMsgs(); return; }
-    if (e.target.id === 'dueInput' && UI.sheet) { const t = task(UI.sheet.id); t.due = e.target.value || null; save(); refresh(); renderLayer(true); toast(t.due ? 'Due date updated' : 'Due date cleared'); }
+    if (e.target.classList.contains('dueInput')) { const t = task(tidOf(e.target)); t.due = e.target.value || null; save(); refresh(); renderLayer(true); toast(t.due ? 'Due date updated' : 'Due date cleared'); }
   });
   document.addEventListener('submit', e => {
     if (e.target.id === 'askForm') { e.preventDefault(); const i = $('#askInput'); const v = i.value; i.value = ''; askSubmit(v); }

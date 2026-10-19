@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keeper logo options</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+  :root{--brand:#6E4BD8;--ink:#1E1B26;--ink-2:#5F596D;--line:#ECE9F1}
+  *{box-sizing:border-box}
+  body{margin:0;background:#F5F3F9;font-family:"Instrument Sans",system-ui,sans-serif;color:var(--ink);padding:32px 16px}
+  h1{margin:0 0 4px;font-size:28px;letter-spacing:-.02em}
+  p.sub{margin:0 0 24px;color:var(--ink-2);font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1240px}
+  .opt{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:16px}
+  .opt h2{margin:0;font-size:18px}
+  .opt p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.4}
+  .row{display:flex;align-items:center;gap:18px}
+  .tile{width:96px;height:96px;flex:none}
+  .small{display:flex;gap:10px;align-items:center}
+  .small svg{width:32px;height:32px}
+  .small .tiny{width:20px;height:20px}
+  .lockup{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:#FAF9FC}
+  .lockup svg{width:30px;height:30px}
+  .lockup span{font-family:"Instrument Serif",Georgia,serif;font-style:italic;font-size:30px;line-height:1}
+  .dark{background:#1E1B26;color:#fff}
+  .num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--brand);color:#fff;font-size:14px;font-weight:600;margin-right:8px}
+  .cur{opacity:.8}
+</style>
+</head>
+<body>
+<h1>Keeper logo options</h1>
+<p class="sub">Five directions, each shown as an app icon, at favicon size, and next to the wordmark. The current mark is last for comparison.</p>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- 1 Net -->
+    <symbol id="l1" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#6E4BD8"/>
+      <circle cx="60" cy="32" r="9" fill="#fff"/>
+      <path d="M28 56h64c0 20-14 36-32 36S28 76 28 56z" fill="none" stroke="#fff" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M44 57l12 33M60 57v35M76 57l-12 33M33 70h54M40 81h40" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".85"/>
+    </symbol>
+    <!-- 2 k + check -->
+    <symbol id="l2" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#6E4BD8"/>
+      <path d="M42 26v68" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+      <path d="M82 38L46 64" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+      <path d="M58 70l12 14 26-34" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- 3 Bookmark with check -->
+    <symbol id="l3" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#6E4BD8"/>
+      <path d="M36 24h48a4 4 0 0 1 4 4v68l-28-18-28 18V28a4 4 0 0 1 4-4z" fill="#fff"/>
+      <path d="M47 50l9 9 18-19" fill="none" stroke="#6E4BD8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- 4 Castle keep -->
+    <symbol id="l4" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#6E4BD8"/>
+      <path d="M32 96V38h11v10h11V38h12v10h11V38h11v58z" fill="#fff"/>
+      <path d="M52 96V78a8 8 0 0 1 16 0v18z" fill="#6E4BD8"/>
+      <circle cx="60" cy="60" r="5" fill="#6E4BD8"/>
+    </symbol>
+    <!-- 5 Promise loop -->
+    <symbol id="l5" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#6E4BD8"/>
+      <rect x="54" y="43" width="46" height="34" rx="17" fill="none" stroke="#fff" stroke-width="10"/>
+      <rect x="20" y="43" width="46" height="34" rx="17" fill="none" stroke="#fff" stroke-width="10"/>
+      <path d="M54 60a17 17 0 0 0 17 17" fill="none" stroke="#6E4BD8" stroke-width="18"/>
+      <path d="M54 60a17 17 0 0 0 17 17" fill="none" stroke="#fff" stroke-width="10"/>
+    </symbol>
+    <!-- current -->
+    <symbol id="l0" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#6E4BD8"/>
+      <circle cx="60" cy="34" r="9" fill="#fff"/>
+      <path d="M34 54v8a26 26 0 0 0 52 0v-8" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="grid" id="grid"></div>
+
+<script>
+  const OPTS = [
+    ['l1', 'Net', 'A task dropping into a net. Says “nothing slips through” at a glance and keeps the current catch idea, but more literal.'],
+    ['l2', 'k-check', 'A lowercase k whose leg becomes a checkmark. Ownable monogram; reads as “done” even at 16px.'],
+    ['l3', 'Bookmark', 'A bookmark with a check: “saved and handled.” Familiar, calm and very legible small; less distinctive.'],
+    ['l4', 'The Keep', 'A castle keep, the safest tower in a castle. A playful pun on the name with a strong, simple silhouette.'],
+    ['l5', 'Promise loop', 'Two linked loops, like a pinky promise or chain link. About commitments between you and clients.'],
+    ['l0', 'Current (for reference)', 'A dot caught in a cup. Clean, but reads like a smiley face at small sizes.']
+  ];
+  const use = (id, cls) => `<svg class="${cls || ''}" viewBox="0 0 120 120"><use href="#${id}"/></svg>`;
+  document.getElementById('grid').innerHTML = OPTS.map(([id, name, why], i) => `
+    <section class="opt ${id === 'l0' ? 'cur' : ''}">
+      <h2>${id === 'l0' ? '' : `<span class="num">${i + 1}</span>`}${name}</h2>
+      <div class="row">${use(id, 'tile')}<div class="small">${use(id)}${use(id, 'tiny')}</div></div>
+      <div class="lockup">${use(id)}<span>keeper</span></div>
+      <div class="lockup dark">${use(id)}<span>keeper</span></div>
+      <p>${why}</p>
+    </section>`).join('');
+</script>
+</body>
+</html>
