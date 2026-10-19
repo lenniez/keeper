@@ -60,12 +60,16 @@
     chev: '<path d="M9 6l6 6-6 6"/>',
     check: '<path d="M5 12l5 5 9-10"/>',
     cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
-    bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>'
+    bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+    filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
+    ext: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'
   };
   const ic = (n, cls) => '<svg class="icon ' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[n] || '') + '</svg>';
   /* colour is reserved for actions: sources, people and projects are neutral */
   const srcLabel = s => (D.SOURCES[s] || D.SOURCES.keeper).label;
-  const srcIc = s => '<span class="src-ic" title="' + esc(srcLabel(s)) + '">' + ic(s) + '</span>';
+  const srcIc = s => '<span class="src-ic" style="--c:' + (D.SOURCES[s] || D.SOURCES.keeper).color + '" title="' + esc(srcLabel(s)) + '">' + ic(s) + '</span>';
+  const sdot = st => '<span class="sdot"></span>';
+  const spill = st => '<span class="spill s-' + st + '">' + esc(statusLabel(st)) + '</span>';
   const srcTag = s => '<span class="lab">' + srcIc(s) + esc(srcLabel(s)) + '</span>';
   const personName = k => (D.PEOPLE[k] ? D.PEOPLE[k].name : k) || '';
   const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -90,7 +94,7 @@
       tasks: D.SEED.map(t => mkTask(t)), incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
   }
   function load() {
-    try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = s.mstatus || 'upnext'; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
+    try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = 'upnext'; s.live = true; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
     return null;
   }
   let S = load() || fresh();
@@ -155,36 +159,46 @@
   }
 
   /* ---------- task parsing (assistant) ---------- */
+  const NUMW = { a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, couple: 2, few: 3 };
+  const num = w => (/^\d+$/.test(w) ? +w : NUMW[w] || 0);
+  const diff = d => Math.round((d - today0()) / DAY);
+  const future = d => { if (d < today0()) d.setFullYear(d.getFullYear() + 1); return d; };
+  /* understands most ways people say a date: weekdays, relative spans, month names, the 25th, 10/30, 2026-11-04 … */
   function parseDue(text) {
-    const s = text.toLowerCase();
-    const pre = '(?:\\b(?:by|on|due|before|until|for)\\s+)?';
+    const s = text.toLowerCase().replace(/[’']/g, '');
+    const pre = '(?:\\b(?:by|on|due|before|until|for|at)\\s+)?(?:the\\s+)?';
+    const N = '(\\d+|a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|couple of|few)';
+    const MONTHS = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sept?(?:ember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\\.?';
+    const DAYS = '(monday|mon|tuesday|tues|tue|wednesday|wed|thursday|thurs|thur|thu|friday|fri|saturday|sat|sunday|sun)';
+    const dowIdx = w => DOW.findIndex(d => d.startsWith(w.slice(0, 3)));
     const tries = [
-      [new RegExp(pre + '\\b(today|tonight|end of (the )?day|eod)\\b'), () => 0],
-      [new RegExp(pre + '\\btomorrow\\b'), () => 1],
-      [new RegExp(pre + '\\b(end of (the )?week|this week|eow)\\b'), () => daysToDow(5, true)],
-      [new RegExp(pre + '\\bnext week\\b'), () => daysToDow(1, false)],
-      [new RegExp(pre + '\\bin (\\d{1,2}) days?\\b'), m => +m[m.length - 1] || +m[1]],
-      [new RegExp(pre + '\\b(?:(next|this)\\s+)?(monday|mon|tuesday|tues|tue|wednesday|wed|thursday|thurs|thur|thu|friday|fri|saturday|sat|sunday|sun)\\b'), m => {
-        const w = m[2]; const idx = DOW.findIndex(d => d.startsWith(w.slice(0, 3)));
-        return daysToDow(idx, false) + (m[1] === 'next' && daysToDow(idx, false) < 4 ? 7 : 0);
-      }],
-      [new RegExp(pre + '\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b'), m => {
-        const d = new Date(today0().getFullYear(), MON.indexOf(m[1].slice(0, 3)), +m[2]);
-        if (d < today0()) d.setFullYear(d.getFullYear() + 1);
-        return Math.round((d - today0()) / DAY);
-      }],
-      [new RegExp(pre + '\\b(\\d{1,2})/(\\d{1,2})\\b'), m => {
-        const d = new Date(today0().getFullYear(), +m[1] - 1, +m[2]);
-        if (d < today0()) d.setFullYear(d.getFullYear() + 1);
-        return Math.round((d - today0()) / DAY);
-      }]
+      ['(\\d{4})-(\\d{2})-(\\d{2})', m => diff(new Date(+m[1], +m[2] - 1, +m[3]))],
+      [N + ' (day|week|month)s? from (now|today)\\b', m => unit(num(m[1].replace(' of', '')), m[2])],
+      ['in ' + N + ' (day|week|month)s?\\b', m => unit(num(m[1].replace(' of', '')), m[2])],
+      ['day after tomorrow', () => 2],
+      ['(today|tonight|end of (the )?day|eod|asap|right away)\\b', () => 0],
+      ['(tomorrow|tmrw|tmr)\\b', () => 1],
+      ['(end of (the )?month|eom|month end)\\b', () => { const t = today0(); return diff(new Date(t.getFullYear(), t.getMonth() + 1, 0)); }],
+      ['(end of (the )?week|this week|eow)\\b', () => daysToDow(5, true)],
+      ['(this )?weekend\\b', () => daysToDow(6, true)],
+      ['next month\\b', () => { const t = today0(); return diff(new Date(t.getFullYear(), t.getMonth() + 1, 1)); }],
+      ['(next week|early next week)\\b', () => daysToDow(1, false)],
+      ['end of next week\\b', () => daysToDow(5, true) + 7],
+      ['(next|this|coming)?\\s*' + DAYS + '\\b', m => { const i = dowIdx(m[2]); const n = daysToDow(i, false); return n + (m[1] === 'next' && n < 4 ? 7 : 0); }],
+      [MONTHS + '\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?\\b', m => { const d = new Date(m[3] ? +m[3] : today0().getFullYear(), MON.indexOf(m[1].slice(0, 3)), +m[2]); return diff(m[3] ? d : future(d)); }],
+      ['(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?' + MONTHS + '\\b', m => diff(future(new Date(today0().getFullYear(), MON.indexOf(m[2].slice(0, 3)), +m[1])))],
+      ['(\\d{1,2})/(\\d{1,2})(?:/(\\d{2,4}))?\\b', m => { const y = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : today0().getFullYear(); const d = new Date(y, +m[1] - 1, +m[2]); return diff(m[3] ? d : future(d)); }],
+      ['(\\d{1,2})(st|nd|rd|th)\\b', m => { const t = today0(); let d = new Date(t.getFullYear(), t.getMonth(), +m[1]); if (d < t) d = new Date(t.getFullYear(), t.getMonth() + 1, +m[1]); return diff(d); }]
     ];
-    for (const [re, fn] of tries) {
-      const m = s.match(re);
-      if (m) {
-        // re-run to get captures without the optional prefix group confusion
+    function unit(n, u) { if (!n) n = 1; if (u === 'day') return n; if (u === 'week') return n * 7; const t = today0(); return diff(new Date(t.getFullYear(), t.getMonth() + n, t.getDate())); }
+    for (const [src, fn] of tries) {
+      const re = new RegExp(pre + '\\b' + src);
+      const m0 = s.match(re);
+      if (m0) {
+        const m = s.slice(m0.index).match(new RegExp('\\b' + src)) || m0;
         const days = fn(m);
-        return { days, start: m.index, end: m.index + m[0].length };
+        if (days == null || isNaN(days)) continue;
+        return { days, start: m0.index, end: m0.index + m0[0].length };
       }
     }
     return null;
@@ -209,8 +223,18 @@
     Object.keys(FIRST).forEach(f => { const m = text.match(new RegExp('\\b' + f + '\\b', 'i')); if (m) out.push({ key: FIRST[f], index: m.index }); });
     return out.sort((a, b) => a.index - b.index);
   }
+  const COLWORDS = [['upnext', 'up next|next up'], ['backlog', 'backlog|later|someday'], ['inprogress', 'in progress|doing|working on'], ['blocked', 'blocked|waiting'], ['done', 'done|completed']];
+  function parseCol(text) {
+    for (const [id, words] of COLWORDS) {
+      const m = text.match(new RegExp('\\s*(?:,|\\band\\b|\\bthen\\b)?\\s*\\b(?:(?:add|put|move|file|drop)(?: (?:it|this))? )?(?:to|in|into|on|under)\\s+(?:the\\s+|my\\s+)?(?:' + words + ')(?:\\s+(?:column|list|lane))?\\b', 'i'));
+      if (m) return { id, start: m.index, end: m.index + m[0].length };
+    }
+    return null;
+  }
   function parseTask(text) {
     let w = ' ' + text.trim() + ' ';
+    const cr = parseCol(w); let col = 'upnext';
+    if (cr) { col = cr.id; w = w.slice(0, cr.start) + ' ' + w.slice(cr.end); }
     w = w.replace(/^\s*(please\s+)?(can you\s+)?(remind me to|i need to|i have to|need to|i should|add (a )?task (to )?|todo:?|to-do:?)\s+/i, ' ');
     const dr = parseDue(w);
     let due = null;
@@ -240,9 +264,9 @@
     let project = null;
     Object.keys(PROJKEYS).forEach(k => { if (new RegExp('\\b' + k, 'i').test(text)) project = PROJKEYS[k]; });
     if (!project && requester && D.PEOPLE[requester].project) project = D.PEOPLE[requester].project;
-    let title = w.replace(/\s+/g, ' ').replace(/\s+([,.!?])/g, '$1').replace(/^[\s,.-]+|[\s,.-]+$/g, '').trim();
+    let title = w.replace(/\s+(and|then)\s*$/i, ' ').replace(/\s+/g, ' ').replace(/\s+([,.!?])/g, '$1').replace(/^[\s,.-]+|[\s,.-]+$/g, '').trim();
     title = title.charAt(0).toUpperCase() + title.slice(1);
-    return { title: title || text.trim(), due, dueSet: due != null, requester, requesterSet: !!requester, collaborators, project, category: guessCategory(text) };
+    return { title: title || text.trim(), due, dueSet: due != null, requester, requesterSet: !!requester, collaborators, project, category: guessCategory(text), col };
   }
 
   /* ---------- rendering ---------- */
@@ -320,21 +344,21 @@
     const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     return `<div class="greet"><div class="date">${esc(date)}</div><h1>${g}, <em>Maya</em></h1><div class="sum" id="summary">${summary()}</div></div>`;
   }
-  const searchBtn = () => `<button type="button" class="icon-btn ${UI.search || filterOn() ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Search and filter" aria-expanded="${UI.search}">${ic('search')}</button>`;
-  /* collapsed to an icon by default; expands on demand */
+  const searchBtn = () => { const n = S.filter.tokens.length + (S.filter.text.trim() ? 1 : 0);
+    return `<button type="button" class="icon-btn ${UI.search || n ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Filters" aria-expanded="${UI.search}">${ic('filter')}${n && !UI.search ? `<span class="dot-badge">${n}</span>` : ''}</button>`; };
+  function filterChips() {
+    const cnt = type => S.filter.tokens.filter(t => t.type === type).length;
+    const chip = (menu, label) => `<button type="button" class="chip ${cnt(menu) ? 'on' : ''}" data-action="f-menu" data-menu="${menu}">${label}${cnt(menu) ? ' · ' + cnt(menu) : ''} <span class="caret">▾</span></button>`;
+    return chip('project', 'Project') + chip('person', 'People') + chip('source', 'Channel');
+  }
+  /* collapsed to a filter icon; opens filters with the plain-language search beneath */
   function filterBar() {
     if (!UI.search) return '<div id="filter" hidden></div>';
-    const quick = ['Communication', 'Deliverables', 'Scheduling', 'Purchasing', 'Coordination'];
-    const on = v => S.filter.tokens.some(t => t.type === 'category' && t.value === v);
     return `<div class="search" id="filter">
-      <label class="fbox">${ic('search')}<input id="fInput" type="text" autocomplete="off" placeholder="Try “Slack tasks for Brightside”" value="${esc(S.filter.text)}" aria-label="Filter the board in plain language">
-      <button type="button" class="clr" data-action="f-close" aria-label="Close search">${ic('x')}</button></label>
-      <div class="chips">
-        <button type="button" class="chip" data-action="f-menu" data-menu="project">Project <span class="caret">▾</span></button>
-        <button type="button" class="chip" data-action="f-menu" data-menu="person">People <span class="caret">▾</span></button>
-        <button type="button" class="chip" data-action="f-menu" data-menu="source">Channel <span class="caret">▾</span></button>
-        ${quick.map(c => `<button type="button" class="chip ${on(c) ? 'on' : ''}" data-action="f-cat" data-v="${esc(c)}">${esc(c)}</button>`).join('')}
-      </div>
+      <div class="f-head"><div class="chips" id="fChips">${filterChips()}</div>
+        <button type="button" class="f-close" data-action="f-close">Done</button></div>
+      <label class="fbox">${ic('search')}<input id="fInput" type="text" autocomplete="off" placeholder="Search, e.g. “Slack tasks for Brightside”" value="${esc(S.filter.text)}" aria-label="Search tasks in plain language">
+      <button type="button" class="clr" data-action="f-clear-text" aria-label="Clear search" ${S.filter.text ? '' : 'hidden'}>${ic('x')}</button></label>
       <div class="tokens" id="tokens">${tokensHTML()}</div>
     </div>`;
   }
@@ -363,7 +387,7 @@
     return D.COLUMNS.map(c => {
       const list = S.tasks.filter(t => t.status === c.id && matches(t, toks));
       return `<section class="col" data-col="${c.id}">
-        <div class="col-h ${c.id === 'blocked' && list.length ? 'bad' : ''}">${esc(c.name)}<span class="n">${list.length}</span></div>
+        <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span></div>
         <div class="col-body">${list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks' : 'Drop tasks here'}</div>`}</div>
       </section>`;
     }).join('');
@@ -373,7 +397,7 @@
     const toks = activeTokens();
     return D.COLUMNS.map(c => {
       const n = S.tasks.filter(t => t.status === c.id && matches(t, toks)).length;
-      return `<button type="button" class="mtab ${S.mstatus === c.id ? 'on' : ''}" data-action="mtab" data-tab="${c.id}">${esc(c.name)}<span class="n">${n}</span></button>`;
+      return `<button type="button" class="mtab s-${c.id} ${S.mstatus === c.id ? 'on' : ''}" data-action="mtab" data-tab="${c.id}">${sdot(c.id)}${esc(c.name)}<span class="n">${n}</span></button>`;
     }).join('');
   }
   function mListHTML() {
@@ -393,7 +417,7 @@
         <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''} · <span class="due ${di.cls}">${esc(di.label)}</span></span>
         ${opts && opts.snip && t.snippet ? `<span class="snip">“${esc(t.snippet)}”</span>` : ''}
       </span>
-      <span class="when">${ago(t.captured)}${opts && opts.status ? `<span class="st">${esc(statusLabel(t.status))}</span>` : ''}</span>
+      <span class="when">${ago(t.captured)}${opts && opts.status ? spill(t.status) : ''}</span>
     </button>`;
   }
   function feedPageHTML() {
@@ -405,11 +429,11 @@
       const items = list.filter(t => !used.has(t.id) && fn(t));
       items.forEach(t => used.add(t.id));
       if (!items.length) return '';
-      return `<div class="feed-sec"><h3>${name === 'Live now' ? '<span class="live-dot ' + (S.live ? '' : 'off') + '"></span>' : ''}${name}</h3><div class="feed-list">${items.map(t => feedRow(t, { snip: true, status: true })).join('')}</div></div>`;
+      return `<div class="feed-sec"><h3>${name === 'Live now' ? '<span class="live-dot"></span>' : ''}${name}</h3><div class="feed-list">${items.map(t => feedRow(t, { snip: true, status: true })).join('')}</div></div>`;
     }).join('');
     const left = D.INCOMING.length - S.incomingIdx;
     return `<div class="feed-tools">
-        <button type="button" class="live-tog" data-action="live"><span class="live-dot ${S.live ? '' : 'off'}"></span>${S.live ? 'Live · pause' : 'Paused · resume'}</button>
+        <span class="live-pill"><span class="live-dot"></span>Live</span>
         <button type="button" class="btn-ghost" data-action="simulate" ${left > 0 ? '' : 'disabled'}>${ic('bolt')} ${left > 0 ? 'Simulate incoming task' : 'All caught up'}</button>
       </div>${secs}`;
   }
@@ -436,14 +460,12 @@
       <p class="m-hint">Tap to edit · hold and drag onto a tab to move</p>`;
     return `<div class="m-home">
       <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
-        ${S.screen === 'board' ? searchBtn() : ''}<span class="m-me" aria-label="Maya">M</span></div>
+        ${S.screen === 'board' ? searchBtn() : ''}<button class="m-me" data-action="go" data-screen="sources" aria-label="Maya · channels and settings">M</button></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
+        <button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>
         <button class="${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed"><span class="navi">${ic('feed')}${badge('navBadge')}</span>Incoming</button>
-        <button class="fab" data-action="ask" aria-label="Ask Keeper: add a task by typing or voice">${ic('plus')}</button>
-        <button class="${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('plug')}Channels</button>
-        <button data-action="ask-voice">${ic('mic')}Voice</button>
       </nav>
     </div>`;
   }
@@ -478,10 +500,77 @@
     const sm = $('#summary'); if (sm) sm.innerHTML = summary();
     const tk = $('#tokens'); if (tk) tk.innerHTML = tokensHTML();
     const sb = $('#searchBtn'); if (sb) sb.classList.toggle('on', UI.search || filterOn());
-    $$('.chips .chip[data-action="f-cat"]').forEach(c => c.classList.toggle('on', S.filter.tokens.some(t => t.type === 'category' && t.value === c.dataset.v)));
+    const fc = $('#fChips'); if (fc) fc.innerHTML = filterChips();
+    const sb2 = $('#searchBtn'); if (sb2 && !UI.search) sb2.outerHTML = searchBtn();
     const nb = $('#navBadge'); if (nb) { nb.textContent = S.unseen; nb.hidden = !S.unseen; }
     const ic2 = $('#incCount'); if (ic2) ic2.textContent = S.unseen ? S.unseen + ' new' : '';
     if (UI.sheet && (UI.sheet.type === 'task' || UI.sheet.type === 'inc')) renderLayer(true);
+  }
+
+  /* ---------- original source (deeplink) ---------- */
+  const ORIGIN = {
+    gmail: { noun: 'email', cta: 'Open in Gmail', url: 'https://mail.google.com/mail/u/0/#inbox', note: 'In the real product this button opens this exact email (Gmail links each message by its ID). Gmail’s phone app can’t open a single message from a link, so on mobile it opens Gmail on the web.' },
+    outlook: { noun: 'email', cta: 'Open in Outlook', url: 'https://outlook.office.com/mail/', note: 'In the real product this button uses the link Microsoft provides for each message, so it opens this exact email in Outlook.' },
+    slack: { noun: 'Slack message', cta: 'Open in Slack', url: 'https://app.slack.com/client', note: 'In the real product this button uses the message’s Slack permalink: it opens the Slack app at this message on phones and desktop.' },
+    sms: { noun: 'text thread', note: 'Clients text your Keeper Line, a business number Keeper owns, so the thread lives here in Keeper rather than in Messages. Replies go out from the same number, keeping your personal number private.' },
+    zoom: { noun: 'call transcript', cta: 'Open recording in Zoom', url: 'https://zoom.us/recording', note: 'Keeper keeps the transcript and jumps to the moment the commitment was made. The button opens the full cloud recording in Zoom.' },
+    meet: { noun: 'call transcript', cta: 'Open recording in Drive', url: 'https://drive.google.com/drive/my-drive', note: 'Google Meet saves recordings and transcripts to Google Drive. Keeper jumps to the moment the commitment was made; the button opens the recording.' }
+  };
+  const DOMAIN = { northwind: 'northwindcoffee.com', halcyon: 'halcyonhealth.com', brightside: 'brightside.studio', okafor: 'okaforrealty.com', lumen: 'lumenlabs.ai', studio: 'mayastudio.co' };
+  function origin(t) {
+    const m = (t.snippet || '').match(/^([A-Z][a-z]+):\s*(.*)$/);
+    let speaker = m ? m[1] : null, text = (m ? m[2] : t.snippet || '').replace(/^[“"]|[”"]$/g, '');
+    const key = speaker ? Object.keys(D.PEOPLE).find(k => D.PEOPLE[k].name.split(' ')[0] === speaker) : null;
+    const fromKey = key || (speaker ? null : t.requester);
+    const fromName = speaker ? (key ? personName(key) : speaker) : personName(t.requester) || 'Unknown';
+    return { text, fromKey, fromName, mine: fromKey === 'maya' };
+  }
+  function origRow(t) {
+    if (t.source === 'keeper' || !t.snippet) return '';
+    const o = origin(t), meta = ORIGIN[t.source] || {};
+    return `<button type="button" class="orig" data-action="src" data-id="${t.id}">${srcIc(t.source)}
+      <span class="o-txt"><b>View original ${esc(meta.noun || 'message')}</b><span>${esc(o.mine ? 'You' : o.fromName)} · ${esc(srcLabel(t.source))} · ${ago(t.captured)} ago</span></span>${ic('chev')}</button>`;
+  }
+  function sourceView(t) {
+    const o = origin(t), when = new Date(t.captured);
+    const time = when.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    const date = when.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const proj = projName(t.project) || 'Studio', dom = DOMAIN[t.project] || 'example.com';
+    const other = t.requester && t.requester !== 'maya' ? t.requester : (t.collaborators[0] || null);
+    const otherName = other ? personName(other) : 'Client';
+    const first = n => n.split(' ')[0];
+    const quote = `<mark>${esc(o.text)}</mark>`;
+    if (t.source === 'gmail' || t.source === 'outlook') {
+      const fromName = o.mine ? 'Maya' : o.fromName;
+      const addr = o.mine ? 'maya@mayastudio.co' : (first(fromName).toLowerCase() + '@' + (/figma/i.test(fromName) ? 'figma.com' : dom));
+      return `<div class="sv"><div class="sv-bar">${srcIc(t.source)}${esc(srcLabel(t.source))}<small>${esc(date)}</small></div><div class="sv-pad">
+        <h3 class="em-subj">Re: ${esc(proj)} · ${esc(t.category.toLowerCase())}</h3>
+        <div class="em-from">${av(o.fromKey || other)}<span><b>${esc(fromName)}</b> &lt;${esc(addr)}&gt;<br>to ${o.mine ? esc(otherName) : 'Maya'}</span><span class="t">${esc(time)}</span></div>
+        <div class="em-body"><p>Hi ${o.mine ? esc(first(otherName)) : 'Maya'},</p><p>Hope your week is going well. ${quote}</p><p>Thanks!<br>${esc(first(fromName))}</p></div>
+      </div></div>`;
+    }
+    if (t.source === 'slack') {
+      const ch = '#' + proj.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-design';
+      return `<div class="sv"><div class="sv-bar">${srcIc('slack')}${esc(proj)} workspace · ${esc(ch)}<small>${esc(date)}</small></div><div class="sv-pad">
+        <div class="sl-msg">${av('maya')}<div><div class="who">Maya <small>${esc(new Date(t.captured - 1200000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }))}</small></div><p>Morning! Pushing the latest round of files now.</p></div></div>
+        <div class="sl-msg">${av(o.fromKey || other)}<div><div class="who">${esc(o.fromName)} <small>${esc(time)}</small></div><p>${quote}</p></div></div>
+      </div></div>`;
+    }
+    if (t.source === 'sms') {
+      const inb = o.mine ? 'out' : 'in';
+      return `<div class="sv"><div class="sv-bar">${srcIc('sms')}${esc(otherName)} · Keeper Line (917) 555-0142<small>${esc(date)}</small></div><div class="sv-pad"><div class="tx">
+        <span class="ts">${esc(date)} · ${esc(time)}</span>
+        <div class="b ${inb === 'in' ? 'out' : 'in'}">Hi ${o.mine ? '' : esc(first(otherName))}, quick check-in on ${esc(proj)}.</div>
+        <div class="b ${inb}">${quote}</div>
+      </div></div></div>`;
+    }
+    const mins = 4 + (t.title.length % 30), ts = n => String(Math.floor(n)).padStart(2, '0') + ':' + String(Math.round((n % 1) * 60)).padStart(2, '0');
+    const sp = o.mine ? 'Maya' : o.fromName;
+    return `<div class="sv"><div class="sv-bar">${srcIc(t.source)}${esc(proj)} sync · ${esc(srcLabel(t.source))}<small>${esc(date)}</small></div><div class="sv-pad">
+      <div class="tr-row"><span class="ts">${ts(mins - 1.3)}</span><span><b>${esc(o.mine ? otherName : 'Maya')}</b>Okay, so what’s the next step on that?</span></div>
+      <div class="tr-row"><span class="ts">${ts(mins)}</span><span><b>${esc(sp)}</b>${quote}</span></div>
+      <div class="tr-row"><span class="ts">${ts(mins + .7)}</span><span><b>${esc(o.mine ? otherName : 'Maya')}</b>Perfect, that works.</span></div>
+    </div></div>`;
   }
 
   /* ---------- sheets ---------- */
@@ -498,9 +587,10 @@
         <div class="sh-h">${srcTag(t.source)}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="sh-body">
           <h2 class="sh-title">${esc(t.title)}</h2>
-          ${t.snippet ? `<div class="quote"><span class="from">Caught ${ago(t.captured)} ago from ${esc((D.SOURCES[t.source] || {}).label)}</span>“${esc(t.snippet)}”</div>` : ''}
+          ${t.snippet ? `<div class="quote"><span class="from">Caught ${ago(t.captured)} ago from ${esc(srcLabel(t.source))}</span>“${esc(t.snippet)}”</div>` : ''}
+          ${origRow(t)}
           <dl class="fields"><dt>Requested by</dt><dd>${req}</dd><dt>Collaborators</dt><dd>${collabs}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd><dt>Type</dt><dd>${esc(t.category)}</dd></dl>
-          <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${esc(c.name)}</button>`).join('')}</div></div>
+          <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="s-${c.id} ${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${sdot(c.id)}${esc(c.name)}</button>`).join('')}</div></div>
           <div><div class="fl">Due date</div><div class="duebox">
             <input type="date" id="dueInput" value="${t.due || ''}" aria-label="Due date">
             ${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
@@ -509,23 +599,31 @@
         </div>
         <div class="sh-foot">${t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`}</div>
       </div>`;
+    } else if (UI.sheet.type === 'src') {
+      const t = task(UI.sheet.id); if (!t) { UI.sheet = null; return renderLayer(); }
+      const o = ORIGIN[t.source] || {};
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Original ${esc(srcLabel(t.source))} message">
+        <div class="grab"></div>
+        <div class="sh-h"><button class="back" data-action="open" data-id="${t.id}" aria-label="Back to task">${ic('back')}</button><span class="lab">${srcIc(t.source)}Original ${esc(o.noun || 'message')}</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-body">${sourceView(t)}<p class="sv-note">${esc(o.note || '')}</p></div>
+        ${o.url ? `<div class="sh-foot"><a class="btn-primary" href="${o.url}" target="_blank" rel="noopener">${esc(o.cta)} ${ic('ext')}</a></div>` : ''}
+      </div>`;
     } else if (UI.sheet.type === 'inc') {
       const list = incoming().slice(0, 12);
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Incoming">
         <div class="grab"></div>
-        <div class="sh-h"><span class="live-dot ${S.live ? '' : 'off'}"></span><b>Incoming</b><span class="lab">${S.live ? 'Live' : 'Paused'}</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h"><span class="live-dot"></span><b>Incoming</b><span class="lab">Live</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="inc-list"><div class="feed-list">${list.map(t => feedRow(t, { status: true })).join('')}</div></div>
         <div class="sh-foot"><button class="btn-ghost" data-action="simulate">${ic('bolt')} Simulate</button><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
       </div>`;
     } else if (UI.sheet.type === 'ask') {
-      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask" role="dialog" aria-modal="true" aria-label="Ask Keeper">
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask" role="dialog" aria-modal="true" aria-label="Add a task">
         <div class="grab"></div>
-        <div class="sh-h"><span class="logo-mark" aria-hidden="true"></span><b>Ask Keeper</b><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h"><span class="logo-mark" aria-hidden="true"></span><b>New task</b><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="ask-msgs" id="askMsgs">${askMsgsHTML()}</div>
-        <div class="listen" id="listen" ${UI.ask.listening ? '' : 'hidden'}><span class="wave"><i></i><i></i><i></i><i></i></span>Listening… speak your task</div>
+        <div class="vstage ${UI.ask.msgs.length ? 'compact' : ''}" id="vstage">${vstageHTML()}</div>
         <form class="ask-in" id="askForm">
-          <input id="askInput" type="text" autocomplete="off" placeholder="${UI.ask.awaiting === 'requester' ? 'Type a name…' : UI.ask.awaiting === 'due' ? 'e.g. Friday, Oct 30, next week' : 'Type a task, e.g. “Send Jen the logo by Friday”'}" aria-label="Message Keeper">
-          <button type="button" class="mic ${UI.ask.listening ? 'rec' : ''}" data-action="mic" aria-label="Voice input">${ic('mic')}</button>
+          <input id="askInput" type="text" autocomplete="off" placeholder="${askPlaceholder()}" aria-label="Type a task">
           <button type="submit" class="send" aria-label="Send">${ic('send')}</button>
         </form>
       </div>`;
@@ -543,53 +641,76 @@
     UI.sheet = null;
   }
 
-  /* ---------- assistant ---------- */
-  const SUGGEST = ['Send Jen the revised logo by Friday with Leo', 'Order business cards for Okafor', 'Schedule a call with Raj next Tuesday'];
+  /* ---------- assistant: voice first, type as fallback ---------- */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const ADDCOLS = ['upnext', 'backlog', 'inprogress', 'blocked', 'done'];
   function startAsk(voice) {
-    UI.ask = { msgs: [{ from: 'k', text: 'What do you need to keep track of? Type it or tap the mic, and I’ll fill in the details.', chips: SUGGEST, chipType: 'suggest' }], draft: null, awaiting: null, listening: false };
+    UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice, interim: '' };
     openSheet({ type: 'ask' });
-    setTimeout(() => { if (voice) startListening(); else { const i = $('#askInput'); if (i && mode() === 'desktop') i.focus(); } }, 350);
+    setTimeout(() => { if (voice && SR) startListening(); else { const i = $('#askInput'); if (i && mode() === 'desktop') i.focus(); } }, 380);
   }
+  const askPlaceholder = () => !UI.ask ? '' : UI.ask.awaiting === 'requester' ? 'Type a name…' : UI.ask.awaiting === 'due' ? 'Any date: “in 2 weeks”, “Nov 14”, “the 30th”' : 'Or type it here';
+  function vstageHTML() {
+    const A = UI.ask;
+    const cap = A.listening ? 'Listening… tap to stop' : SR ? (A.msgs.length ? 'Tap to answer' : 'Tap to talk') : 'Voice needs Chrome, Edge or Safari. Type below.';
+    return `<button type="button" class="orb ${A.listening ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}>${ic('mic')}</button>
+      ${A.listening && A.interim ? `<div class="vlive" id="vlive">${esc(A.interim)}</div>` : `<div class="vcap">${cap}</div>`}`;
+  }
+  function paintVoice() { const v = $('#vstage'); if (v) { v.innerHTML = vstageHTML(); v.classList.toggle('compact', UI.ask.msgs.length > 0); } }
   function askMsgsHTML() {
     const A = UI.ask; const last = A.msgs.length - 1;
+    if (!A.msgs.length) return `<div class="ask-empty">What do you need to keep track of?<small>Say it like you’d tell an assistant: “Send Jen the logo by the 30th with Leo.”</small></div>`;
     return A.msgs.map((m, i) => {
-      if (m.from === 'me') return `<div class="msg me"><div class="bub">${esc(m.text)}</div></div>`;
-      let h = `<div class="msg"><span class="logo-mark k" aria-hidden="true"></span><div class="bub">${esc(m.text)}</div></div>`;
+      if (m.from === 'me') return `<div class="msg me ${i === last ? 'nw' : ''}"><div class="bub">${esc(m.text)}</div></div>`;
+      let h = `<div class="msg ${i === last ? 'nw' : ''}"><span class="logo-mark k" aria-hidden="true"></span><div class="bub">${esc(m.text)}</div></div>`;
       if (m.draft) h += draftHTML(m.draft, i === last);
-      if (m.chips && i === last) h += `<div class="qchips">${m.chips.map(c => `<button type="button" class="chip" data-action="qchip" data-v="${esc(c)}">${esc(c)}</button>`).join('')}</div>`;
+      if (m.chips && i === last) h += `<div class="qchips">${m.chips.map(c => `<button type="button" class="chip" data-action="qchip" data-v="${esc(c)}">${esc(c)}</button>`).join('')}${m.datePick ? `<label class="duepick chip">${ic('cal')}<input type="date" id="askDate" min="${iso(today0())}" aria-label="Pick any date"></label>` : ''}</div>`;
       return h;
     }).join('');
   }
   function draftHTML(d, live) {
-    const due = d.due == null ? 'No date' : dueInfo(iso(addDays(d.due)), 'upnext').label + ' · ' + shortDate(addDays(d.due));
     return `<div class="draft"><h3 class="sh-title">${esc(d.title)}</h3>
       <dl class="fields"><dt>Requested by</dt><dd>${d.requester && d.requester !== 'maya' ? av(d.requester) + esc(personName(d.requester)) : 'You'}</dd>
-      <dt>Due</dt><dd>${esc(due)}</dd>
+      <dt>Due</dt><dd>${live ? `<input type="date" id="draftDue" value="${d.due == null ? '' : iso(addDays(d.due))}" aria-label="Due date">` : ''}${live ? '' : d.due == null ? 'No date' : esc(dueInfo(iso(addDays(d.due)), 'upnext').label + (Math.abs(d.due) < 7 ? ' · ' + shortDate(addDays(d.due)) : ''))}</dd>
       <dt>Collaborators</dt><dd>${d.collaborators.length ? d.collaborators.map(c => av(c) + esc(personName(c))).join(' ') : 'None'}</dd>
-      <dt>Project</dt><dd>${projTag(d.project) || 'None'}</dd><dt>Type</dt><dd>${esc(d.category)}</dd></dl>
-      ${live ? `<div class="draft-acts"><button type="button" class="btn-primary" data-action="draft-add">Add to Up Next</button><button type="button" class="btn-ghost" data-action="draft-redo">Start over</button></div>` : ''}</div>`;
+      <dt>Project</dt><dd>${projTag(d.project) || 'None'}</dd></dl>
+      ${live ? `<div><div class="fl">Add to</div><div class="statuses">${ADDCOLS.map(c => `<button type="button" class="s-${c} ${d.col === c ? 'on' : ''}" data-action="draft-col" data-v="${c}">${sdot(c)}${esc(statusLabel(c))}</button>`).join('')}</div></div>
+      <div class="draft-acts"><button type="button" class="btn-primary" data-action="draft-add">Add to ${esc(statusLabel(d.col))}</button><button type="button" class="btn-ghost" data-action="draft-redo">Start over</button></div>` : `<div class="fl" style="margin:0">Added to ${esc(statusLabel(d.col))}</div>`}</div>`;
   }
-  function pushMsg(m) { UI.ask.msgs.push(m); const el = $('#askMsgs'); if (el) { el.innerHTML = askMsgsHTML(); el.scrollTop = el.scrollHeight; } }
-  function setAskPlaceholder() { const i = $('#askInput'); if (i) i.placeholder = UI.ask.awaiting === 'requester' ? 'Type a name…' : UI.ask.awaiting === 'due' ? 'e.g. Friday, Oct 30, next week' : 'Type a task, e.g. “Send Jen the logo by Friday”'; }
+  function paintMsgs() { const el = $('#askMsgs'); if (el) { el.innerHTML = askMsgsHTML(); el.scrollTop = el.scrollHeight; } paintVoice(); }
+  function pushMsg(m) { UI.ask.msgs.push(m); paintMsgs(); }
+  function setAskPlaceholder() { const i = $('#askInput'); if (i) i.placeholder = askPlaceholder(); }
+  /* in voice mode Keeper reads its question aloud, then listens for the answer */
+  function say(text, listenAfter) {
+    const A = UI.ask;
+    if (!A || !A.voice || !window.speechSynthesis) { return; }
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.rate = 1.05;
+      u.onend = () => { if (listenAfter && UI.ask === A && UI.sheet && UI.sheet.type === 'ask' && !A.listening) startListening(); };
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
   function askNext() {
     const A = UI.ask, d = A.draft;
     if (!d.requesterSet) {
       A.awaiting = 'requester';
       const clients = Object.keys(D.PEOPLE).filter(k => D.PEOPLE[k].role === 'client').map(k => D.PEOPLE[k].name.split(' ')[0]);
-      pushMsg({ from: 'k', text: 'Who is this for?', chips: clients.concat('Just me') });
+      pushMsg({ from: 'k', text: 'Who is this for?', chips: clients.concat('Just me') }); say('Who is this for?', true);
     } else if (!d.dueSet) {
       A.awaiting = 'due';
-      pushMsg({ from: 'k', text: 'When is it due?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'] });
+      pushMsg({ from: 'k', text: 'When is it due?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('When is it due?', true);
     } else {
       A.awaiting = 'confirm';
       const proj = d.project && D.PROJECTS[d.project] ? ` I filed it under ${D.PROJECTS[d.project].name}.` : '';
-      pushMsg({ from: 'k', text: 'Here’s the task.' + proj + ' Add it to your board?', draft: Object.assign({}, d) });
+      pushMsg({ from: 'k', text: 'Here’s the task.' + proj + ' Pick a column or add it to ' + statusLabel(d.col) + '.', draft: d });
+      say('Got it. Say “add it” to put it in ' + statusLabel(d.col) + ', or name another column.', true);
     }
     setAskPlaceholder();
   }
-  function askSubmit(text) {
+  function askSubmit(text, viaVoice) {
     text = (text || '').trim(); if (!text || !UI.ask) return;
-    const A = UI.ask;
+    const A = UI.ask; A.voice = !!viaVoice;
     pushMsg({ from: 'me', text });
     if (A.awaiting === 'requester') {
       const s = text.toLowerCase();
@@ -600,9 +721,15 @@
       return setTimeout(askNext, 350);
     }
     if (A.awaiting === 'due') {
-      if (/\bno( due)?( date)?\b|none|whenever|no rush/i.test(text)) { A.draft.due = null; A.draft.dueSet = true; }
-      else { const r = parseDue(text); if (r) { A.draft.due = r.days; A.draft.dueSet = true; } else { pushMsg({ from: 'k', text: 'I didn’t catch a date. Try “Friday”, “tomorrow” or “Oct 30”.', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'] }); return; } }
+      if (/\bno( due)?( date)?\b|none|whenever|no rush|no deadline/i.test(text)) { A.draft.due = null; A.draft.dueSet = true; }
+      else { const r = parseDue(text); if (r) { A.draft.due = r.days; A.draft.dueSet = true; } else { pushMsg({ from: 'k', text: 'I didn’t catch a date. Try “in 2 weeks”, “Nov 14” or “the 30th”, or pick one.', chips: ['Today', 'Tomorrow', 'Next week', 'No due date'], datePick: true }); say('Sorry, what date?', true); return; } }
       return setTimeout(askNext, 350);
+    }
+    if (A.awaiting === 'confirm') {
+      const cr = parseCol(' ' + text + ' ') || (() => { const m = COLWORDS.find(([, w]) => new RegExp('^\\s*(' + w + ')\\s*$', 'i').test(text)); return m ? { id: m[0] } : null; })();
+      if (cr) { A.draft.col = cr.id; return addDraft(); }
+      if (/^(yes|yeah|yep|sure|ok(ay)?|add( it)?|do it|sounds good|confirm|perfect|great)\b/i.test(text)) return addDraft();
+      if (/^(no|nope|start over|cancel)\b/i.test(text)) { A.draft = null; A.awaiting = null; pushMsg({ from: 'k', text: 'No problem. What’s the task?' }); setAskPlaceholder(); return; }
     }
     A.draft = parseTask(text);
     const bits = [];
@@ -614,40 +741,39 @@
   }
   function addDraft() {
     const d = UI.ask.draft; if (!d) return;
-    const t = mkTask({ title: d.title, source: 'keeper', category: d.category, project: d.project, requester: d.requester === 'maya' ? 'maya' : d.requester, collaborators: d.collaborators, due: d.due, status: 'upnext', snippet: '' });
+    const t = mkTask({ title: d.title, source: 'keeper', category: d.category, project: d.project, requester: d.requester === 'maya' ? 'maya' : d.requester, collaborators: d.collaborators, due: d.due, status: d.col, snippet: '' });
     t.fresh = true;
-    S.tasks.unshift(t); save();
+    S.tasks.unshift(t); if (mode() === 'mobile') S.mstatus = d.col; save();
     refresh();
-    toast(srcIc('keeper') + 'Added to Up Next: ' + esc(d.title));
+    toast(srcIc('keeper') + 'Added to ' + esc(statusLabel(d.col)) + ': ' + esc(d.title));
     UI.ask.awaiting = null; UI.ask.draft = null;
-    pushMsg({ from: 'k', text: 'Added to Up Next. Anything else?', chips: ['Done for now'], chipType: 'done' });
+    paintMsgs();
+    pushMsg({ from: 'k', text: 'Added to ' + statusLabel(d.col) + '. Anything else?', chips: ['Done for now'] });
+    say('Added.', false);
     setAskPlaceholder();
     setTimeout(() => { t.fresh = false; }, 4000);
   }
   /* voice */
   let rec = null;
   function startListening() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { pushMsg({ from: 'k', text: 'Voice input isn’t available in this browser. Try Chrome, Edge or Safari, or type your task instead.' }); return; }
+    if (!SR) { paintVoice(); return; }
+    if (window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {}
     try {
       rec = new SR(); rec.lang = 'en-US'; rec.interimResults = true; rec.maxAlternatives = 1;
       let finalText = '';
       rec.onresult = e => {
         let interim = '';
         for (let i = e.resultIndex; i < e.results.length; i++) { const r = e.results[i]; if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript; }
-        const inp = $('#askInput'); if (inp) inp.value = (finalText + interim).trim();
+        UI.ask.interim = (finalText + ' ' + interim).trim();
+        const v = $('#vlive'); if (v) v.textContent = UI.ask.interim; else paintVoice();
       };
-      rec.onerror = e => { setListening(false); if (e.error === 'not-allowed' || e.error === 'service-not-allowed') pushMsg({ from: 'k', text: 'I need microphone permission to listen. Allow it in your browser, or type instead.' }); };
-      rec.onend = () => { setListening(false); const inp = $('#askInput'); const v = (finalText || (inp && inp.value) || '').trim(); if (v) { if (inp) inp.value = ''; askSubmit(v); } };
+      rec.onerror = e => { setListening(false); if (e.error === 'not-allowed' || e.error === 'service-not-allowed') pushMsg({ from: 'k', text: 'I need microphone permission to listen. Allow it in your browser, or type below.' }); };
+      rec.onend = () => { const v = (finalText || UI.ask.interim || '').trim(); UI.ask.interim = ''; setListening(false); if (v) askSubmit(v, true); };
       rec.start(); setListening(true);
     } catch (e) { setListening(false); }
   }
-  function stopListening() { if (rec) { try { rec.stop(); } catch (e) {} } }
-  function setListening(on) {
-    if (!UI.ask) return; UI.ask.listening = on;
-    const l = $('#listen'); if (l) l.hidden = !on;
-    const m = $('.mic'); if (m) m.classList.toggle('rec', on);
-  }
+  function stopListening() { if (rec) { try { rec.stop(); } catch (e) {} } if (window.speechSynthesis) try { speechSynthesis.cancel(); } catch (e) {} }
+  function setListening(on) { if (!UI.ask) return; UI.ask.listening = on; paintVoice(); }
 
   /* ---------- live arrivals ---------- */
   function arrive(manual) {
@@ -747,13 +873,15 @@
       case 'inc': S.unseen = 0; save(); refresh(); openSheet({ type: 'inc' }); break;
       case 'mtab': S.mstatus = a.dataset.tab; save(); refresh(); { const mb = $('#mBody'), mt = $('#mTabs'); if (mb && mt && mb.scrollTop > mt.offsetTop) mb.scrollTop = mt.offsetTop; } break;
       case 'search': UI.search = !UI.search; render(); if (UI.search) { const i = $('#fInput'); if (i) i.focus(); } break;
-      case 'f-close': UI.search = false; S.filter = { text: '', tokens: [] }; save(); render(); break;
+      case 'f-close': UI.search = false; save(); render(); break;
       case 'open': openSheet({ type: 'task', id: a.dataset.id }); break;
       case 'close': closeSheet(); break;
       case 'set-status': { const t = task(UI.sheet.id); t.status = a.dataset.v; save(); refresh(); renderLayer(true); toast('Moved to ' + esc(statusLabel(t.status))); break; }
       case 'set-due': { const t = task(UI.sheet.id); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); save(); refresh(); renderLayer(true); toast(t.due ? 'Due ' + esc(dueInfo(t.due, t.status).label.toLowerCase()) : 'Due date cleared'); break; }
-      case 'f-clear': S.filter = { text: '', tokens: [] }; save(); { const i = $('#fInput'); if (i) i.value = ''; } refresh(); break;
-      case 'f-cat': toggleToken({ type: 'category', value: a.dataset.v, label: a.dataset.v }); break;
+      case 'f-clear': S.filter = { text: '', tokens: [] }; save(); render(); break;
+      case 'f-clear-text': S.filter.text = ''; save(); { const i = $('#fInput'); if (i) { i.value = ''; i.focus(); } a.hidden = true; } refresh(); break;
+      case 'src': openSheet({ type: 'src', id: a.dataset.id }); break;
+      case 'draft-col': if (UI.ask && UI.ask.draft) { UI.ask.draft.col = a.dataset.v; paintMsgs(); } break;
       case 'f-proj': toggleToken({ type: 'project', value: a.dataset.v, label: D.PROJECTS[a.dataset.v].name }); break;
       case 'f-menu': if (UI.menu === a.dataset.menu) closeMenu(); else openMenu(a, a.dataset.menu); break;
       case 'menu-pick': toggleToken({ type: a.dataset.type, value: a.dataset.v, label: a.dataset.label }); openMenu($(`.chip[data-menu="${UI.menu || a.dataset.type}"]`) || a, a.dataset.type); break;
@@ -771,7 +899,7 @@
       }
       case 'ask': startAsk(false); break;
       case 'ask-voice': startAsk(true); break;
-      case 'mic': if (UI.ask && UI.ask.listening) stopListening(); else startListening(); break;
+      case 'mic': if (UI.ask && UI.ask.listening) { if (rec) try { rec.stop(); } catch (err) {} } else startListening(); break;
       case 'qchip': {
         const v = a.dataset.v;
         if (v === 'Done for now') { closeSheet(); break; }
@@ -779,8 +907,7 @@
         askSubmit(v); break;
       }
       case 'draft-add': addDraft(); break;
-      case 'draft-redo': UI.ask.draft = null; UI.ask.awaiting = null; pushMsg({ from: 'k', text: 'No problem. What’s the task?', chips: SUGGEST }); setAskPlaceholder(); break;
-      case 'live': S.live = !S.live; save(); refresh(); toast(S.live ? 'Live feed resumed' : 'Live feed paused'); break;
+      case 'draft-redo': UI.ask.draft = null; UI.ask.awaiting = null; pushMsg({ from: 'k', text: 'No problem. What’s the task?' }); setAskPlaceholder(); break;
       case 'simulate': arrive(true); break;
     }
   });
@@ -794,9 +921,11 @@
     return re ? text.replace(new RegExp(re.source, 'gi'), ' ') : text;
   }
   document.addEventListener('input', e => {
-    if (e.target.id === 'fInput') { S.filter.text = e.target.value; jumpToMatches(); save(); refresh(); }
+    if (e.target.id === 'fInput') { S.filter.text = e.target.value; jumpToMatches(); save(); refresh(); const c = $('.fbox .clr'); if (c) c.hidden = !S.filter.text; }
   });
   document.addEventListener('change', e => {
+    if (e.target.id === 'askDate' && e.target.value && UI.ask) { const d = fromISO(e.target.value); askSubmit(d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), false); return; }
+    if (e.target.id === 'draftDue' && UI.ask && UI.ask.draft) { UI.ask.draft.due = e.target.value ? daysOut(e.target.value) : null; paintMsgs(); return; }
     if (e.target.id === 'dueInput' && UI.sheet) { const t = task(UI.sheet.id); t.due = e.target.value || null; save(); refresh(); renderLayer(true); toast(t.due ? 'Due date updated' : 'Due date cleared'); }
   });
   document.addEventListener('submit', e => {

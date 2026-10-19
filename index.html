@@ -42,7 +42,8 @@
           <tr><td>Zoom &amp; Google Meet capture</td><td>Visual only</td><td>Needs paid Zoom / Workspace plans or a paid meeting-bot service</td></tr>
           <tr><td>Live incoming tasks</td><td>Simulated on a timer</td><td>Needs a backend and AI processing per message</td></tr>
           <tr><td>Natural-language input &amp; filter</td><td>Rule-based parsing</td><td>An LLM API (small per-use cost)</td></tr>
-          <tr><td>Voice entry</td><td>Real (browser speech recognition)</td><td>Works in Chrome, Edge and Safari; not Firefox</td></tr>
+          <tr><td>Voice entry</td><td>Real: browser speech recognition, and Keeper reads its follow-up questions aloud</td><td>Works in Chrome, Edge and Safari; not Firefox. A production app would use a paid speech-to-text API for accuracy</td></tr>
+          <tr><td>Link to the original message</td><td>Mock preview; “Open in…” goes to the app’s home page</td><td>Gmail, Outlook and Slack give each message its own link, so the button opens that exact message. Texts to the Keeper Line and call transcripts are stored by Keeper, so they open inside Keeper. iMessage can’t be linked into: Apple offers no way to read or open a specific message</td></tr>
           <tr><td>Board, drag &amp; drop, due dates</td><td>Fully working</td><td>—</td></tr>
         </tbody>
       </table>
