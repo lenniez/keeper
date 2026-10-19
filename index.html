@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keeper · Prototype</title>
+<meta name="description" content="Keeper catches commitments from email, Slack, texts and calls and turns them into one task board. Clickable prototype.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="shell-bar">
+    <div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span><span class="proto-pill">Prototype</span></div>
+    <div class="shell-ctrls">
+      <div class="seg" role="group" aria-label="View">
+        <button type="button" data-action="mode" data-mode="mobile" aria-pressed="true">Mobile</button>
+        <button type="button" data-action="mode" data-mode="desktop" aria-pressed="false">Desktop</button>
+      </div>
+      <button type="button" class="shell-btn" data-action="about">About</button>
+      <button type="button" class="shell-btn" data-action="reset">Reset demo</button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="device" id="device">
+      <div class="device-notch" aria-hidden="true"></div>
+      <div class="app" id="app"></div>
+    </div>
+  </main>
+
+  <div class="about" id="about" hidden>
+    <div class="about-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+      <h2 id="aboutTitle">About this prototype</h2>
+      <p>Keeper is a visual prototype. Data is sample data for Maya, an independent brand strategist, and your changes are saved only in this browser.</p>
+      <table class="about-table">
+        <thead><tr><th>Feature</th><th>In this prototype</th><th>Real product</th></tr></thead>
+        <tbody>
+          <tr><td>Channel connections</td><td>Visual only</td><td>Gmail needs Google's paid security assessment; Outlook and Slack need app review</td></tr>
+          <tr><td>Keeper business number</td><td>Visual only</td><td>Feasible via a provider like Twilio: about $1–2/month per number plus per-message fees and carrier registration</td></tr>
+          <tr><td>Zoom &amp; Google Meet capture</td><td>Visual only</td><td>Needs paid Zoom / Workspace plans or a paid meeting-bot service</td></tr>
+          <tr><td>Live incoming tasks</td><td>Simulated on a timer</td><td>Needs a backend and AI processing per message</td></tr>
+          <tr><td>Natural-language input &amp; filter</td><td>Rule-based parsing</td><td>An LLM API (small per-use cost)</td></tr>
+          <tr><td>Voice entry</td><td>Real (browser speech recognition)</td><td>Works in Chrome, Edge and Safari; not Firefox</td></tr>
+          <tr><td>Board, drag &amp; drop, due dates</td><td>Fully working</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <button type="button" class="btn-primary" data-action="about-close">Got it</button>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
