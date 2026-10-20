@@ -380,7 +380,7 @@
     </div></div>`;
   }
   function privacyCard() {
-    return `<div class="priv"><div class="priv-h">${ic('shield')}<b>Your business stays yours</b></div>
+    return `<div class="priv"><div class="priv-h">${ic('shield')}<b>Your data stays yours</b></div>
       <ul><li>${ic('check')}Your messages and client data are never used to train AI models, ours or anyone else’s.</li>
       <li>${ic('check')}Encrypted in transit and at rest. Only you can see your list.</li>
       <li>${ic('check')}Keeper reads to find tasks. It never sends anything without your permission.</li>
