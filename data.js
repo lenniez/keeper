@@ -39,7 +39,6 @@ window.KEEPER_DATA = (function () {
   const COLUMNS = [
     { id: 'upnext',     name: 'Up Next' },
     { id: 'inprogress', name: 'In Progress' },
-    { id: 'blocked',    name: 'Blocked' },
     { id: 'done',       name: 'Done' }
   ];
 
@@ -52,7 +51,7 @@ window.KEEPER_DATA = (function () {
     { title: 'Send final brand guidelines PDF', source: 'slack', category: 'Deliverables', project: 'brightside', requester: 'dana', collaborators: ['leo'], due: 2, status: 'upnext', ago: 420,
       snippet: 'Dana: can we get the final guidelines PDF this week so the printer can start?',
       also: [{ source: 'gmail', ago: 300, snippet: 'Dana: Following up on the guidelines PDF. Any update for the printer?' }] },
-    { title: 'Book Priya for the Okafor office shoot', source: 'sms', category: 'Coordination', project: 'okafor', requester: 'tomi', collaborators: ['priya'], due: 1, status: 'blocked', ago: 1500,
+    { title: 'Book Priya for the Okafor office shoot', source: 'sms', category: 'Coordination', project: 'okafor', requester: 'tomi', collaborators: ['priya'], due: 1, status: 'inprogress', ago: 1500,
       snippet: 'Tomi: Saturday works for the office shoot if your photographer is free?' },
     { title: 'Send weekly status report to Halcyon', source: 'outlook', category: 'Status update', project: 'halcyon', requester: 'marcus', collaborators: [], due: 3, status: 'upnext', ago: 1600,
       snippet: 'Marcus: please keep the Friday status emails coming, leadership reads them.' },

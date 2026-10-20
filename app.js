@@ -22,12 +22,11 @@
   function dueInfo(due, status) {
     if (!due) return { label: 'No date', cls: 'none' };
     const n = daysOut(due), d = fromISO(due);
-    if (status === 'done') return { label: shortDate(d), cls: '' };
-    if (n < 0) return { label: n === -1 ? 'Yesterday' : 'Overdue', cls: 'overdue' };
+    const md = (d.getMonth() + 1) + '/' + d.getDate();
+    if (status === 'done') return { label: md, cls: '' };
     if (n === 0) return { label: 'Today', cls: 'today' };
     if (n === 1) return { label: 'Tomorrow', cls: 'soon' };
-    if (n < 7) return { label: d.toLocaleDateString('en-US', { weekday: 'short' }), cls: 'soon' };
-    return { label: shortDate(d), cls: '' };
+    return { label: md, cls: n < 0 ? 'overdue' : '' };
   }
   const agoText = ts => { const s = ago(ts); return s === 'now' ? 'just now' : s + ' ago'; };
   function ago(ts) {
@@ -240,7 +239,7 @@
     Object.keys(FIRST).forEach(f => { const m = text.match(new RegExp('\\b' + f + '\\b', 'i')); if (m) out.push({ key: FIRST[f], index: m.index }); });
     return out.sort((a, b) => a.index - b.index);
   }
-  const COLWORDS = [['upnext', 'up next|next up|backlog|later|someday'], ['inprogress', 'in progress|doing|working on'], ['blocked', 'blocked|waiting']];
+  const COLWORDS = [['upnext', 'up next|next up|backlog|later|someday'], ['inprogress', 'in progress|doing|working on|blocked|waiting']];
   function parseCol(text) {
     for (const [id, words] of COLWORDS) {
       const m = text.match(new RegExp('\\s*(?:,|\\band\\b|\\bthen\\b)?\\s*\\b(?:(?:add|put|move|file|drop)(?: (?:it|this))? )?(?:to|in|into|on|under)\\s+(?:the\\s+|my\\s+)?(?:' + words + ')(?:\\s+(?:column|list|lane))?\\b', 'i'));
@@ -425,9 +424,8 @@
   /* triage card: accept or dismiss what Keeper caught */
   function reviewCard(t) {
     const from = t.requester && t.requester !== 'maya' ? personName(t.requester) : 'You';
-    return `<article class="rv ${t.low ? 'low' : ''} ${t.fresh ? 'fresh' : ''}" data-tid="${t.id}">
+    return `<article class="rv ${t.fresh ? 'fresh' : ''}" data-tid="${t.id}">
       <div class="rv-top">${srcIcons(t)}<span>${esc(from)} · ${esc(srcLabel(t.source))} · ${agoText(t.captured)}</span></div>
-      ${t.low ? `<div class="maybe">${ic('help')}Possible task · Keeper isn’t sure this is a request</div>` : ''}
       <button type="button" class="rv-title" data-action="open" data-id="${t.id}">${esc(t.title)}</button>
       ${t.snippet ? `<div class="rv-snip">“${esc(origin(t).text)}”</div>` : ''}
       <div class="rv-acts"><button type="button" class="btn-ghost" data-action="rv-dismiss">${t.low ? 'Not a task' : 'Dismiss'}</button><button type="button" class="btn-primary" data-action="rv-add">${ic('check')}Add to Up Next</button></div>
@@ -444,7 +442,7 @@
     const di = dueInfo(t.due, t.status);
     const who = t.requester && t.requester !== 'maya' ? personName(t.requester) : 'You';
     const where = [projName(t.project), who].filter(Boolean).join(' · ');
-    return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.status === 'blocked' ? 'blocked' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
+    return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
       <div class="card-title">${esc(t.title)}</div>
       <div class="card-meta"><span class="where">${srcIcons(t)}<span>${esc(where)}</span></span>
         <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
@@ -465,7 +463,7 @@
     return D.COLUMNS.map(c => {
       const list = colTasks(c.id, toks);
       if (c.id === 'done' && !S.doneOpen) return `<section class="col collapsed" data-col="done">
-        <button type="button" class="col-toggle" data-action="done-toggle" aria-expanded="false" aria-label="Show Done (${list.length})">${ic('chev')}<span class="spill s-done">Done</span><span class="n">${list.length}</span></button>
+        <button type="button" class="col-toggle" data-action="done-toggle" aria-expanded="false" aria-label="Show Done (${list.length})"><span class="spill s-done">${sdot('done')}Done</span><span class="n">${list.length}</span><span class="show">Show ${ic('chev')}</span></button>
         <div class="col-body" hidden>${list.map(cardHTML).join('')}</div></section>`;
       return `<section class="col" data-col="${c.id}">
         <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span>${sortNote(c.id)}${c.id === 'done' ? `<button type="button" class="col-x" data-action="done-toggle" aria-label="Collapse Done">${ic('x')}</button>` : ''}</div>
@@ -492,10 +490,10 @@
     const di = dueInfo(t.due, t.status);
     const req = t.requester && t.requester !== 'maya' ? 'From ' + esc(personName(t.requester)) : 'From you';
     const proj = projName(t.project);
-    return `<button type="button" class="frow ${t.fresh ? 'new' : ''} ${mode() === 'desktop' && UI.feedSel === t.id ? 'sel' : ''}" data-action="open" data-id="${t.id}">
+    return `<button type="button" class="frow ${t.fresh ? 'new' : ''} ${t.triage ? 'triage' : ''} ${mode() === 'desktop' && UI.feedSel === t.id ? 'sel' : ''}" data-action="open" data-id="${t.id}">
       ${srcIc(t.source)}
       <span class="frow-txt"><span class="frow-title">${t.fresh ? '<span class="newtag">NEW</span> ' : ''}${esc(t.title)}</span>
-        ${t.low && t.triage ? `<span class="maybe">${ic('help')}Possible task</span>` : ''}
+
         <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''}</span>
         ${opts && opts.snip && t.snippet ? `<span class="snip">“${esc(t.snippet)}”</span>` : ''}
         <span class="frow-foot">${opts && opts.status ? spill(t.triage ? 'triage' : t.status) : ''}${t.also && t.also.length ? `<span class="merged">${ic('merge')}${t.also.length + 1} sources</span>` : ''}<span class="due ${di.cls}">${esc(di.label)}</span><span class="ago">${agoText(t.captured)}</span></span>
@@ -781,7 +779,7 @@
       ${ed === 'due' ? `<dd class="pop"><div class="duebox">${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
         <button type="button" class="chip ${!t.due ? 'on' : ''}" data-action="set-due" data-n="none">No date</button><input type="date" class="dueInput" value="${t.due || ''}" aria-label="Pick a date"></div></dd>` : ''}`;
     return {
-      body: `${t.low && t.triage ? `<div class="maybe big">${ic('help')}Possible task. Keeper isn’t sure this is a request.</div>` : ''}${origBlock(t)}
+      body: `${origBlock(t)}
           <h2 class="sh-title">${esc(t.title)}</h2>
           <dl class="fields">${statusRow}${dueRow}<dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>`,
       foot: t.triage ? `<button class="btn-ghost" data-action="rv-dismiss">${t.low ? 'Not a task' : 'Dismiss'}</button><button class="btn-primary" data-action="rv-add">${ic('check')} Add to Up Next</button>`
@@ -864,7 +862,7 @@
 
   /* ---------- assistant: voice first, type as fallback ---------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const ADDCOLS = ['upnext', 'inprogress', 'blocked'];
+  const ADDCOLS = ['upnext', 'inprogress'];
   function startAsk(voice) {
     UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice || mode() === 'mobile', handsFree: !!voice, interim: '' };
     openSheet({ type: 'ask' });
@@ -1000,7 +998,7 @@
     if (A.awaiting === 'review') {
       if (ADDWORDS.test(text)) return setTimeout(() => (d.requesterSet && d.dueSet ? addDraft() : askMissing()), 200);
       if (/^change the date$/i.test(text)) { A.awaiting = 'due-edit'; pushMsg({ from: 'k', text: 'What’s the new due date?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('What’s the new due date?', true); return; }
-      if (/^change the column$/i.test(text)) { A.awaiting = 'col-edit'; pushMsg({ from: 'k', text: 'Which column?', chips: ADDCOLS.map(statusLabel) }); say('Which column? Up next, in progress, or blocked?', true); return; }
+      if (/^change the column$/i.test(text)) { A.awaiting = 'col-edit'; pushMsg({ from: 'k', text: 'Which column?', chips: ADDCOLS.map(statusLabel) }); say('Which column? Up next or in progress?', true); return; }
       if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
       if (NOCHANGE.test(text) || /^yes,? (it'?s|that'?s|looks)/i.test(text)) return setTimeout(askMissing, 300);
       if (/^(yes|yeah|yep|sure)\b/i.test(text)) { pushMsg({ from: 'k', text: 'What should I change? Say a new date, a person, a column, or “call it…” for a new title.' }); say('What should I change?', true); return; }
@@ -1093,7 +1091,7 @@
       const t = mkTask(Object.assign({}, tpl, { status: 'upnext', ago: 0, triage: true }));
       t.fresh = true;
       S.tasks.push(t); S.unseen = (S.unseen || 0) + 1; save(); refresh();
-      toast(esc(t.title), { title: t.low ? 'Possible task to review' : 'New task kept', id: t.id, sub: srcIc(t.source) + 'From ' + esc(personName(t.requester) || 'you') + ' · ' + esc(D.SOURCES[t.source].label) });
+      toast(esc(t.title), { title: 'New task kept', id: t.id, sub: srcIc(t.source) + 'From ' + esc(personName(t.requester) || 'you') + ' · ' + esc(D.SOURCES[t.source].label) });
       setTimeout(() => { t.fresh = false; refresh(); }, 6000);
       return;
     }
@@ -1102,7 +1100,7 @@
   let liveTimer = null;
   function scheduleLive() {
     clearTimeout(liveTimer);
-    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 11000);
+    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 60000);
   }
 
   /* ---------- toasts ---------- */
