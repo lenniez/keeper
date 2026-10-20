@@ -532,7 +532,7 @@
       const n = S.tasks.filter(t => t.source === k).length;
       return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
         ${srcIc(k)}
-        <span class="chan-txt"><b>${esc(s.label)}</b><span>${on ? n + ' tasks caught · listening' : esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
+        <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
         <span class="tog" aria-hidden="true"></span></button>`;
     }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p></section>
       <section class="set-col"><h2 class="sec-h first">Assistant</h2>
