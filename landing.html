@@ -403,6 +403,33 @@
   .kept .sec-cta .btn{padding:11px 18px;font-size:15px}
   .kept::after{background:radial-gradient(50% 50% at 50% 50%,rgba(246,164,114,.35),transparent 70%)}
   .kept .lines em{color:#F6B98F}
+  /* ---------- revision 6: people, day story, iPhone 18 Pro frames ---------- */
+  .photo{display:block;width:100%;height:100%;object-fit:cover;background:linear-gradient(135deg,#FCE3D3,#E7E0FB)}
+  .photo.broken{visibility:hidden}
+  .day{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:44px;align-items:start}
+  .day-photo{position:sticky;top:90px;border-radius:24px;overflow:hidden;aspect-ratio:4/5;background:linear-gradient(135deg,#FCE3D3,#E7E0FB);box-shadow:0 30px 60px -36px rgba(80,40,20,.45)}
+  .day-photo .cap{position:absolute;left:14px;bottom:14px;background:rgba(255,255,255,.92);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+  .tl{list-style:none;margin:0;padding:0;position:relative}
+  .tl::before{content:"";position:absolute;left:84px;top:8px;bottom:8px;width:2px;background:linear-gradient(var(--peach),var(--brand-2))}
+  .tl li{display:grid;grid-template-columns:72px 1fr;gap:28px;padding:0 0 26px;position:relative}
+  .tl li::after{content:"";position:absolute;left:79px;top:6px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--peach)}
+  .tl li.end::after{border-color:var(--brand);background:var(--brand)}
+  .tl time{font-size:14px;font-weight:700;color:var(--ink-2);text-align:right;padding-top:2px;white-space:nowrap}
+  .tl b{display:block;font-size:18px;letter-spacing:-.01em;margin-bottom:4px}
+  .tl p{margin:0;color:var(--ink-2);font-size:16px}
+  .moments{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;margin-bottom:48px}
+  .moment{margin:0;position:relative;border-radius:20px;overflow:hidden;height:280px;background:linear-gradient(135deg,#FCE3D3,#E2F4F1)}
+  .moment figcaption{position:absolute;left:12px;bottom:12px;background:rgba(255,255,255,.92);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600}
+  /* iPhone 18 Pro: thinner bezels, smaller Dynamic Island, titanium edge */
+  .phone{padding:2px;border-radius:46px;background:linear-gradient(150deg,#C9C4BD 0%,#7E7A75 14%,#B5B0A9 40%,#6E6A66 72%,#CFCAC3 100%)}
+  .phone::before{inset:2px;border-radius:44px;background:#050506}
+  .phone .screen{margin:5px;border-radius:40px}
+  .phone .island{top:12px;width:56px;height:17px;margin-left:-28px;border-radius:10px}
+  .phone .status{height:30px;padding:5px 24px 0 26px}
+  .phone [class^="btn-"]{background:linear-gradient(90deg,#A9A49D,#6E6A66)}
+  .phone .btn-r{background:linear-gradient(270deg,#A9A49D,#6E6A66)}
+  @media (max-width:900px){.day{grid-template-columns:1fr}.day-photo{position:relative;top:0;aspect-ratio:4/3}.moments{grid-template-columns:1fr 1fr}.moments .moment:first-child{grid-column:1 / -1}}
+  @media (max-width:520px){.tl::before{left:66px}.tl li{grid-template-columns:56px 1fr;gap:24px}.tl li::after{left:61px}}
 </style>
 </head>
 <body>
@@ -413,6 +440,7 @@
     <a class="brand" href="#top" aria-label="Keeper home"><span class="mark" aria-hidden="true"></span><span class="word">keeper</span></a>
     <ul>
       <li><a href="#what">What is Keeper</a></li>
+      <li><a href="#day">A day with Keeper</a></li>
       <li><a href="#product">Product</a></li>
       <li><a href="#trust">Privacy</a></li>
       <li><a href="#compare">Compare</a></li>
@@ -465,13 +493,13 @@
   <div class="wrap">
     <div class="sec-h rev">
       <h2>One list for everything you’ve promised.</h2>
-      <p>Connect the channels your clients already use. Keeper finds the commitments in them and lines them up by due date.</p>
+      <p>Connect the channels your clients already use (yes, even the client who only texts). Keeper finds the commitments and lines them up by due date.</p>
     </div>
     <div class="diffs">
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8l-6 6-3-3M4 4h16v16H4z"/></svg></div>
         <h3>No data entry</h3>
-        <p>You never add a task by hand unless you want to. Keeper hears “I’ll send that over Friday” and puts it on your list with the right client, date and source.</p>
+        <p>Typing up to-dos is nobody’s favorite part of the job. Keeper hears “I’ll send that over Friday” and puts it on your list with the right client, date and source.</p>
       </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
@@ -481,12 +509,12 @@
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
         <h3>Voice when your hands are full</h3>
-        <p>Between site visits? Say it out loud. Keeper asks only for what’s missing and reads the task back.</p>
+        <p>Between site visits? Say it out loud. Keeper asks only for what’s missing and reads it back. No thumbs required.</p>
       </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></div>
         <h3>Sorted before you sit down</h3>
-        <p>Your morning starts with one prioritized list: what’s due today, what’s overdue, and what’s already drafted for you.</p>
+        <p>One prioritized list is waiting before your coffee is cool enough to drink: what’s due, what’s overdue, and what’s already drafted.</p>
       </article>
     </div>
     <div class="what-shots">
@@ -497,11 +525,36 @@
   </div>
 </section>
 
+<section id="day">
+  <div class="wrap">
+    <div class="sec-h rev">
+      <h2>A Tuesday with Keeper.</h2>
+      <p>Meet Maya, an independent brand strategist with five clients and one very full phone.</p>
+    </div>
+    <div class="day">
+      <div class="day-photo rev"><img class="photo " src="https://images.unsplash.com/photo-1602803056945-ebac8ae8fd00?auto=format&fit=crop&w=900&q=70" alt="A woman holding a coffee mug, starting her morning" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><span class="cap">7:48 AM · still on coffee number one</span></div>
+      <ol class="tl">
+        <li class="rev"><time>7:48 AM</time><div><b>Her list is already waiting</b><p>Overnight, Keeper caught three requests: two emails and a Slack message. Maya reads them before her coffee cools.</p></div></li>
+        <li class="rev"><time>9:15 AM</time><div><b>“I’ll send the revised timeline by Friday”</b><p>Said on a Zoom call with Raj. It’s on her list, due Friday, before she even hangs up.</p></div></li>
+        <li class="rev"><time>11:30 AM</time><div><b>The scheduling back-and-forth that didn’t happen</b><p>Tomi texts asking when she can see the new office. Keeper finds Wednesday at 2 and books it. Maya hears about it from her own calendar.</p></div></li>
+        <li class="rev"><time>2:40 PM</time><div><b>A thought in the parking lot</b><p>“Order sample prints for Dana.” She says it once into her phone. Clean task, right client, done.</p></div></li>
+        <li class="rev"><time>5:30 PM</time><div><b>Five minutes of approvals</b><p>Three drafted replies are ready. She sends two, tweaks one, and calls it a day.</p></div></li>
+        <li class="rev end"><time>6:00 PM</time><div><b>Laptop closed</b><p>Nothing slipped. Nobody’s waiting on her. Dinner is, though.</p></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
 <section id="product">
   <div class="wrap">
     <div class="sec-h rev">
       <h2>Designed for people who work on the go.</h2>
-      <p>Most task tools are built for a desk. Keeper is built for the car, the site visit and the five minutes between calls.</p>
+      <p>Most task tools assume you’re sitting at a desk. You’re usually not. Keeper is built for the parking lot, the site visit and the five minutes between calls.</p>
+    </div>
+    <div class="moments">
+      <figure class="moment rev"><img class="photo " src="https://images.unsplash.com/photo-1758521962822-588389e13887?auto=format&fit=crop&w=900&q=70" alt="A man working from his car between appointments" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Between appointments</figcaption></figure>
+      <figure class="moment rev"><img class="photo " src="https://images.unsplash.com/photo-1769865562984-3be33b64632c?auto=format&fit=crop&w=900&q=70" alt="A young woman in a red hat working outdoors" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Wherever the work is</figcaption></figure>
+      <figure class="moment rev"><img class="photo " src="https://images.unsplash.com/photo-1595986630530-969786b19b4d?auto=format&fit=crop&w=900&q=70" alt="A woman laughing while looking at her phone" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>When a client says yes</figcaption></figure>
     </div>
     <div class="shots">
       <figure class="shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-voice.png" alt="Keeper voice capture screen with a large microphone button" loading="lazy"></div></div>
@@ -519,7 +572,7 @@
   <div class="wrap trust">
     <div class="sec-h trust-h rev" style="margin-bottom:0">
       <h2>You’re in control, and your data stays yours.</h2>
-      <p>Keeper reads to find tasks. Everything else happens on your terms.</p>
+      <p>Keeper reads to find tasks. It won’t send a thing without your say-so.</p>
     </div>
     <div class="rev">
       <div class="trust-list" style="margin-top:0">
@@ -595,7 +648,7 @@
       <h2>Three steps, then it’s hands-off.</h2>
     </div>
     <div class="steps">
-      <div class="step rev"><span class="k">1</span><h3>Connect your channels</h3><p>Turn on the inboxes, workspaces and calls you use. Clients can text a business number so your personal one stays private.</p>
+      <div class="step rev"><span class="k">1</span><h3>Connect your channels</h3><p>Turn on the inboxes, workspaces and calls you use. It takes about as long as making toast. Clients can text a business number so your personal one stays private.</p>
         <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-onb.png" alt="Choosing which channels Keeper tracks" loading="lazy"></div></div></div>
       <div class="step rev"><span class="k">2</span><h3>Review what Keeper found</h3><p>Every commitment lands with its client, due date and a link to the original message. Keep it or dismiss it.</p>
         <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-review.png" alt="Reviewing the tasks Keeper found, with Keep and Dismiss buttons" loading="lazy"></div></div></div>
@@ -609,7 +662,7 @@
   <div class="wrap">
     <div class="kept" id="kept">
       <div class="lines"><span>Promises <em>kept.</em></span><span>Clients <em>kept.</em></span><span>Weekends <em>kept.</em></span></div>
-      <p>Nothing you promised slips through, so the people who pay you come back, and your evenings stay yours.</p>
+      <p>Nothing slips through, your clients stay happy, and your evenings go back to being yours.</p>
       <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
     </div>
     <div class="meta"><span style="display:flex;align-items:center;gap:8px"><span class="mark" style="width:22px;height:22px;border-radius:6px" aria-hidden="true"></span>Keeper · every commitment, tracked.</span><span>Concept landing page for a prototype. Names and examples are illustrative.</span></div>
