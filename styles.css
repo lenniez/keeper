@@ -890,3 +890,8 @@ button.sort-note{color:var(--brand-ink);font-weight:600;text-decoration:underlin
 .m-tools .icon-btn .dot-badge{position:static;margin-left:2px;border:0;min-width:20px;height:20px}
 .splash-in{display:flex;flex-direction:column;align-items:center;gap:18px}
 .splash .wordmark{font-size:44px;color:var(--ink);animation:rise .6s .2s both}
+/* onboarding hero: "kept." carries the line */
+.onb h1 em{display:inline-block;font-size:2em;line-height:.9;margin-top:4px;color:var(--brand);letter-spacing:-.01em;padding:0 .08em .12em 0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M3 14C50 6 120 4 197 9' fill='none' stroke='%23B49CF5' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E") left bottom/100% .32em no-repeat;
+  animation:keptIn .7s .15s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes keptIn{from{opacity:0;transform:translateY(8px) scale(.94)}to{opacity:1;transform:none}}
