@@ -8,7 +8,7 @@ window.KEEPER_DATA = (function () {
     zoom:    { label: 'Zoom',    color: '#2D7FF9', desc: 'Zoom notes' },
     meet:    { label: 'Google Meet', color: '#0E8A7E', desc: 'Meet transcripts' },
     gcal:    { label: 'Google Calendar', color: '#1A73E8', desc: 'Free time and invites' },
-    keeper:  { label: 'Added by you', color: '#6E4BD8', desc: 'Tasks you add with the assistant' }
+    keeper:  { label: 'Added by you', color: '#17796C', desc: 'Tasks you add with the assistant' }
   };
 
   const PROJECTS = {
