@@ -63,6 +63,7 @@
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
     down: '<path d="M6 9l6 6 6-6"/>',
+    gcal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     clip: '<path d="M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
     link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.6v.3M12 17h.01"/>',
@@ -557,19 +558,19 @@
   }
   function sourcesHTML() {
     const keys = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'];
-    return `<div class="src-page"><section class="set-col"><h2 class="sec-h first">Channels</h2>${keys.map(k => {
-      const s = D.SOURCES[k], on = S.channels.includes(k);
-      const n = S.tasks.filter(t => t.source === k).length;
-      return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
-        ${srcIc(k)}
-        <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
-        <span class="tog" aria-hidden="true"></span></button>`;
-    }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p></section>
-      <section class="set-col"><h2 class="sec-h first">Assistant</h2>
-      <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>Assistant voice</b><span>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</span></span>${ic('chev')}</button>
+    return `<div class="src-page">
+      <section class="set-sec"><h2 class="sec-h first">Tracked channels</h2>
+      ${keys.map(k => {
+        const s = D.SOURCES[k], on = S.channels.includes(k);
+        return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
+          ${srcIc(k)}
+          <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
+          <span class="tog" aria-hidden="true"></span></button>`;
+      }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p></section>
+      <section class="set-sec"><h2 class="sec-h">Assistant voice</h2>
+      <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</b><span>The voice Keeper uses when you add tasks by voice</span></span>${ic('chev')}</button></section>
       ${agentSettings()}
-      <h2 class="sec-h">Account</h2>
-      <div class="chan acct"><img class="m-me" src="maya.svg" alt=""><span class="chan-txt"><b>Maya</b><span>maya@mayastudio.co</span></span></div></section></div>`;
+    </div>`;
   }
   const badge = id => `<span class="dot-badge" id="${id}" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span>`;
 
@@ -712,6 +713,7 @@
     outlook: { host: 'login.microsoftonline.com', who: 'Microsoft', perms: ['Read your mail', 'Keep access to data you’ve given it access to'], allow: 'Accept' },
     slack: { host: 'slack.com/oauth', who: 'Slack', perms: ['View messages in channels and DMs you’re part of', 'View basic info about people in the workspace'], allow: 'Allow', workspaces: ['Northwind Coffee', 'Halcyon Health', 'Brightside Studio'] },
     zoom: { host: 'zoom.us/oauth', who: 'Zoom', perms: ['View your cloud recordings and transcripts', 'View your scheduled meetings'], allow: 'Allow' },
+    gcal: { host: 'accounts.google.com', who: 'Google', perms: ['See your free and busy times', 'Create events and send invites from your calendar'], allow: 'Allow' },
     meet: { host: 'accounts.google.com', who: 'Google', perms: ['See Google Meet recordings and transcripts in your Drive', 'See your calendar events'], allow: 'Allow' }
   };
   const NUMBERS = ['(917) 555-0142', '(646) 555-0198', '(212) 555-0117'];
@@ -747,11 +749,11 @@
     const k = UI.sheet.k;
     if (k === 'sms') D.SOURCES.sms.number = NUMBERS[UI.sheet.pick || 0];
     UI.sheet.step = 'done'; renderLayer(true);
-    if (!S.channels.includes(k)) S.channels.push(k);
+    if (k === 'gcal') S.calendar = true; else if (!S.channels.includes(k)) S.channels.push(k);
     save();
     setTimeout(() => {
       closeSheet();
-      if (!S.onboarded) render(); else { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); refresh(); toast(srcIc(k) + 'Keeper is now listening to ' + esc(D.SOURCES[k].label)); }
+      if (!S.onboarded) render(); else { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); refresh(); if (k !== 'gcal') toast(srcIc(k) + 'Keeper is now listening to ' + esc(D.SOURCES[k].label)); }
     }, 900);
   }
 
@@ -832,13 +834,22 @@
     if (/^(send|share|reply|add|approve|update)\b/i.test(t.title)) return AG().draft === 'off' ? null : 'draft';
     return null;
   }
-  const agentTasks = () => S.tasks.filter(t => agentKind(t) && !(t.agent && t.agent.sent));
+  const agentTasks = () => S.tasks.filter(t => agentKind(t));
+  const calOn = () => S.calendar !== false;
+  const autoReply = () => AG().draft === 'auto';
+  const autoBook = () => AG().schedule === 'auto' && calOn();
+  /* what the agent has done (or would do) for a task right now */
+  function agentState(t) {
+    const k = agentKind(t), st = t.agent || {};
+    if (k === 'draft') return st.sent ? 'sent' : autoReply() ? 'autosent' : 'draft';
+    if (k === 'schedule') return st.booked != null ? 'booked' : st.sent ? 'timessent' : autoBook() && !st.manual ? 'autobooked' : 'times';
+    return null;
+  }
   function agentBadge(t) {
-    const k = agentKind(t); if (!k) return '';
-    const st = t.agent || {};
-    if (st.sent) return `<span class="ag-badge sent">${ic('check')}${k === 'schedule' ? 'Invite sent' : 'Sent'}</span>`;
-    const auto = k === 'draft' ? AG().draft === 'auto' : AG().schedule === 'auto';
-    return `<span class="ag-badge ${auto ? 'auto' : ''}">${ic('spark')}${auto ? 'Sending automatically' : k === 'schedule' ? 'Times ready' : 'Draft ready'}</span>`;
+    const s = agentState(t); if (!s) return '';
+    const B = { draft: ['', 'spark', 'Draft ready'], sent: ['sent', 'check', 'Reply sent'], autosent: ['auto', 'bolt', 'Replied automatically'],
+      times: ['', 'cal', 'Times ready'], timessent: ['sent', 'check', 'Times sent'], booked: ['sent', 'cal', 'Meeting booked'], autobooked: ['auto', 'cal', 'Booked automatically'] }[s];
+    return `<span class="ag-badge ${B[0]}">${ic(B[1])}${B[2]}</span>`;
   }
   /* turn the task into the object being delivered: "Send Jen the two logo options" -> "the two logo options" */
   function objectOf(t) {
@@ -882,44 +893,93 @@
     ((t.agent || {}).context || []).forEach(c => out.push({ ic: 'link', label: c.label }));
     return out;
   }
+  function meetInfo(t) {
+    const visit = /book|visit|shoot/i.test(t.title);
+    const what = /shoot/i.test(t.title) ? 'Office photoshoot' : visit ? 'Site visit' : /review/i.test(t.title) ? 'Design review' : 'Call';
+    return { title: projName(t.project) + ' · ' + what, mins: visit ? 60 : 30, where: /okafor/.test(t.project || '') ? 'Okafor Realty, 214 Bleecker St' : 'Google Meet link added' };
+  }
+  function slotRange(i, mins) {
+    const [n, time] = SLOTS[i], d = slotDate(n);
+    const [hm, ap] = time.split(' '); let [h, m] = hm.split(':').map(Number); if (ap === 'PM' && h !== 12) h += 12;
+    const end = new Date(d); end.setHours(h, m + mins);
+    const fmt = x => x.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(':00', '');
+    const start = new Date(d); start.setHours(h, m);
+    return { d, day: d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase(), date: d.getDate(), text: d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' }) + ' · ' + fmt(start) + '–' + fmt(end) };
+  }
+  function eventCard(t, i, auto) {
+    const m = meetInfo(t), r = slotRange(i, m.mins);
+    return `<div class="ev"><div class="ev-date"><b>${r.day}</b><span>${r.date}</span></div><div class="ev-txt"><b>${esc(m.title)}</b><span>${esc(r.text)}</span><span>${esc(m.where)}</span>
+      <span class="ev-meta">${ic('cal')}${auto ? 'Booked automatically · ' : ''}On your Google Calendar · Invite sent to ${esc(fn(t.requester))}</span></div></div>`;
+  }
+  function msgDetails(t, d, label) {
+    return `<details class="ag-msg"><summary>${esc(label)}</summary><div class="ag-to"><span>To</span>${av(t.requester)}${esc(personName(t.requester))} · ${esc(d.via)}</div><pre class="ag-body">${esc(((t.agent || {}).text) || d.body)}</pre></details>`;
+  }
   function agentBlock(t) {
     const k = agentKind(t); if (!k) return '';
-    const st = t.agent || {}, d = agentDraft(t), auto = k === 'draft' ? AG().draft === 'auto' : AG().schedule === 'auto';
-    if (st.sent) return `<section class="ag sent"><div class="ag-h">${ic('check')}<b>${k === 'schedule' ? 'Invite sent' : 'Sent'}</b><span>${esc(d.via)} · just now</span></div><pre class="ag-body">${esc(st.text || d.body)}</pre></section>`;
-    const slots = k === 'schedule' ? `<div class="ag-slots"><div class="fl">Proposed times · from your calendar</div>${SLOTS.map(([n, time], i) => `<button type="button" class="chip ${st.slot === i ? 'on' : ''}" data-action="ag-slot" data-i="${i}">${esc(slotLabel(n, time))}</button>`).join('')}</div>` : '';
+    const st = t.agent || {}, d = agentDraft(t), state = agentState(t);
+    const ctx = `<details class="ag-ctx"><summary>Based on ${d.context.length} sources</summary><ul>${d.context.map(c => `<li>${P[c.ic] ? (D.SOURCES[c.ic] ? srcIc(c.ic) : `<span class="src-ic">${ic(c.ic)}</span>`) : ''}${esc(c.label)}</li>`).join('')}</ul></details>`;
+    if (state === 'sent' || state === 'autosent') return `<section class="ag sent" id="agent"><div class="ag-h">${ic(state === 'autosent' ? 'bolt' : 'check')}<b>${state === 'autosent' ? 'Replied automatically' : 'Reply sent'}</b><span>${esc(d.via)} · just now</span></div>
+      <div class="ag-to"><span>To</span>${av(t.requester)}${esc(personName(t.requester))}</div><pre class="ag-body">${esc(st.text || d.body)}</pre>${ctx}
+      ${state === 'autosent' ? `<p class="ag-auto">${ic('bolt')}Sent in real time because “Reply automatically” is on. <button type="button" class="linkish" data-action="go-agent">Agent settings</button></p>` : ''}</section>`;
+    if (state === 'booked' || state === 'autobooked') {
+      const i = st.booked != null ? st.booked : 0;
+      return `<section class="ag sent" id="agent"><div class="ag-h">${ic('cal')}<b>${state === 'autobooked' ? 'Keeper booked the meeting' : 'Meeting booked'}</b><span>Google Calendar</span></div>
+        ${eventCard(t, i, state === 'autobooked')}${msgDetails(t, agentDraft(Object.assign({}, t, { agent: Object.assign({}, st, { slot: i }) })), 'Message sent with the invite')}
+        ${state === 'autobooked' ? `<p class="ag-auto">${ic('bolt')}Booked in your first open slot because “Book automatically” is on. <button type="button" class="linkish" data-action="go-agent">Agent settings</button></p>` : ''}
+        <div class="ag-tools"><button type="button" class="linkish" data-action="ag-unbook">Reschedule</button></div></section>`;
+    }
+    if (state === 'timessent') return `<section class="ag sent" id="agent"><div class="ag-h">${ic('check')}<b>Times sent</b><span>${esc(d.via)}</span></div><p class="ag-note">Keeper will book the meeting as soon as ${esc(fn(t.requester))} picks a time.</p>${msgDetails(t, d, 'Message sent')}</section>`;
+    if (k === 'schedule') {
+      const sel = st.slot == null ? 0 : st.slot, m = meetInfo(t);
+      if (!calOn()) return `<section class="ag" id="agent"><div class="ag-h">${ic('cal')}<b>Connect your calendar to book this</b></div><p class="ag-note">Keeper needs your calendar to find free time and send invites.</p><div class="ag-acts"><button type="button" class="btn-primary" data-action="cal-connect">Connect Google Calendar</button></div></section>`;
+      return `<section class="ag" id="agent">
+        <div class="ag-h">${ic('cal')}<b>Keeper found times on your calendar</b><span>Google Calendar</span></div>
+        <div class="ag-meet"><b>${esc(m.title)}</b><span>${m.mins} min · ${esc(m.where)}</span></div>
+        <div class="ag-slots" role="radiogroup" aria-label="Free times">${SLOTS.map((x, i) => `<button type="button" role="radio" aria-checked="${sel === i}" class="slot ${sel === i ? 'on' : ''}" data-action="ag-slot" data-i="${i}"><span class="radio"></span>${esc(slotRange(i, m.mins).text)}<small>Free</small></button>`).join('')}</div>
+        ${msgDetails(t, agentDraft(Object.assign({}, t, { agent: Object.assign({}, st, { slot: sel }) })), 'Invite message to ' + fn(t.requester))}
+        ${ctx}
+        <div class="ag-acts"><button type="button" class="btn-ghost" data-action="ag-sendtimes">Let ${esc(fn(t.requester))} pick</button><button type="button" class="btn-primary" data-action="ag-book">${ic('cal')}Book meeting</button></div>
+      </section>`;
+    }
     return `<section class="ag" id="agent">
-      <div class="ag-h">${ic('spark')}<b>${k === 'schedule' ? 'Keeper proposed times' : 'Keeper drafted a reply'}</b><span>${esc(d.via)}</span></div>
-      ${slots}
+      <div class="ag-h">${ic('spark')}<b>Keeper drafted a reply</b><span>${esc(d.via)}</span></div>
       <div class="ag-to"><span>To</span>${av(t.requester)}${esc(personName(t.requester))}</div>
       ${st.editing ? `<textarea class="ag-edit" aria-label="Edit draft">${esc(st.text || d.body)}</textarea>` : `<pre class="ag-body">${esc(st.text || d.body)}</pre>`}
       ${d.attach.length ? `<div class="ag-att">${d.attach.map(f => `<span class="att">${ic('clip')}${esc(f)}<small>from Drive</small></span>`).join('')}</div>` : ''}
-      <details class="ag-ctx"><summary>Based on ${d.context.length} sources</summary><ul>${d.context.map(c => `<li>${P[c.ic] ? (D.SOURCES[c.ic] ? srcIc(c.ic) : `<span class="src-ic">${ic(c.ic)}</span>`) : ''}${esc(c.label)}</li>`).join('')}</ul></details>
+      ${ctx}
       ${UI.addCtx === t.id ? `<form class="ag-add" data-tid="${t.id}"><input type="text" placeholder="Paste a link or doc name" aria-label="Add a link or document"><button type="submit" class="btn-ghost">Add</button></form>` : ''}
       <div class="ag-tools"><button type="button" class="linkish" data-action="ag-ctx">${ic('link')}Add link or doc</button><button type="button" class="linkish" data-action="ag-regen">${ic('spark')}Rewrite</button><button type="button" class="linkish" data-action="ag-edit">${st.editing ? 'Done editing' : 'Edit'}</button></div>
-      ${auto ? `<p class="ag-auto">${ic('bolt')}Keeper will send this at 5:00 PM unless you change it. <button type="button" class="linkish" data-action="go-agent">Agent settings</button></p>` : ''}
-      <div class="ag-acts"><button type="button" class="btn-ghost" data-action="ag-discard">Discard</button><button type="button" class="btn-primary" data-action="ag-send" ${k === 'schedule' && st.slot == null && AG().schedule !== 'auto' ? '' : ''}>${ic('send')}${k === 'schedule' ? (st.slot == null ? 'Send times' : 'Send invite') : d.via.startsWith('Reply') ? 'Send reply' : 'Send'}</button></div>
+      <div class="ag-acts"><button type="button" class="btn-ghost" data-action="ag-discard">Discard</button><button type="button" class="btn-primary" data-action="ag-send">${ic('send')}${d.via.startsWith('Reply') ? 'Send reply' : 'Send'}</button></div>
     </section>`;
   }
   function agentStrip() {
     const list = agentTasks(); if (!vision() || !list.length) return '';
-    const dr = list.filter(t => agentKind(t) === 'draft').length, sc = list.length - dr;
-    const txt = [dr ? `${dr} repl${dr === 1 ? 'y' : 'ies'} drafted` : '', sc ? `${sc} schedule${sc === 1 ? '' : 's'} proposed` : ''].filter(Boolean).join(' · ');
-    return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Keeper did the legwork</b><span>${txt}. Review and send.</span></span>${ic('chev')}</button>`;
+    const c = {}; list.forEach(t => { const s = agentState(t); c[s] = (c[s] || 0) + 1; });
+    const pl = (n, a, b) => n + ' ' + (n === 1 ? a : b);
+    const bits = [c.draft && pl(c.draft, 'reply drafted', 'replies drafted'), c.autosent && pl(c.autosent, 'reply sent automatically', 'replies sent automatically'),
+      c.times && pl(c.times, 'meeting ready to book', 'meetings ready to book'), (c.autobooked || 0) + (c.booked || 0) && pl((c.autobooked || 0) + (c.booked || 0), 'meeting booked', 'meetings booked')].filter(Boolean);
+    const todo = (c.draft || 0) + (c.times || 0);
+    return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Keeper did the legwork</b><span>${bits.join(' · ')}.${todo ? ' Review and send.' : ''}</span></span>${ic('chev')}</button>`;
   }
   function agentSettings() {
     if (!vision()) return '';
     const g = AG();
-    const opt = (key, v, label, sub) => `<button type="button" class="ag-opt ${g[key] === v ? 'on' : ''}" data-action="ag-set" data-k="${key}" data-v="${v}" aria-pressed="${g[key] === v}"><span class="radio"></span><span class="vt"><b>${label}</b><span>${sub}</span></span></button>`;
-    return `<h2 class="sec-h">Agent <span class="vis-tag">Vision</span></h2>
-      <div class="ag-set"><div class="fl">Replies and follow-ups</div>
-        ${opt('draft', 'off', 'Off', 'Keeper only lists tasks')}
-        ${opt('draft', 'review', 'Draft for my review', 'Keeper writes the reply; you send it')}
-        ${opt('draft', 'auto', 'Draft and send automatically', 'Sent at 5 PM unless you edit or stop it')}</div>
-      <div class="ag-set"><div class="fl">Meetings and visits</div>
+    const opt = (key, v, label, sub, dis) => `<button type="button" class="ag-opt ${g[key] === v ? 'on' : ''}" data-action="ag-set" data-k="${key}" data-v="${v}" aria-pressed="${g[key] === v}" ${dis ? 'disabled' : ''}><span class="radio"></span><span class="vt"><b>${label}</b><span>${sub}</span></span></button>`;
+    return `<section class="set-sec"><h2 class="sec-h">Agent <span class="vis-tag">Vision</span> <span class="crumb">›</span> General replies</h2>
+        <p class="sec-sub">How Keeper handles replies to emails, Slack and texts.</p>
+        ${opt('draft', 'off', 'Off', 'Keeper only tracks tasks')}
+        ${opt('draft', 'review', 'Draft for my review', 'Keeper writes the reply; you edit and send it')}
+        ${opt('draft', 'auto', 'Reply automatically', 'Send automatic replies in real time')}
+      </section>
+      <section class="set-sec"><h2 class="sec-h">Agent <span class="vis-tag">Vision</span> <span class="crumb">›</span> Scheduling</h2>
+        <p class="sec-sub">Keeper finds free time on your calendar, books the meeting and sends the invite.</p>
+        <div class="chan cal-row ${calOn() ? 'on' : ''}"><span class="src-ic" style="--c:#1A73E8">${ic('cal')}</span><span class="chan-txt"><b>Google Calendar</b><span>${calOn() ? 'Connected · maya@mayastudio.co' : 'Not connected'}</span></span>
+          <button type="button" class="${calOn() ? 'btn-ghost' : 'btn-primary'} cal-btn" data-action="${calOn() ? 'cal-disconnect' : 'cal-connect'}">${calOn() ? 'Disconnect' : 'Connect'}</button></div>
         ${opt('schedule', 'off', 'Off', 'No scheduling help')}
-        ${opt('schedule', 'suggest', 'Suggest times', 'Keeper proposes free slots; you confirm')}
-        ${opt('schedule', 'auto', 'Book automatically', 'Keeper sends invites for open slots')}</div>
-      <p class="note">Automatic actions only go to people you’ve worked with before, and every message is logged in the task.</p>`;
+        ${opt('schedule', 'suggest', 'Find times for me to book', 'Keeper picks free slots; you confirm with one tap')}
+        ${opt('schedule', 'auto', 'Book automatically', 'Keeper books the first free slot and sends the invite', !calOn())}
+      </section>
+      <p class="note">Automatic actions only go to people you’ve worked with before, and everything Keeper sends or books is logged on the task.</p>`;
   }
 
   /* ---------- sheets ---------- */
@@ -1245,7 +1305,7 @@
   let liveTimer = null;
   function scheduleLive() {
     clearTimeout(liveTimer);
-    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 60000);
+    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 120000);
   }
 
   /* ---------- toasts ---------- */
@@ -1363,7 +1423,12 @@
       case 'open-agent': openSheet({ type: 'task', id: a.dataset.id }); setTimeout(() => { const el = $('.sheet #agent'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 360); break;
       case 'ag-set': S.agent = Object.assign(AG(), { [a.dataset.k]: a.dataset.v }); save(); { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); } break;
       case 'go-agent': S.screen = 'sources'; UI.sheet = null; save(); render(); break;
-      case 'ag-slot': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { slot: (t.agent || {}).slot === +a.dataset.i ? null : +a.dataset.i, text: null }); save(); refresh(); renderLayer(true); break; }
+      case 'ag-slot': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { slot: +a.dataset.i, text: null }); save(); refresh(); renderLayer(true); break; }
+      case 'ag-book': { const t = task(tidOf(a)); const i = (t.agent || {}).slot || 0; t.agent = Object.assign({}, t.agent, { booked: i, slot: i }); if (t.status === 'upnext') t.status = 'inprogress'; save(); refresh(); renderLayer(true); toast('Added to your Google Calendar · invite sent to ' + esc(fn(t.requester)), { title: 'Meeting booked' }); break; }
+      case 'ag-sendtimes': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { sent: true, slot: null, text: null }); save(); refresh(); renderLayer(true); break; }
+      case 'ag-unbook': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { booked: null, sent: false, slot: 0, manual: true }); save(); refresh(); renderLayer(true); break; }
+      case 'cal-connect': startConnect('gcal'); break;
+      case 'cal-disconnect': S.calendar = false; save(); { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); } refresh(); break;
       case 'ag-regen': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { v: ((t.agent || {}).v || 0) + 1, text: null, editing: false }); save(); refresh(); renderLayer(true); break; }
       case 'ag-edit': { const t = task(tidOf(a)); const st = t.agent || {}; const ta = a.closest('.ag').querySelector('.ag-edit'); t.agent = Object.assign({}, st, { editing: !st.editing, text: ta ? ta.value : st.text }); save(); refresh(); renderLayer(true); const n = $('.ag-edit'); if (n) n.focus(); break; }
       case 'ag-ctx': { const id = tidOf(a); UI.addCtx = UI.addCtx === id ? null : id; refresh(); renderLayer(true); const i = $('.ag-add input'); if (i) i.focus(); break; }
