@@ -341,6 +341,7 @@
     device.style.transform = 'translate(-50%,-50%) scale(' + s.toFixed(4) + ')';
   }
   function render() {
+    applyAgent();
     setMode();
     UI.menu = null;
     if (!S.onboarded) app.innerHTML = renderOnboarding();
@@ -548,7 +549,7 @@
     if (sel) UI.feedSel = sel.id;
     const d = sel && taskDetail(sel);
     return `<div class="feed-split"><div class="feed-col">${body}</div>
-      <aside class="feed-detail" data-tid="${sel ? sel.id : ''}">${sel ? `<div class="fd-h">${spill(sel.triage ? 'triage' : sel.status)}</div><div class="fd-body">${d.body}</div><div class="fd-foot">${d.foot}</div>` : '<div class="empty">Select a task to see details</div>'}</aside></div>`;
+      <aside class="feed-detail" data-tid="${sel ? sel.id : ''}">${sel ? `<div class="fd-body">${d.body}</div><div class="fd-foot">${d.foot}</div>` : '<div class="empty">Select a task to see details</div>'}</aside></div>`;
   }
   /* title row for the Task Feed: live indicator plus a small link to channel settings */
   function feedHead() {
@@ -616,6 +617,7 @@
   /* refresh data-driven regions without touching inputs */
   function refresh() {
     if (!S.onboarded) return;
+    applyAgent();
     if (UI.drag && UI.drag.active) { UI.pending = true; return; }
     const b = $('#board'); if (b) b.classList.toggle('done-collapsed', !S.doneOpen); if (b) { const sl = b.scrollLeft; b.innerHTML = boardHTML(); b.scrollLeft = sl; }
     const mt = $('#mTabs'); if (mt) { const sl = mt.scrollLeft; mt.innerHTML = mTabsHTML(); mt.scrollLeft = sl; }
@@ -813,9 +815,9 @@
       ${ed === 'due' ? `<dd class="pop"><div class="duebox">${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
         <button type="button" class="chip ${!t.due ? 'on' : ''}" data-action="set-due" data-n="none">No date</button><input type="date" class="dueInput" value="${t.due || ''}" aria-label="Pick a date"></div></dd>` : ''}`;
     return {
-      body: `${origBlock(t)}
-          <h2 class="sh-title">${esc(t.title)}</h2>
+      body: `<h2 class="sh-title">${esc(t.title)}</h2>
           <dl class="fields">${statusRow}${dueRow}<dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
+          ${origBlock(t)}
           ${agentBlock(t)}`,
       foot: t.triage ? `<button class="btn-ghost" data-action="rv-dismiss">Dismiss</button><button class="btn-primary" data-action="rv-add">${ic('check')} Keep</button>`
         : t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`
@@ -823,11 +825,12 @@
   }
   /* ================= Vision: Keeper agent prepares the work ================= */
   const vision = () => S.scope === 'vision';
-  const AG = () => Object.assign({ draft: 'review', schedule: 'suggest' }, S.agent || {});
+  const AG = () => Object.assign({ draft: 'review', schedule: 'auto' }, S.agent || {});
   const SENDVIA = { gmail: 'Reply in the Gmail thread', outlook: 'Reply in the Outlook thread', slack: 'Reply in the Slack thread', sms: 'Text from your business line', zoom: 'Follow-up email', meet: 'Follow-up email', keeper: 'Email' };
   /* which tasks the agent can do the work for */
   function agentKind(t) {
-    if (!vision() || t.dismissed || t.triage || t.agentOff || t.status === 'done') return null;
+    if (!vision() || t.dismissed || t.triage || t.agentOff) return null;
+    if (t.status === 'done' && !(t.agent && (t.agent.booked != null || t.agent.sent))) return null;
     const client = t.requester && D.PEOPLE[t.requester] && D.PEOPLE[t.requester].role === 'client';
     if (!client) return null;
     if (/^(schedule|reschedule|book|set up)\b/i.test(t.title) || t.category === 'Scheduling') return AG().schedule === 'off' ? null : 'schedule';
@@ -841,9 +844,21 @@
   /* what the agent has done (or would do) for a task right now */
   function agentState(t) {
     const k = agentKind(t), st = t.agent || {};
-    if (k === 'draft') return st.sent ? 'sent' : autoReply() ? 'autosent' : 'draft';
-    if (k === 'schedule') return st.booked != null ? 'booked' : st.sent ? 'timessent' : autoBook() && !st.manual ? 'autobooked' : 'times';
+    if (k === 'draft') return st.sent ? (st.auto ? 'autosent' : 'sent') : 'draft';
+    if (k === 'schedule') return st.booked != null ? (st.auto ? 'autobooked' : 'booked') : st.sent ? 'timessent' : 'times';
     return null;
+  }
+  /* with automatic permissions on, Keeper actually does the work: books (task -> Done) or replies (task -> In Progress) */
+  function applyAgent() {
+    if (!vision() || !S.onboarded) return;
+    let changed = false;
+    S.tasks.forEach(t => {
+      const k = agentKind(t); if (!k || t.status === 'done') return;
+      const st = t.agent || {};
+      if (k === 'schedule' && autoBook() && st.booked == null && !st.sent && !st.manual) { t.agent = Object.assign({}, st, { booked: 0, slot: 0, auto: true }); t.status = 'done'; changed = true; }
+      if (k === 'draft' && autoReply() && !st.sent) { t.agent = Object.assign({}, st, { sent: true, auto: true }); if (t.status === 'upnext') t.status = 'inprogress'; changed = true; }
+    });
+    if (changed) save();
   }
   function agentBadge(t) {
     const s = agentState(t); if (!s) return '';
@@ -883,7 +898,7 @@
     const body = v === 0
       ? `Hi ${first},\n\nAs promised, here ${plural ? 'are' : 'is'} ${obj}.${also}\n\n${extra.length ? 'I’ve also included ' + extra.join(', ') + ' for reference.\n\n' : ''}Let me know if anything needs a tweak.${t.due && daysOut(t.due) > 1 ? ` I can turn changes around before ${due}.` : ''}\n\nBest,\nMaya`
       : `Hey ${first}! ${obj.charAt(0).toUpperCase() + obj.slice(1)} ${plural ? 'are' : 'is'} attached.${also}${extra.length ? ' Also linking ' + extra.join(', ') + '.' : ''} Shout if you want any changes.\n\nMaya`;
-    return { kind: k, body, via: SENDVIA[t.source], context: contextOf(t), attach: [fileName(t)] };
+    return { kind: k, body, via: SENDVIA[t.source], context: contextOf(t), attach: [] };
   }
   function contextOf(t) {
     const out = [{ ic: t.source, label: (D.SOURCES[t.source] || {}).label + ' message from ' + fn(t.requester) }];
@@ -957,7 +972,7 @@
     const c = {}; list.forEach(t => { const s = agentState(t); c[s] = (c[s] || 0) + 1; });
     const pl = (n, a, b) => n + ' ' + (n === 1 ? a : b);
     const bits = [c.draft && pl(c.draft, 'reply drafted', 'replies drafted'), c.autosent && pl(c.autosent, 'reply sent automatically', 'replies sent automatically'),
-      c.times && pl(c.times, 'meeting ready to book', 'meetings ready to book'), (c.autobooked || 0) + (c.booked || 0) && pl((c.autobooked || 0) + (c.booked || 0), 'meeting booked', 'meetings booked')].filter(Boolean);
+      c.times && pl(c.times, 'meeting ready to book', 'meetings ready to book'), (c.autobooked || 0) + (c.booked || 0) && pl((c.autobooked || 0) + (c.booked || 0), 'meeting booked and marked done', 'meetings booked and marked done')].filter(Boolean);
     const todo = (c.draft || 0) + (c.times || 0);
     return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Keeper did the legwork</b><span>${bits.join(' · ')}.${todo ? ' Review and send.' : ''}</span></span>${ic('chev')}</button>`;
   }
@@ -965,13 +980,13 @@
     if (!vision()) return '';
     const g = AG();
     const opt = (key, v, label, sub, dis) => `<button type="button" class="ag-opt ${g[key] === v ? 'on' : ''}" data-action="ag-set" data-k="${key}" data-v="${v}" aria-pressed="${g[key] === v}" ${dis ? 'disabled' : ''}><span class="radio"></span><span class="vt"><b>${label}</b><span>${sub}</span></span></button>`;
-    return `<section class="set-sec"><h2 class="sec-h">Agent <span class="vis-tag">Vision</span> <span class="crumb">›</span> General replies</h2>
+    return `<section class="set-sec"><h2 class="sec-h">Keeper Agent: General replies</h2>
         <p class="sec-sub">How Keeper handles replies to emails, Slack and texts.</p>
         ${opt('draft', 'off', 'Off', 'Keeper only tracks tasks')}
         ${opt('draft', 'review', 'Draft for my review', 'Keeper writes the reply; you edit and send it')}
         ${opt('draft', 'auto', 'Reply automatically', 'Send automatic replies in real time')}
       </section>
-      <section class="set-sec"><h2 class="sec-h">Agent <span class="vis-tag">Vision</span> <span class="crumb">›</span> Scheduling</h2>
+      <section class="set-sec"><h2 class="sec-h">Keeper Agent: Scheduling</h2>
         <p class="sec-sub">Keeper finds free time on your calendar, books the meeting and sends the invite.</p>
         <div class="chan cal-row ${calOn() ? 'on' : ''}"><span class="src-ic" style="--c:#1A73E8">${ic('cal')}</span><span class="chan-txt"><b>Google Calendar</b><span>${calOn() ? 'Connected · maya@mayastudio.co' : 'Not connected'}</span></span>
           <button type="button" class="${calOn() ? 'btn-ghost' : 'btn-primary'} cal-btn" data-action="${calOn() ? 'cal-disconnect' : 'cal-connect'}">${calOn() ? 'Disconnect' : 'Connect'}</button></div>
@@ -1421,19 +1436,19 @@
       case 'review': openSheet({ type: 'review' }); break;
       case 'agent-list': openSheet({ type: 'agents' }); break;
       case 'open-agent': openSheet({ type: 'task', id: a.dataset.id }); setTimeout(() => { const el = $('.sheet #agent'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 360); break;
-      case 'ag-set': S.agent = Object.assign(AG(), { [a.dataset.k]: a.dataset.v }); save(); { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); } break;
+      case 'ag-set': S.agent = Object.assign(AG(), { [a.dataset.k]: a.dataset.v }); save(); applyAgent(); { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); } break;
       case 'go-agent': S.screen = 'sources'; UI.sheet = null; save(); render(); break;
       case 'ag-slot': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { slot: +a.dataset.i, text: null }); save(); refresh(); renderLayer(true); break; }
-      case 'ag-book': { const t = task(tidOf(a)); const i = (t.agent || {}).slot || 0; t.agent = Object.assign({}, t.agent, { booked: i, slot: i }); if (t.status === 'upnext') t.status = 'inprogress'; save(); refresh(); renderLayer(true); toast('Added to your Google Calendar · invite sent to ' + esc(fn(t.requester)), { title: 'Meeting booked' }); break; }
+      case 'ag-book': { const t = task(tidOf(a)); const i = (t.agent || {}).slot || 0; t.agent = Object.assign({}, t.agent, { booked: i, slot: i }); t.status = 'done'; save(); refresh(); renderLayer(true); toast('Added to your Google Calendar · invite sent to ' + esc(fn(t.requester)), { title: 'Meeting booked' }); break; }
       case 'ag-sendtimes': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { sent: true, slot: null, text: null }); save(); refresh(); renderLayer(true); break; }
-      case 'ag-unbook': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { booked: null, sent: false, slot: 0, manual: true }); save(); refresh(); renderLayer(true); break; }
+      case 'ag-unbook': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { booked: null, sent: false, slot: 0, manual: true, auto: false }); if (t.status === 'done') t.status = 'inprogress'; save(); refresh(); renderLayer(true); break; }
       case 'cal-connect': startConnect('gcal'); break;
       case 'cal-disconnect': S.calendar = false; save(); { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); } refresh(); break;
       case 'ag-regen': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { v: ((t.agent || {}).v || 0) + 1, text: null, editing: false }); save(); refresh(); renderLayer(true); break; }
       case 'ag-edit': { const t = task(tidOf(a)); const st = t.agent || {}; const ta = a.closest('.ag').querySelector('.ag-edit'); t.agent = Object.assign({}, st, { editing: !st.editing, text: ta ? ta.value : st.text }); save(); refresh(); renderLayer(true); const n = $('.ag-edit'); if (n) n.focus(); break; }
       case 'ag-ctx': { const id = tidOf(a); UI.addCtx = UI.addCtx === id ? null : id; refresh(); renderLayer(true); const i = $('.ag-add input'); if (i) i.focus(); break; }
       case 'ag-discard': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { text: null, editing: false, v: 0, slot: null, context: [] }); S.agent = S.agent || {}; t.agentOff = true; save(); refresh(); renderLayer(true); break; }
-      case 'ag-send': { const t = task(tidOf(a)); const ta = a.closest('.ag').querySelector('.ag-edit'); const d = agentDraft(t); t.agent = Object.assign({}, t.agent, { sent: true, text: ta ? ta.value : (t.agent || {}).text || d.body, editing: false }); if (t.status === 'upnext' && d.kind === 'draft') t.status = 'inprogress'; save(); refresh(); renderLayer(true); toast((d.kind === 'schedule' ? 'Times sent to ' : 'Reply sent to ') + esc(personName(t.requester)), { title: 'Sent by Keeper' }); break; }
+      case 'ag-send': { const t = task(tidOf(a)); const ta = a.closest('.ag').querySelector('.ag-edit'); const d = agentDraft(t); t.agent = Object.assign({}, t.agent, { sent: true, text: ta ? ta.value : (t.agent || {}).text || d.body, editing: false }); if (t.status === 'upnext') t.status = 'inprogress'; save(); refresh(); renderLayer(true); toast((d.kind === 'schedule' ? 'Times sent to ' : 'Reply sent to ') + esc(personName(t.requester)), { title: 'Sent by Keeper' }); break; }
       case 'src-tab': UI.srcTab[tidOf(a)] = +a.dataset.i; UI.expand[tidOf(a)] = false; refresh(); if (UI.sheet) renderLayer(true); break;
       case 'f-due': toggleToken({ type: 'due', value: a.dataset.v, label: a.dataset.v === 'today' ? 'Due today' : 'Overdue' }); break;
       case 'f-clear': S.filter = { text: '', tokens: [] }; save(); render(); break;

@@ -881,3 +881,7 @@ button.sort-note{color:var(--brand-ink);font-weight:600;text-decoration:underlin
 .ag-auto .icon{vertical-align:-3px;margin-right:4px}
 .ag-auto .linkish{margin-left:4px}
 .set-sec .ag-opt,.set-sec .chan{max-width:100%}
+/* settings: every card spans the same width */
+.set-sec{align-items:stretch;width:100%}
+.set-sec > .chan,.set-sec > .ag-opt,.set-sec > .cal-row{width:100%;box-sizing:border-box}
+.device.is-desktop .src-page{width:100%}
