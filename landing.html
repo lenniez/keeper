@@ -500,6 +500,34 @@
   /* ---------- revision 10: teal → sea green CTAs ---------- */
   .btn.primary{background:linear-gradient(135deg,#127567 0%,#1C8F6B 100%);box-shadow:0 12px 24px -12px rgba(28,143,107,.7)}
   .btn.primary:hover{background:linear-gradient(135deg,#0F665A 0%,#18805F 100%)}
+  /* ---------- revision 11: gradient accent text, collage, Otter-style feature cards ---------- */
+  .hero h1 em,.sec-h h2 em{background:linear-gradient(100deg,#127567 0%,#1C8F6B 55%,#3FA98A 100%);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+  .kept .lines em{background:linear-gradient(100deg,#7CD3C2,#B9E6C9);-webkit-background-clip:text;background-clip:text;color:transparent!important}
+  .go-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:40px;align-items:center;margin-bottom:40px}
+  .go-head .sec-h h2{font-size:clamp(28px,3vw,40px)}
+  .collage{position:relative;height:340px}
+  .collage figure{position:absolute;margin:0;border-radius:18px;overflow:hidden;border:5px solid #fff;box-shadow:0 22px 40px -22px rgba(60,40,20,.45);background:linear-gradient(135deg,#FBE3D6,#DDF1EC)}
+  .collage figcaption{position:absolute;left:10px;bottom:10px;background:rgba(255,255,255,.92);border-radius:999px;padding:4px 10px;font-size:13px;font-weight:600}
+  .collage .c1{left:0;top:30px;width:54%;height:230px;transform:rotate(-3deg);z-index:1}
+  .collage .c2{right:0;top:0;width:44%;height:190px;transform:rotate(3deg);z-index:2}
+  .collage .c3{right:12%;bottom:0;width:46%;height:170px;transform:rotate(-1.5deg);z-index:3}
+  .feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .feat{position:relative;border-radius:28px;overflow:hidden;min-height:470px;padding:36px 36px 0;display:flex;flex-direction:column}
+  .feat.f1{grid-column:1 / -1;flex-direction:row;gap:32px;min-height:420px;padding-bottom:0;background:linear-gradient(140deg,#F2FAF7 0%,#DCF1EA 55%,#C9E9DF 100%)}
+  .feat.f2{background:linear-gradient(150deg,#FFF6EC 0%,#FBE6D6 60%,#F6D7C3 100%)}
+  .feat.f3{background:linear-gradient(150deg,#FBF4E2 0%,#F6E6C0 60%,#EED7A6 100%)}
+  .feat-txt{position:relative;z-index:2;max-width:440px}
+  .feat.f1 .feat-txt{flex:0 0 38%;align-self:center;padding-bottom:36px}
+  .feat h3{margin:6px 0 10px;font-size:clamp(24px,2.4vw,32px);letter-spacing:-.025em;line-height:1.1;font-weight:600}
+  .feat p{margin:0;font-size:17px;color:var(--ink-2)}
+  .crop{position:relative;margin-top:28px;margin-left:auto;width:88%;flex:1;min-height:300px;border:10px solid #0B0A0E;border-bottom:0;border-radius:34px 34px 0 0;background-color:var(--bg);background-image:var(--img);background-repeat:no-repeat;background-size:calc(var(--zoom)*100%) auto;background-position:var(--x) var(--y);box-shadow:0 30px 60px -30px rgba(30,20,60,.45)}
+  .crop{background-image:none!important;overflow:hidden}
+  .crop img{position:absolute;left:0;top:0;display:block;max-width:none;height:auto}
+  .crop::before{content:"";position:absolute;inset:-2px;border-radius:26px 26px 0 0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06);pointer-events:none}
+  .feat.f1 .crop{flex:1;margin-top:40px;width:auto;min-height:380px;margin-right:-10px}
+  .feat.f2 .crop,.feat.f3 .crop{margin-right:-36px}
+  @media (max-width:900px){.go-head{grid-template-columns:1fr}.feat-grid{grid-template-columns:1fr}.feat.f1{flex-direction:column}.feat.f1 .crop{align-self:stretch;margin:28px -24px 0 24px;min-height:300px;flex:none;height:320px}.collage figcaption{white-space:nowrap;font-size:12px}.feat.f1 .feat-txt{padding-bottom:0}.feat{padding:28px 24px 0;min-height:420px}.feat.f2 .crop,.feat.f3 .crop{margin-right:-24px}}
+  @media (max-width:520px){.collage{height:280px}.collage .c1{height:180px}.collage .c2{height:150px}.collage .c3{height:140px}}
 </style>
 </head>
 <body>
@@ -588,7 +616,7 @@
       </article>
     </div>
     <div class="what-shots">
-      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-feed.png" alt="The Task Feed showing new tasks from each channel" loading="lazy"></div></div><figcaption><b>Every channel feeds in</b>Gmail, Outlook, Slack, business texts, Zoom and Meet.</figcaption></figure>
+      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-settings.png" alt="Settings showing Gmail, Slack, business texts and Zoom connected" loading="lazy"></div></div><figcaption><b>Every channel feeds in</b>Gmail, Outlook, Slack, business texts, Zoom and Meet.</figcaption></figure>
       <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-board.png" alt="The Keeper board on a phone, with tasks sorted by due date" loading="lazy"></div></div><figcaption><b>Get one list</b>Every commitment, sorted by due date, with drafts ready to approve.</figcaption></figure>
     </div>
     <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
@@ -615,24 +643,48 @@
   </div>
 </section>
 
-<section id="product">
+<section id="setup" style="padding-top:24px">
   <div class="wrap">
     <div class="sec-h rev">
-      <h2>Designed for people who work on the go.</h2>
-      <p>Most task tools are built for a desk. Keeper is built for the car, the site visit and the five minutes between calls in your kitchen.</p>
+      <h2>Three steps, then it’s hands-off.</h2>
     </div>
-    <div class="moments">
-      <figure class="moment rev"><img class="photo " src="https://images.unsplash.com/photo-1758521962822-588389e13887?auto=format&fit=crop&w=900&q=70" alt="A man working from his car between appointments" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Between appointments</figcaption></figure>
-      <figure class="moment rev"><img class="photo " src="https://images.unsplash.com/photo-1769865562984-3be33b64632c?auto=format&fit=crop&w=900&q=70" alt="A young woman in a red hat working outdoors" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Wherever the work is</figcaption></figure>
-      <figure class="moment rev"><img class="photo " src="https://images.unsplash.com/photo-1595986630530-969786b19b4d?auto=format&fit=crop&w=900&q=70" alt="A woman laughing while looking at her phone" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>When a client says yes</figcaption></figure>
+    <div class="steps">
+      <div class="step rev"><span class="k">1</span><h3>Connect your channels</h3><p>Turn on the inboxes, workspaces and calls you use. It takes about as long as making toast. Clients can text a business number so your personal one stays private.</p>
+        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-onb.png" alt="Choosing which channels Keeper tracks" loading="lazy"></div></div></div>
+      <div class="step rev"><span class="k">2</span><h3>Review what Keeper found</h3><p>Every commitment lands with its client, due date and a link to the original message. Keep it or dismiss it.</p>
+        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-review.png" alt="Reviewing the tasks Keeper found, with Keep and Dismiss buttons" loading="lazy"></div></div></div>
+      <div class="step rev"><span class="k">3</span><h3>Approve the easy ones</h3><p>For routine replies and scheduling, Keeper prepares a draft or a booking. Approve it in one tap, or let it handle those on its own.</p>
+        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-draft.png" alt="A reply Keeper drafted, ready to send" loading="lazy"></div></div></div>
     </div>
-    <div class="shots">
-      <figure class="shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-voice.png" alt="Keeper voice capture screen with a large microphone button" loading="lazy"></div></div>
-        <figcaption><span class="tagline">Voice mode</span><b>Say it, don’t type it</b><span>Tap once and talk. Keeper turns a ramble into a clean task and reads it back.</span></figcaption></figure>
-      <figure class="shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-task.png" alt="A task showing the original email it came from" loading="lazy"></div></div>
-        <figcaption><span class="tagline">Pulled from your channels</span><b>See where every task came from</b><span>The exact line from the email, Slack or text, one tap from the original.</span></figcaption></figure>
-      <figure class="shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-board.png" alt="The Keeper board on a phone" loading="lazy"></div></div>
-        <figcaption><span class="tagline">Mobile first</span><b>Your day on one screen</b><span>Sorted by due date. Swipe right to finish a task.</span></figcaption></figure>
+  </div>
+</section>
+
+<section id="product">
+  <div class="wrap">
+    <div class="go-head">
+      <div class="sec-h rev" style="margin:0">
+        <h2>Designed for people who work on the go.</h2>
+        <p>Most task tools are built for a desk. Keeper is built for the car, the site visit and the five minutes between calls in your kitchen.</p>
+      </div>
+      <div class="collage rev" aria-label="People working on the go">
+        <figure class="c1"><img class="photo" src="https://images.unsplash.com/photo-1758521962822-588389e13887?auto=format&fit=crop&w=700&q=70" alt="A man working from his car between appointments" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Between appointments</figcaption></figure>
+        <figure class="c2"><img class="photo" src="https://images.unsplash.com/photo-1769865562984-3be33b64632c?auto=format&fit=crop&w=700&q=70" alt="A young woman in a red hat working outdoors" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Wherever the work is</figcaption></figure>
+        <figure class="c3"><img class="photo" src="https://images.unsplash.com/photo-1595986630530-969786b19b4d?auto=format&fit=crop&w=700&q=70" alt="A woman laughing while looking at her phone" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>When a client says yes</figcaption></figure>
+      </div>
+    </div>
+    <div class="feat-grid">
+      <article class="feat f1 rev">
+        <div class="feat-txt"><span class="tagline">Pulled from your channels</span><h3>See where every task came from</h3><p>The exact line from the email, Slack or text that created it, with the original one tap away.</p></div>
+        <div class="crop"><img src="img/m-task.png" alt="A task showing the original email it came from, with an Open in Gmail button" loading="lazy" style="width:100%;transform:translate(0%,-44%)"></div>
+      </article>
+      <article class="feat f2 rev">
+        <div class="feat-txt"><span class="tagline">Mobile first</span><h3>Your day on one screen</h3><p>Sorted by due date. Swipe right to finish a task.</p></div>
+        <div class="crop"><img src="img/m-board.png" alt="The Keeper list on a phone, with drafts ready to approve" loading="lazy" style="width:100%;transform:translate(0%,-8.5%)"></div>
+      </article>
+      <article class="feat f3 rev">
+        <div class="feat-txt"><span class="tagline">Voice mode</span><h3>Say it, don’t type it</h3><p>Tap once and talk. Keeper turns a ramble into a clean task and reads it back.</p></div>
+        <div class="crop"><img src="img/m-voice.png" alt="Keeper voice capture screen with a large microphone button" loading="lazy" style="width:100%;transform:translate(0%,-27%)"></div>
+      </article>
     </div>
     <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
   </div>
@@ -709,22 +761,6 @@
       <div class="stat rev"><b>6 hrs</b><span>saved per week, on average</span></div>
     </div>
     <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
-  </div>
-</section>
-
-<section id="setup" style="padding-top:24px">
-  <div class="wrap">
-    <div class="sec-h rev">
-      <h2>Three steps, then it’s hands-off.</h2>
-    </div>
-    <div class="steps">
-      <div class="step rev"><span class="k">1</span><h3>Connect your channels</h3><p>Turn on the inboxes, workspaces and calls you use. It takes about as long as making toast. Clients can text a business number so your personal one stays private.</p>
-        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-onb.png" alt="Choosing which channels Keeper tracks" loading="lazy"></div></div></div>
-      <div class="step rev"><span class="k">2</span><h3>Review what Keeper found</h3><p>Every commitment lands with its client, due date and a link to the original message. Keep it or dismiss it.</p>
-        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-review.png" alt="Reviewing the tasks Keeper found, with Keep and Dismiss buttons" loading="lazy"></div></div></div>
-      <div class="step rev"><span class="k">3</span><h3>Approve the easy ones</h3><p>For routine replies and scheduling, Keeper prepares a draft or a booking. Approve it in one tap, or let it handle those on its own.</p>
-        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-draft.png" alt="A reply Keeper drafted, ready to send" loading="lazy"></div></div></div>
-    </div>
   </div>
 </section>
 
