@@ -63,6 +63,7 @@
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
     down: '<path d="M6 9l6 6 6-6"/>',
+    shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
     gcal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     clip: '<path d="M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
     link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
@@ -376,6 +377,13 @@
         <span class="small">${decided < list.length ? 'Anything you skip now stays in To review.' : 'You can change these later.'}</span></div>
     </div></div>`;
   }
+  function privacyCard() {
+    return `<div class="priv"><div class="priv-h">${ic('shield')}<b>Your business stays yours</b></div>
+      <ul><li>${ic('check')}Your messages and client data are never used to train AI models, ours or anyone else’s.</li>
+      <li>${ic('check')}Encrypted in transit and at rest. Only you can see your board.</li>
+      <li>${ic('check')}Keeper reads to find tasks. It never sends anything without your permission.</li>
+      <li>${ic('check')}Disconnect a channel or delete everything, anytime, in one tap.</li></ul></div>`;
+  }
   function renderOnboarding() {
     const steps = n => '<div class="steps">' + [0, 1, 2, 3].map(i => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
     if (S.step === 0) return `<div class="onb"><div class="onb-inner">
@@ -388,7 +396,7 @@
       const keys = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'];
       const rows = keys.map(k => {
         const s = D.SOURCES[k], on = S.channels.includes(k);
-        const extra = k === 'sms' ? '<span class="num">New number: (917) 555-0142</span>' : '';
+        const extra = k === 'sms' ? '<span class="num">' + bizNum() + '</span>' : '';
         return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
           <span class="src-ic" style="--c:${s.color}">${ic(k)}</span>
           <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${extra}</span>
@@ -398,6 +406,7 @@
         <h2>Where do your tasks come from?</h2>
         <p class="lead">Pick the channels Keeper should listen to. You can change these anytime.</p>
         <div class="chan-list">${rows}</div>
+        ${privacyCard()}
         <div class="onb-foot"><button class="btn-primary" data-action="onb-next" ${S.channels.length ? '' : 'disabled'}>Connect ${S.channels.length} channel${S.channels.length === 1 ? '' : 's'}</button>
         <span class="small">Prototype: connections are simulated</span></div>
       </div></div>`;
@@ -565,7 +574,7 @@
         const s = D.SOURCES[k], on = S.channels.includes(k);
         return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
           ${srcIc(k)}
-          <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">(917) 555-0142</span>' : ''}</span>
+          <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">' + bizNum() + '</span>' : ''}</span>
           <span class="tog" aria-hidden="true"></span></button>`;
       }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p></section>
       <section class="set-sec"><h2 class="sec-h">Assistant voice</h2>
@@ -697,7 +706,7 @@
     }
     if (t.source === 'sms') {
       const inb = o.mine ? 'out' : 'in';
-      return `<div class="sv"><div class="sv-bar">${srcIc('sms')}${esc(otherName)} · Business texts (917) 555-0142<small>${esc(date)}</small></div><div class="sv-pad"><div class="tx">
+      return `<div class="sv"><div class="sv-bar">${srcIc('sms')}${esc(otherName)} · Business texts ${bizNum()}<small>${esc(date)}</small></div><div class="sv-pad"><div class="tx">
         <span class="ts">${esc(date)} · ${esc(time)}</span>
         <div class="b ${inb === 'in' ? 'out' : 'in'}">Hi ${o.mine ? '' : esc(first(otherName))}, quick check-in on ${esc(proj)}.</div>
         <div class="b ${inb}">${quote}</div>
@@ -722,6 +731,7 @@
     meet: { host: 'accounts.google.com', who: 'Google', perms: ['See Google Meet recordings and transcripts in your Drive', 'See your calendar events'], allow: 'Allow' }
   };
   const NUMBERS = ['(917) 555-0142', '(646) 555-0198', '(212) 555-0117'];
+  const bizNum = () => S.bizNum || NUMBERS[0];
   function connectHTML(k) {
     const st = UI.sheet.step, src = D.SOURCES[k], c = CONNECT[k];
     const close = `<button class="x" data-action="connect-cancel" aria-label="Cancel">${ic('x')}</button>`;
@@ -742,7 +752,7 @@
         <div class="cx-acct">${av('maya')}<span><b>Maya</b>maya@mayastudio.co</span></div>
         ${c.workspaces ? `<div><div class="fl">Workspaces</div><div class="cx-list">${c.workspaces.map(w => `<label class="cx-ws"><input type="checkbox" checked> ${esc(w)}</label>`).join('')}</div></div>` : ''}
         <div><div class="fl">This will let Keeper:</div><ul class="cx-perms">${c.perms.map(x => `<li>${ic('check')}${esc(x)}</li>`).join('')}</ul></div>
-        <p class="cx-note">This stands in for ${esc(c.who)}’s own permission page, which opens in the real product. Keeper only reads; it never sends or deletes anything.</p>
+        <p class="cx-note">This stands in for ${esc(c.who)}’s own permission page, which opens in the real product. Keeper only reads; it never sends or deletes anything. Your data is encrypted and never used to train AI models.</p>
       </div>
       <div class="sh-foot"><button class="btn-ghost" data-action="connect-cancel">Cancel</button><button class="btn-primary" data-action="connect-allow">${esc(c.allow)}</button></div>`;
   }
@@ -752,7 +762,7 @@
   }
   function finishConnect() {
     const k = UI.sheet.k;
-    if (k === 'sms') D.SOURCES.sms.number = NUMBERS[UI.sheet.pick || 0];
+    if (k === 'sms') S.bizNum = NUMBERS[UI.sheet.pick || 0];
     UI.sheet.step = 'done'; renderLayer(true);
     if (k === 'gcal') S.calendar = true; else if (!S.channels.includes(k)) S.channels.push(k);
     save();

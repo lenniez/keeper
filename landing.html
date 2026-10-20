@@ -160,6 +160,19 @@
   ul.ticks li{display:flex;gap:10px;align-items:flex-start;color:var(--ink-2)}
   ul.ticks svg{width:20px;height:20px;color:var(--brand);flex:none;margin-top:3px}
 
+  /* privacy */
+  .privacy{background:#fff;border-block:1px solid var(--line)}
+  .privs{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .pv{border:1px solid var(--line);border-radius:18px;padding:22px;background:var(--bg)}
+  .pv .ic{width:44px;height:44px;border-radius:12px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;margin-bottom:14px}
+  .pv .ic svg{width:22px;height:22px}
+  .pv h3{margin:0 0 6px;font-size:19px;letter-spacing:-.01em}
+  .pv p{margin:0;color:var(--ink-2);font-size:16px}
+  .promise{margin-top:28px;display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;border-radius:16px;padding:18px 22px;font-size:18px}
+  .promise svg{width:28px;height:28px;color:var(--brand-2);flex:none}
+  .promise em{color:var(--brand-2)}
+  @media (max-width:900px){.privs{grid-template-columns:1fr 1fr}}
+  @media (max-width:520px){.privs{grid-template-columns:1fr}}
   /* final */
   .final{text-align:center}
   .final h2{font-size:clamp(36px,5vw,60px);line-height:1.04;letter-spacing:-.03em;margin:0 0 16px;font-weight:600}
@@ -201,6 +214,7 @@
       <li><a href="#why">Why Keeper</a></li>
       <li><a href="#how">How it works</a></li>
       <li><a href="#control">You’re in control</a></li>
+      <li><a href="#privacy">Privacy</a></li>
     </ul>
     <a class="btn primary" href="index.html">Try Keeper</a>
   </div>
@@ -213,7 +227,7 @@
       <h1>Promises made.<br>Promises <em>kept.</em></h1>
       <p class="lead">Keeper listens across your email, Slack, texts and calls, catches every commitment you make, and gets the work started for you. You never type a task again.</p>
       <div class="ctas"><a class="btn primary" href="index.html">Try Keeper free</a><a class="btn ghost" href="#how">See how it works</a></div>
-      <p class="reassure">Connect your channels in about a minute. Keeper reads, and only sends what you allow.</p>
+      <p class="reassure">Connect your channels in about a minute. Your data is never used to train AI models.</p>
     </div>
     <div class="visual" aria-label="Messages from email, Slack, texts and calls becoming tasks on one board">
       <div class="stream" aria-hidden="true">
@@ -354,10 +368,27 @@
   </div>
 </section>
 
+<section class="privacy" id="privacy">
+  <div class="wrap">
+    <div class="sec-h rev">
+      <span class="eyebrow">Privacy</span>
+      <h2>Your client work is <em>yours to keep.</em></h2>
+      <p>Keeper reads your conversations so you don’t have to. That takes trust, so we built it to earn it.</p>
+    </div>
+    <div class="privs">
+      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Never used to train AI</h3><p>Your messages, files and client details are never used to train our models or anyone else’s. Our AI providers are contractually barred from it too.</p></div>
+      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><h3>Encrypted and private</h3><p>Data is encrypted in transit and at rest, and only you can see your board. No one at Keeper reads your messages.</p></div>
+      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><h3>Reads only what it needs</h3><p>Keeper scans for commitments and keeps just the snippet that created each task. It never sends, deletes or edits anything without your permission.</p></div>
+      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></div><h3>Leave anytime, take nothing with us</h3><p>Disconnect a channel and Keeper stops reading instantly. Delete your account and everything goes with it.</p></div>
+    </div>
+    <div class="promise rev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span>Our promise: your business information is <em>kept</em> private. It’s in the name.</span></div>
+  </div>
+</section>
+
 <section class="final" style="padding-top:24px">
   <div class="wrap rev">
     <h2>Your next promise is already in your inbox.<br><em>Let Keeper catch it.</em></h2>
-    <p>Set up takes about a minute. No tasks to type, ever.</p>
+    <p>Set up takes about a minute. No tasks to type, ever. Your data stays private.</p>
     <div class="ctas"><a class="btn primary" href="index.html">Try Keeper free</a><a class="btn ghost" href="#how">How it works</a></div>
   </div>
 </section>
