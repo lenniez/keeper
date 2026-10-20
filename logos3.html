@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keeper logo variations</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap">
+<style>
+  :root{--ink:#1E1B26;--ink-2:#5F596D;--line:#ECE9F1;--cream:#FCF8F3;--teal:#17796C;--sea:#1C8F6B;--tc:#BC4E2B;--mari:#E9A93A}
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 16px;background:var(--cream);font-family:"Instrument Sans",system-ui,sans-serif;color:var(--ink)}
+  h1{margin:0 0 4px;font-size:28px;letter-spacing:-.02em}
+  p.sub{margin:0 0 24px;color:var(--ink-2);font-size:16px;max-width:760px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1320px}
+  .opt{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+  .opt h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+  .num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;font-size:13px}
+  .tag{font-size:12px;font-weight:700;color:#0F5E54;background:#E2F4F1;border-radius:999px;padding:2px 8px}
+  .opt p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.4}
+  .row{display:flex;align-items:center;gap:16px}
+  .tile{width:88px;height:88px}
+  .small{display:flex;gap:10px;align-items:center}.small svg{width:32px;height:32px}.small .tiny{width:18px;height:18px}
+  .lockup{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:var(--cream)}
+  .lockup svg{width:30px;height:30px}
+  .lockup span{font-weight:700;font-size:26px;letter-spacing:-.035em;line-height:1}
+  .lockup.dark{background:#1E1B26;color:#fff}
+</style>
+</head>
+<body>
+<h1>Keeper logo variations</h1>
+<p class="sub">The jar mark redrawn in the new brand system: teal and sea green as the core, marigold for warmth, cream and ink as the ground. Each is shown as an app icon, at small sizes, and with the wordmark on light and dark.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gTeal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#127567"/><stop offset="1" stop-color="#1C8F6B"/></linearGradient>
+    <symbol id="jar" viewBox="0 0 120 120"><rect x="42" y="20" width="36" height="10" rx="4"/><path d="M44 34h32v4c10 4 14 12 14 22v22a12 12 0 0 1-12 12H42a12 12 0 0 1-12-12V60c0-10 4-18 14-22z"/></symbol>
+    <!-- 1 Teal gradient tile, cream jar, marigold dots -->
+    <symbol id="v1" viewBox="0 0 120 120"><rect width="120" height="120" rx="30" fill="url(#gTeal)"/><g fill="#FCF8F3"><use href="#jar"/></g><g fill="#E9A93A"><circle cx="50" cy="76" r="7"/><circle cx="70" cy="76" r="7"/><circle cx="60" cy="61" r="7"/></g></symbol>
+    <!-- 2 Flat teal tile, white jar, teal dots (current, refined) -->
+    <symbol id="v2" viewBox="0 0 120 120"><rect width="120" height="120" rx="30" fill="#17796C"/><g fill="#fff"><use href="#jar"/></g><g fill="#17796C"><circle cx="50" cy="76" r="7"/><circle cx="70" cy="76" r="7"/><circle cx="60" cy="61" r="7"/></g></symbol>
+    <!-- 3 Cream tile, teal jar, tri-color dots (one per channel family) -->
+    <symbol id="v3" viewBox="0 0 120 120"><rect width="120" height="120" rx="30" fill="#FCF8F3"/><rect x=".75" y=".75" width="118.5" height="118.5" rx="29.5" fill="none" stroke="#E6E1D9" stroke-width="1.5"/><g fill="url(#gTeal)"><use href="#jar"/></g><circle cx="50" cy="76" r="7" fill="#E9A93A"/><circle cx="70" cy="76" r="7" fill="#F2C97C"/><circle cx="60" cy="61" r="7" fill="#FCF8F3"/></symbol>
+    <!-- 4 Marigold tile, ink jar, cream dots: warmest -->
+    <symbol id="v4" viewBox="0 0 120 120"><rect width="120" height="120" rx="30" fill="#E9A93A"/><g fill="#1E1B26"><use href="#jar"/></g><g fill="#E9A93A"><circle cx="50" cy="76" r="7"/><circle cx="70" cy="76" r="7"/><circle cx="60" cy="61" r="7"/></g></symbol>
+    <!-- 5 Ink tile, sea-green jar, marigold dots: night mode -->
+    <symbol id="v5" viewBox="0 0 120 120"><rect width="120" height="120" rx="30" fill="#1E1B26"/><g fill="#2AA083"><use href="#jar"/></g><g fill="#1E1B26"><circle cx="50" cy="76" r="7"/><circle cx="70" cy="76" r="7"/></g><circle cx="60" cy="61" r="7" fill="#E9A93A"/></symbol>
+    <!-- 6 Tile-less: gradient jar with check in the middle (task done) -->
+    <symbol id="v6" viewBox="0 0 120 120"><g fill="url(#gTeal)"><use href="#jar"/></g><path d="M47 68l9 9 17-18" fill="none" stroke="#FCF8F3" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+<div class="grid" id="g"></div>
+<script>
+  const O=[
+    ['v1','Teal gradient + marigold','The CTA gradient as the tile, cream jar, three marigold “tasks” inside. Ties the logo to the buttons; the marigold adds warmth.','Recommended'],
+    ['v2','Flat teal','The current mark, cleaned up. Simple and calm, but a little plain next to the gradient buttons.'],
+    ['v3','Cream tile, teal jar','Light and paper-like, with three different dots for different channels. Friendliest; needs an outline on white backgrounds.'],
+    ['v4','Marigold tile','The warmest and most optimistic. Stands out on a home screen, but drifts away from teal as the core color.'],
+    ['v5','Ink tile (dark)','Premium and confident; the one marigold dot is the “new task” just caught. Good for dark mode and app stores.'],
+    ['v6','Jar with a check, no tile','The jar alone with a check inside: “kept and done”. Works as a favicon and in-line mark, less as an app icon.']
+  ];
+  const use=(id,c)=>`<svg class="${c||''}" viewBox="0 0 120 120"><use href="#${id}"/></svg>`;
+  document.getElementById('g').innerHTML=O.map(([id,n,d,t],i)=>`<section class="opt">
+    <h2><span class="num">${i+1}</span>${n}${t?` <span class="tag">${t}</span>`:''}</h2>
+    <div class="row">${use(id,'tile')}<div class="small">${use(id)}${use(id,'tiny')}</div></div>
+    <div class="lockup">${use(id)}<span>keeper</span></div>
+    <div class="lockup dark">${use(id)}<span>keeper</span></div>
+    <p>${d}</p></section>`).join('');
+</script>
+</body>
+</html>

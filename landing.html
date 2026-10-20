@@ -528,6 +528,19 @@
   .feat.f2 .crop,.feat.f3 .crop{margin-right:-36px}
   @media (max-width:900px){.go-head{grid-template-columns:1fr}.feat-grid{grid-template-columns:1fr}.feat.f1{flex-direction:column}.feat.f1 .crop{align-self:stretch;margin:28px -24px 0 24px;min-height:300px;flex:none;height:320px}.collage figcaption{white-space:nowrap;font-size:12px}.feat.f1 .feat-txt{padding-bottom:0}.feat{padding:28px 24px 0;min-height:420px}.feat.f2 .crop,.feat.f3 .crop{margin-right:-24px}}
   @media (max-width:520px){.collage{height:280px}.collage .c1{height:180px}.collage .c2{height:150px}.collage .c3{height:140px}}
+  /* ---------- revision 12 ---------- */
+  .hero h1{font-size:clamp(38px,4.6vw,60px)}
+  .tl::before{left:87px}
+  @media (max-width:520px){.tl::before{left:69px}}
+  /* compact feature cards: four across, icon beside title */
+  #what .diffs{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  #what .diff{padding:20px;border-radius:18px}
+  #what .diff .ic{width:36px;height:36px;border-radius:10px;margin-bottom:12px}
+  #what .diff .ic svg{width:19px;height:19px}
+  #what .diff h3{font-size:17px;margin:0 0 6px;letter-spacing:-.01em;line-height:1.25}
+  #what .diff p{font-size:15px;line-height:1.45}
+  @media (max-width:1000px){#what .diffs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:520px){#what .diffs{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -551,7 +564,7 @@
 <header class="hero" id="top">
   <div class="wrap">
     <div>
-      <h1>A to-do list that <em>updates itself.</em></h1>
+      <h1>The only to-do list that <em>updates itself.</em></h1>
       <p class="lead">Keeper turns your email, Slack, texts and calls into one to-do list, and handles the simple tasks for you. Built for freelancers, consultants and independent agents.</p>
       <div class="ctas"><a class="btn primary" href="index.html">Try Keeper free</a><a class="btn ghost" href="#setup">How to set it up</a></div>
     </div>
@@ -667,9 +680,9 @@
         <p>Most task tools are built for a desk. Keeper is built for the car, the site visit and the five minutes between calls in your kitchen.</p>
       </div>
       <div class="collage rev" aria-label="People working on the go">
-        <figure class="c1"><img class="photo" src="https://images.unsplash.com/photo-1758521962822-588389e13887?auto=format&fit=crop&w=700&q=70" alt="A man working from his car between appointments" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Between appointments</figcaption></figure>
-        <figure class="c2"><img class="photo" src="https://images.unsplash.com/photo-1769865562984-3be33b64632c?auto=format&fit=crop&w=700&q=70" alt="A young woman in a red hat working outdoors" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>Wherever the work is</figcaption></figure>
-        <figure class="c3"><img class="photo" src="https://images.unsplash.com/photo-1595986630530-969786b19b4d?auto=format&fit=crop&w=700&q=70" alt="A woman laughing while looking at her phone" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"><figcaption>When a client says yes</figcaption></figure>
+        <figure class="c1"><img class="photo" src="https://images.unsplash.com/photo-1758521962822-588389e13887?auto=format&fit=crop&w=700&q=70" alt="A man working from his car between appointments" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"></figure>
+        <figure class="c2"><img class="photo" src="https://images.unsplash.com/photo-1769865562984-3be33b64632c?auto=format&fit=crop&w=700&q=70" alt="A young woman in a red hat working outdoors" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"></figure>
+        <figure class="c3"><img class="photo" src="https://images.unsplash.com/photo-1595986630530-969786b19b4d?auto=format&fit=crop&w=700&q=70" alt="A woman laughing while looking at her phone" loading="lazy" onerror="this.classList.add(&quot;broken&quot;)"></figure>
       </div>
     </div>
     <div class="feat-grid">
@@ -679,7 +692,7 @@
       </article>
       <article class="feat f2 rev">
         <div class="feat-txt"><span class="tagline">Mobile first</span><h3>Your day on one screen</h3><p>Sorted by due date. Swipe right to finish a task.</p></div>
-        <div class="crop"><img src="img/m-board.png" alt="The Keeper list on a phone, with drafts ready to approve" loading="lazy" style="width:100%;transform:translate(0%,-8.5%)"></div>
+        <div class="crop"><img src="img/m-board.png" alt="The Keeper list on a phone, with drafts ready to approve" loading="lazy" style="width:72%;left:14%;transform:translate(0%,-32.8%)"></div>
       </article>
       <article class="feat f3 rev">
         <div class="feat-txt"><span class="tagline">Voice mode</span><h3>Say it, don’t type it</h3><p>Tap once and talk. Keeper turns a ramble into a clean task and reads it back.</p></div>
