@@ -541,6 +541,19 @@
   #what .diff p{font-size:15px;line-height:1.45}
   @media (max-width:1000px){#what .diffs{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media (max-width:520px){#what .diffs{grid-template-columns:1fr}}
+  /* hero sources: full single-line requests */
+  .flow .src{width:auto;max-width:none;padding:9px 14px 9px 10px}
+  .flow .src .st span{overflow:visible;text-overflow:clip;white-space:nowrap}
+  .flow .board{left:56%}
+  @media (max-width:600px){
+    .flow{height:auto!important;aspect-ratio:auto;display:flex;flex-direction:column;gap:8px}
+    .flow .wires{display:none}
+    .flow .src{position:static;transform:none;width:auto;align-self:flex-start}
+    .flow .src:nth-of-type(even){align-self:flex-end}
+    .flow .src .st span{display:block}
+    .flow .board{position:relative;left:auto;right:auto;top:auto;transform:none;width:100%;margin-top:10px}
+    .flow .board::before{content:"↓";position:absolute;top:-26px;left:50%;color:var(--brand-2);font-weight:700}
+  }
 </style>
 </head>
 <body>
@@ -572,7 +585,7 @@
       <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <path d="M38 13 C46 13,44 38,52 40"/><path d="M38 37 C46 37,46 42,52 44"/><path d="M38 61 C46 61,46 50,52 48"/><path d="M38 85 C46 85,44 56,52 52"/>
       </svg>
-<div class="src s1"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M6 38h7V22L4 15v20a3 3 0 0 0 2 3z"/><path fill="#34A853" d="M35 38h7a3 3 0 0 0 2-3V15l-9 7z"/><path fill="#FBBC04" d="M35 11v11l9-7v-3c0-3.7-4.2-5.8-7.2-3.6z"/><path fill="#EA4335" d="M13 22V11l11 8.3L35 11v11l-11 8.3z"/><path fill="#C5221F" d="M4 12v3l9 7V11l-1.8-1.6C8.2 7.2 4 9.3 4 12z"/></svg></span><span class="st"><b>Email · Jen</b><span>Can you send the logo options?</span></span></div><div class="src s2"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#34C759"/><path fill="#fff" d="M24 12c-7.7 0-14 5-14 11.2 0 3.6 2.1 6.8 5.4 8.8L14 37l6.2-3.3c1.2.3 2.5.5 3.8.5 7.7 0 14-5 14-11.2S31.7 12 24 12z"/></svg></span><span class="st"><b>Text · Tomi</b><span>When can you see the space?</span></span></div><div class="src s3"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#E01E5A" d="M14 29a4 4 0 1 1-4-4h4zm2 0a4 4 0 0 1 8 0v10a4 4 0 0 1-8 0z"/><path fill="#36C5F0" d="M20 14a4 4 0 1 1 4-4v4zm0 2a4 4 0 0 1 0 8H10a4 4 0 0 1 0-8z"/><path fill="#2EB67D" d="M34 20a4 4 0 1 1 4 4h-4zm-2 0a4 4 0 0 1-8 0V10a4 4 0 0 1 8 0z"/><path fill="#ECB22E" d="M28 34a4 4 0 1 1-4 4v-4zm0-2a4 4 0 0 1 0-8h10a4 4 0 0 1 0 8z"/></svg></span><span class="st"><b>Slack · Dana</b><span>Final guidelines PDF this week?</span></span></div><div class="src s4"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#0B5CFF"/><rect x="10" y="16" width="19" height="16" rx="4" fill="#fff"/><path fill="#fff" d="M31 21.5l7-4.5v14l-7-4.5z"/></svg></span><span class="st"><b>Zoom call · you</b><span>“I’ll send Raj a timeline.”</span></span></div>
+<div class="src s1"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M6 38h7V22L4 15v20a3 3 0 0 0 2 3z"/><path fill="#34A853" d="M35 38h7a3 3 0 0 0 2-3V15l-9 7z"/><path fill="#FBBC04" d="M35 11v11l9-7v-3c0-3.7-4.2-5.8-7.2-3.6z"/><path fill="#EA4335" d="M13 22V11l11 8.3L35 11v11l-11 8.3z"/><path fill="#C5221F" d="M4 12v3l9 7V11l-1.8-1.6C8.2 7.2 4 9.3 4 12z"/></svg></span><span class="st"><b>Email · Jen</b><span>Can you send the logo options?</span></span></div><div class="src s2"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#34C759"/><path fill="#fff" d="M24 12c-7.7 0-14 5-14 11.2 0 3.6 2.1 6.8 5.4 8.8L14 37l6.2-3.3c1.2.3 2.5.5 3.8.5 7.7 0 14-5 14-11.2S31.7 12 24 12z"/></svg></span><span class="st"><b>Text · Tomi</b><span>When can you see the space?</span></span></div><div class="src s3"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#E01E5A" d="M14 29a4 4 0 1 1-4-4h4zm2 0a4 4 0 0 1 8 0v10a4 4 0 0 1-8 0z"/><path fill="#36C5F0" d="M20 14a4 4 0 1 1 4-4v4zm0 2a4 4 0 0 1 0 8H10a4 4 0 0 1 0-8z"/><path fill="#2EB67D" d="M34 20a4 4 0 1 1 4 4h-4zm-2 0a4 4 0 0 1-8 0V10a4 4 0 0 1 8 0z"/><path fill="#ECB22E" d="M28 34a4 4 0 1 1-4 4v-4zm0-2a4 4 0 0 1 0-8h10a4 4 0 0 1 0 8z"/></svg></span><span class="st"><b>Slack · Dana</b><span>Final PDF this week?</span></span></div><div class="src s4"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#0B5CFF"/><rect x="10" y="16" width="19" height="16" rx="4" fill="#fff"/><path fill="#fff" d="M31 21.5l7-4.5v14l-7-4.5z"/></svg></span><span class="st"><b>Zoom call · you</b><span>“I’ll send Raj a timeline.”</span></span></div>
       <div class="board">
         <div class="board-h"><span class="mark" style="width:24px;height:24px;border-radius:7px" aria-hidden="true"></span>Up Next<span class="live"><span class="dot"></span>Live</span></div>
         <div class="task"><span class="t">Send Jen the logo options</span><span class="badge">✦ Draft ready</span><span class="meta">Northwind · Email<span class="due">Today</span></span></div>
