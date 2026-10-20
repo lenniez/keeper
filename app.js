@@ -1406,7 +1406,7 @@
       case 'scope': S.scope = a.dataset.scope; save(); UI.sheet = null; render(); break;
       case 'about': $('#about').hidden = false; break;
       case 'about-close': $('#about').hidden = true; break;
-      case 'reset': try { localStorage.removeItem(STORE); } catch (err) {} const sc = S.scope; S = fresh(); S.scope = sc; UI.sheet = null; render(); toast('Demo reset'); break;
+      case 'reset': try { localStorage.removeItem(STORE); } catch (err) {} const sc = S.scope; S = fresh(); S.scope = sc; UI.sheet = null; render(); break;
       case 'onb-next':
         if (S.step < 2) { S.step++; save(); render(); }
         if (S.step === 2) setTimeout(() => {
