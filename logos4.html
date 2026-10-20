@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keeper logo explorations</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap">
+<style>
+  :root{--ink:#1E1B26;--ink-2:#5F596D;--line:#ECE9F1;--cream:#FCF8F3}
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 16px;background:var(--cream);font-family:"Instrument Sans",system-ui,sans-serif;color:var(--ink)}
+  h1{margin:0 0 4px;font-size:28px;letter-spacing:-.02em}
+  p.sub{margin:0 0 24px;color:var(--ink-2);font-size:16px;max-width:780px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1320px}
+  .opt{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+  .opt h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+  .num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;font-size:13px}
+  .tag{font-size:12px;font-weight:700;color:#0F5E54;background:#E2F4F1;border-radius:999px;padding:2px 8px}
+  .opt p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.4}
+  .row{display:flex;align-items:center;gap:16px}
+  .tile{width:88px;height:88px}
+  .small{display:flex;gap:10px;align-items:center}.small svg{width:32px;height:32px}.small .tiny{width:18px;height:18px}
+  .lockup{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:var(--cream)}
+  .lockup svg{width:30px;height:30px}
+  .lockup span{font-weight:700;font-size:26px;letter-spacing:-.035em;line-height:1}
+  .lockup.dark{background:#1E1B26;color:#fff}
+</style>
+</head>
+<body>
+<h1>Keeper logo explorations</h1>
+<p class="sub">Five looser takes on “many things caught and kept in one place”, each using at least two brand colors and a gradient. Shown as an app icon, at favicon size, and with the wordmark on light and dark.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="tealSea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0F665A"/><stop offset="1" stop-color="#2AA083"/></linearGradient>
+    <linearGradient id="seaMari" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#127567"/><stop offset=".6" stop-color="#3FA98A"/><stop offset="1" stop-color="#E9C25A"/></linearGradient>
+    <linearGradient id="mariPeach" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F2C063"/><stop offset="1" stop-color="#E98A55"/></linearGradient>
+    <linearGradient id="sunrise" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#127567"/><stop offset=".55" stop-color="#2AA083"/><stop offset="1" stop-color="#F2C063"/></linearGradient>
+    <radialGradient id="glow" cx=".72" cy=".25" r=".7"><stop offset="0" stop-color="#F2C063" stop-opacity=".95"/><stop offset="1" stop-color="#F2C063" stop-opacity="0"/></radialGradient>
+
+    <!-- A: Orbit catch. Three dots spiral into a gradient ring (the jar seen from above) -->
+    <symbol id="a" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="url(#tealSea)"/>
+      <rect width="120" height="120" rx="30" fill="url(#glow)"/>
+      <circle cx="60" cy="62" r="27" fill="none" stroke="#FCF8F3" stroke-width="9"/>
+      <circle cx="60" cy="62" r="9" fill="#FCF8F3"/>
+      <circle cx="91" cy="31" r="6" fill="#FCF8F3" opacity=".9"/><circle cx="101" cy="45" r="4" fill="#FCF8F3" opacity=".6"/><circle cx="80" cy="20" r="3.5" fill="#FCF8F3" opacity=".45"/>
+    </symbol>
+
+    <!-- B: k-jar. A lowercase k whose bowl is a jar, gradient fill -->
+    <symbol id="b" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#FCF8F3"/>
+      <rect x="26" y="18" width="15" height="84" rx="7.5" fill="url(#tealSea)"/>
+      <path d="M38 66L80 26" stroke="url(#tealSea)" stroke-width="15" stroke-linecap="round"/>
+      <rect x="58" y="56" width="22" height="7" rx="3.5" fill="#E98A55"/>
+      <path d="M58 66h22v2c7 3 11 9 11 16v6a12 12 0 0 1-12 12H59a12 12 0 0 1-12-12v-6c0-7 4-13 11-16z" fill="url(#mariPeach)"/>
+      <circle cx="63" cy="88" r="4.5" fill="#FCF8F3"/><circle cx="75" cy="88" r="4.5" fill="#FCF8F3"/><circle cx="69" cy="79" r="4.5" fill="#FCF8F3"/>
+    </symbol>
+
+    <!-- C: Sunrise jar. Jar silhouette cut out of a teal→marigold sky; the dots rise like a sun -->
+    <symbol id="c" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="url(#sunrise)"/>
+      <path d="M42 20h36a4 4 0 0 1 0 8H42a4 4 0 0 1 0-8zM44 34h32v4c10 4 14 12 14 22v22a12 12 0 0 1-12 12H42a12 12 0 0 1-12-12V60c0-10 4-18 14-22z" fill="#FCF8F3" opacity=".96"/>
+      <path d="M30 80h60v2a12 12 0 0 1-12 12H42a12 12 0 0 1-12-12z" fill="#2AA083" opacity=".35"/>
+      <circle cx="60" cy="70" r="14" fill="url(#mariPeach)"/>
+      <path d="M38 66h8M74 66h8" stroke="#E9A93A" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- D: Stacked cards dropping into a gradient tray -->
+    <symbol id="d" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="#1E1B26"/>
+      <rect x="40" y="22" width="40" height="14" rx="7" fill="#E9A93A" transform="rotate(-8 60 29)"/>
+      <rect x="34" y="40" width="52" height="14" rx="7" fill="#F2C97C" transform="rotate(5 60 47)"/>
+      <rect x="30" y="58" width="60" height="14" rx="7" fill="#FCF8F3"/>
+      <path d="M22 66v12a16 16 0 0 0 16 16h44a16 16 0 0 0 16-16V66" fill="none" stroke="url(#seaMari)" stroke-width="9" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- E: Speech bubble jar. Messages become a kept task: bubble outline with a jar lid and a check -->
+    <symbol id="e" viewBox="0 0 120 120">
+      <rect width="120" height="120" rx="30" fill="url(#seaMari)"/>
+      <rect x="44" y="22" width="32" height="9" rx="4.5" fill="#FCF8F3"/>
+      <path d="M36 36h48a12 12 0 0 1 12 12v26a12 12 0 0 1-12 12H58l-14 11v-11h-8a12 12 0 0 1-12-12V48a12 12 0 0 1 12-12z" fill="#FCF8F3"/>
+      <path d="M45 61l10 10 20-21" fill="none" stroke="url(#tealSea)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+<div class="grid" id="g"></div>
+<script>
+  const O=[
+    ['a','Orbit catch','The jar seen from above: a ring with something safely in the middle, and smaller dots spiraling in to be caught. Teal tile with a marigold glow. Very ownable and great in motion.','Recommended'],
+    ['b','k-jar monogram','A lowercase “k” whose leg is a marigold jar holding three tasks. A true monogram: brand initial and brand idea in one shape.'],
+    ['c','Sunrise jar','A cream jar against a teal-to-marigold sky, with a sun rising inside it. Warm, optimistic, and nods to “sorted before you sit down”.'],
+    ['d','Tray of cards','Task cards in marigold and cream drop into a teal-to-gold tray on an ink tile. Literal and readable; the most “product UI” feeling.'],
+    ['e','Message → kept','A speech bubble (every channel is a message) with a jar lid on top and a check inside. Says “your conversations, turned into done”.']
+  ];
+  const use=(id,c)=>`<svg class="${c||''}" viewBox="0 0 120 120"><use href="#${id}"/></svg>`;
+  document.getElementById('g').innerHTML=O.map(([id,n,d,t],i)=>`<section class="opt">
+    <h2><span class="num">${String.fromCharCode(65+i)}</span>${n}${t?` <span class="tag">${t}</span>`:''}</h2>
+    <div class="row">${use(id,'tile')}<div class="small">${use(id)}${use(id,'tiny')}</div></div>
+    <div class="lockup">${use(id)}<span>keeper</span></div>
+    <div class="lockup dark">${use(id)}<span>keeper</span></div>
+    <p>${d}</p></section>`).join('');
+</script>
+</body>
+</html>
