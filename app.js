@@ -433,7 +433,7 @@
   function greeting() {
     const h = new Date().getHours();
     const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-    return `<div class="greet"><h1>${g}, <em>Maya</em></h1><div class="sum" id="summary">${summary()}</div></div>`;
+    return `<div class="greet"><h1>${g}, <em>Maya</em></h1></div>`;
   }
   const searchBtn = () => { const n = S.filter.tokens.length + (S.filter.text.trim() ? 1 : 0);
     return `<button type="button" class="icon-btn labeled ${UI.search || n ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Filters" aria-expanded="${UI.search}">${ic('filter')}Filter${n && !UI.search ? `<span class="dot-badge">${n}</span>` : ''}</button>`; };
@@ -592,7 +592,7 @@
     else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Live Feed">${ic('back')}</button><h1>Settings</h1></div>${sourcesHTML()}`;
     else body = `${greeting()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
       <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
-      <div class="m-tools">${searchBtn()}<span id="mSort">${S.mstatus === 'upnext' ? sortNote('upnext') : ''}</span></div>
+      <div class="m-tools"><div class="tools-l">${searchBtn()}<div class="sum" id="summary">${summary()}</div></div><span id="mSort">${S.mstatus === 'upnext' ? sortNote('upnext') : ''}</span></div>
       ${filterBar()}
       <div class="m-list col-body" id="mList" data-col="${S.mstatus}">${mListHTML()}</div>
       <p class="m-hint">Swipe right to mark done · hold to drag</p>`;
@@ -611,7 +611,7 @@
     let main;
     if (S.screen === 'feed') main = `<div class="screen">${feedHead()}<div id="feedPage">${feedPageHTML()}</div></div>`;
     else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Settings</h1></div>${sourcesHTML()}</div>`;
-    else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
+    else main = `<div class="d-head">${greeting()}<div class="d-acts"><div class="sum" id="summary">${summary()}</div>${searchBtn()}
         <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Live Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
         <button class="btn-ask" data-action="ask">${ic('plus')} Add task</button></div></div>
       ${filterBar()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
@@ -1365,7 +1365,7 @@
     if (kind === 'due') items = DUEWORDS.map(([v, , label]) => ({ type: 'due', value: v, label }));
     if (kind === 'project') items = Object.keys(D.PROJECTS).map(k => ({ type: 'project', value: k, label: D.PROJECTS[k].name }));
     if (kind === 'person') items = Object.keys(D.PEOPLE).filter(k => D.PEOPLE[k].role === 'client').map(k => ({ type: 'person', value: k, label: D.PEOPLE[k].name }));
-    if (kind === 'source') items = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'].map(k => ({ type: 'source', value: k, label: D.SOURCES[k].label }));
+    if (kind === 'source') items = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'].filter(k => S.channels.includes(k)).map(k => ({ type: 'source', value: k, label: D.SOURCES[k].label }));
     const on = it => S.filter.tokens.some(t => t.type === it.type && t.value === it.value);
     const menu = document.createElement('div');
     menu.className = 'menu'; menu.id = 'menu';

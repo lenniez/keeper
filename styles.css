@@ -1048,3 +1048,12 @@ body{background:#EEF0EE}
 .orb.rec .orb-swirl::before{animation-duration:5s}
 .orb.rec .orb-swirl.two::before{animation-duration:3.5s}
 @media (prefers-reduced-motion:reduce){.orb-swirl::before{animation:none!important}}
+
+/* due-today / overdue chips sit beside the Filter button */
+.m-tools .tools-l{display:flex;align-items:center;gap:6px;min-width:0}
+.m-tools .sum,.d-acts .sum{margin-top:0;flex-wrap:nowrap}
+.m-tools .sum-btn,.d-acts .sum-btn{height:34px;display:inline-flex;align-items:center;white-space:nowrap}
+.d-acts .sum{margin-right:2px}
+.m-tools{flex-wrap:wrap;row-gap:6px}
+.m-tools span.sort-note{display:none}
+.m-tools .sort-note{white-space:nowrap}
