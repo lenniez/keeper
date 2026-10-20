@@ -351,7 +351,6 @@
       <div class="onb-hero"><span class="logo-mark" aria-hidden="true"></span>
       <h1>Every commitment, <em>kept.</em></h1>
       <p class="lead">Keeper listens across your inboxes, chats, texts and calls, catches every promise you make, and keeps it on one simple board.</p></div>
-      <div class="onb-me"><img class="m-me" src="maya.svg" alt=""><span><b>Maya</b> · Independent brand strategist · 5 clients</span></div>
       <div class="onb-foot"><button class="btn-primary" data-action="onb-next">Get started</button><span class="small">Takes about a minute</span></div>
     </div></div>`;
     if (S.step === 1) {
