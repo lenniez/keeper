@@ -1059,3 +1059,6 @@ body{background:#EEF0EE}
 .m-tools .sort-note{white-space:nowrap}
 /* review step footer: solid, covers cards scrolling beneath it */
 .ob-foot{bottom:-28px;background:#fff;padding:12px 0 28px;margin-bottom:-28px;z-index:2;box-shadow:0 -18px 18px -2px #fff}
+/* status tabs fit the phone width, no sideways scroll */
+.m-tabs{overflow:visible}
+.mtab{flex:1 1 auto;justify-content:center;padding:7px 8px;gap:5px;min-width:0;white-space:nowrap}
