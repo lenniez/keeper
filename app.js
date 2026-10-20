@@ -466,7 +466,7 @@
         <button type="button" class="col-toggle" data-action="done-toggle" aria-expanded="false" aria-label="Show Done (${list.length})"><span class="spill s-done">${sdot('done')}Done</span><span class="n">${list.length}</span><span class="show">Show ${ic('chev')}</span></button>
         <div class="col-body" hidden>${list.map(cardHTML).join('')}</div></section>`;
       return `<section class="col" data-col="${c.id}">
-        <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span>${sortNote(c.id)}${c.id === 'done' ? `<button type="button" class="col-x" data-action="done-toggle" aria-label="Collapse Done">${ic('x')}</button>` : ''}</div>
+        <div class="col-h"><span class="spill s-${c.id}">${esc(c.name)}</span><span class="n">${list.length}</span>${sortNote(c.id)}${c.id === 'done' ? `<button type="button" class="col-x" data-action="done-toggle" aria-label="Hide Done">Hide</button>` : ''}</div>
         <div class="col-body">${list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks' : 'Drop tasks here'}</div>`}</div>
       </section>`;
     }).join('');
