@@ -610,6 +610,9 @@
   .works-row .works{margin:0;text-align:left;font-size:15px;color:var(--faint)}
   .works-row .chips{margin:0;justify-content:flex-start}
   .feat.f2 .crop,.feat.f3 .crop{margin-left:auto!important;margin-right:auto!important}
+  .feat .feat-name{margin:0 0 8px;font-size:clamp(30px,3vw,40px);font-weight:600;letter-spacing:-.03em;line-height:1.05;color:var(--ink)}
+  .feat p.feat-sub{margin:0 0 8px;font-size:clamp(18px,1.5vw,20px);font-weight:600;letter-spacing:-.01em;color:var(--brand-ink)}
+  .feat p.feat-sub+p{font-size:16px}
 </style>
 </head>
 <body>
@@ -622,8 +625,8 @@
       <li><a href="#what">What is Keeper</a></li>
       <li><a href="#day">A day with Keeper</a></li>
       <li><a href="#product">Product</a></li>
-      <li><a href="#trust">Privacy</a></li>
       <li><a href="#compare">Compare</a></li>
+      <li><a href="#trust">Privacy</a></li>
       <li><a href="#love">Customers</a></li>
     </ul>
     <a class="btn primary" href="index.html">Try Keeper free</a>
@@ -756,18 +759,41 @@
     </div>
     <div class="feat-grid">
       <article class="feat f1 rev">
-        <div class="feat-txt"><span class="tagline">Pulled from your channels</span><h3>See where every task came from</h3><p>The exact line from the email, Slack or text that created it, with the original one tap away.</p></div>
+        <div class="feat-txt"><h3 class="feat-name">Pulled from your channels</h3><p class="feat-sub">See where every task came from</p><p>The exact line from the email, Slack or text that created it, with the original one tap away.</p></div>
         <div class="crop"><img src="img/m-task.png?v=1020d" alt="A task showing the original email it came from, with an Open in Gmail button" loading="lazy" style="width:100%;transform:translate(0%,-50%)"></div>
       </article>
       <article class="feat f2 rev">
-        <div class="feat-txt"><span class="tagline">Mobile first</span><h3>Your day on one screen</h3><p>Sorted by due date. Swipe right to finish a task.</p></div>
+        <div class="feat-txt"><h3 class="feat-name">Mobile first</h3><p class="feat-sub">Your day on one screen</p><p>Sorted by due date. Swipe right to finish a task.</p></div>
         <div class="crop"><img src="img/m-board.png?v=1020d" alt="The Keeper list on a phone, with drafts ready to approve" loading="lazy" style="width:72%;left:14%;transform:translate(0%,-32.8%)"></div>
       </article>
       <article class="feat f3 rev">
-        <div class="feat-txt"><span class="tagline">Voice mode</span><h3>Say it, don’t type it</h3><p>Tap once and talk. Keeper turns a ramble into a clean task and reads it back.</p></div>
+        <div class="feat-txt"><h3 class="feat-name">Voice mode</h3><p class="feat-sub">Say it, don’t type it</p><p>Tap once and talk. Keeper turns a ramble into a clean task and reads it back.</p></div>
         <div class="crop"><img src="img/m-voice.png?v=1020d" alt="Keeper voice capture screen with a large microphone button" loading="lazy" style="width:100%;transform:translate(0%,-27%)"></div>
       </article>
     </div>
+    <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
+  </div>
+</section>
+
+<section class="battle" id="compare" style="border-top:0">
+  <div class="wrap">
+    <div class="sec-h rev">
+      <h2>Only Keeper tracks all your channels and helps you act.</h2>
+      <p>Note-takers catch meetings. Workspaces hold what you type. Keeper catches commitments everywhere, then helps with the routine ones.</p>
+    </div>
+    <p class="bc-hint">Swipe to compare →</p>
+    <div class="bc-wrap rev">
+      <table class="bc">
+        <thead><tr><th scope="col" style="text-align:left">What you need</th>
+          <th scope="col" class="us">Keeper<small>Every channel</small></th>
+          <th scope="col">Otter.ai<small>Meeting notes</small></th>
+          <th scope="col">Motion<small>AI calendar</small></th>
+          <th scope="col">Notion<small>Docs and tasks</small></th>
+          <th scope="col">Todoist<small>Task app</small></th></tr></thead>
+        <tbody><tr><th scope="row">Finds tasks in email automatically</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Forward to add</small></td><td class="p"><span class="part">Partial</span><small>Mail app, manual</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Finds tasks in Slack and texts</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Finds tasks in calls and meetings</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="y"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Meeting notes</small></td><td class="p"><span class="part">Partial</span><small>Meeting notes</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">No manual task entry needed</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Calls only</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Drafts routine replies for you</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Recap emails</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Writing help</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Books meetings on your calendar</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="y"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Shares times</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Built mobile-first for solo operators</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Mobile app, manual</small></td></tr></tbody>
+      </table>
+    </div>
+    <p class="bc-note">Based on each product’s publicly listed features as of October 2026. Competitor tools change often.</p>
     <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
   </div>
 </section>
@@ -794,29 +820,6 @@
       <h4 style="margin-top:10px">Keeper Agent: Scheduling</h4>
       <div class="opt on"><span class="r"></span><span>Book automatically<small>Finds a free slot, books it, sends the invite</small></span></div>
     </div>
-  </div>
-</section>
-
-<section class="battle" id="compare" style="border-top:0">
-  <div class="wrap">
-    <div class="sec-h rev">
-      <h2>Only Keeper tracks all your channels and helps you act.</h2>
-      <p>Note-takers catch meetings. Workspaces hold what you type. Keeper catches commitments everywhere, then helps with the routine ones.</p>
-    </div>
-    <p class="bc-hint">Swipe to compare →</p>
-    <div class="bc-wrap rev">
-      <table class="bc">
-        <thead><tr><th scope="col" style="text-align:left">What you need</th>
-          <th scope="col" class="us">Keeper<small>Every channel</small></th>
-          <th scope="col">Otter.ai<small>Meeting notes</small></th>
-          <th scope="col">Motion<small>AI calendar</small></th>
-          <th scope="col">Notion<small>Docs and tasks</small></th>
-          <th scope="col">Todoist<small>Task app</small></th></tr></thead>
-        <tbody><tr><th scope="row">Finds tasks in email automatically</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Forward to add</small></td><td class="p"><span class="part">Partial</span><small>Mail app, manual</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Finds tasks in Slack and texts</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Finds tasks in calls and meetings</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="y"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Meeting notes</small></td><td class="p"><span class="part">Partial</span><small>Meeting notes</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">No manual task entry needed</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Calls only</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Drafts routine replies for you</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Recap emails</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Writing help</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Books meetings on your calendar</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="y"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Shares times</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Built mobile-first for solo operators</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Mobile app, manual</small></td></tr></tbody>
-      </table>
-    </div>
-    <p class="bc-note">Based on each product’s publicly listed features as of October 2026. Competitor tools change often.</p>
-    <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
   </div>
 </section>
 
