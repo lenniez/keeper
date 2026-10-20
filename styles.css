@@ -909,3 +909,4 @@ a.shell-btn{text-decoration:none;color:inherit;display:inline-flex;align-items:c
 .m-top .wordmark,.d-brand .wordmark{font-size:21px}
 .shell-brand .wordmark{font-size:22px}
 .splash .wordmark{font-size:38px}
+.greet h1 em{font-family:var(--sans);font-style:normal;font-size:1em;font-weight:600;color:var(--brand)}
