@@ -895,3 +895,5 @@ button.sort-note{color:var(--brand-ink);font-weight:600;text-decoration:underlin
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M3 14C50 6 120 4 197 9' fill='none' stroke='%23B49CF5' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E") left bottom/100% .32em no-repeat;
   animation:keptIn .7s .15s cubic-bezier(.2,.9,.3,1.2) both}
 @keyframes keptIn{from{opacity:0;transform:translateY(8px) scale(.94)}to{opacity:1;transform:none}}
+.shell-bar{display:flex;justify-content:space-between}
+a.shell-btn{text-decoration:none;color:inherit;display:inline-flex;align-items:center}
