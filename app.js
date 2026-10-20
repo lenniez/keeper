@@ -425,7 +425,7 @@
     return `<div class="greet"><h1>${g}, <em>Maya</em></h1><div class="sum" id="summary">${summary()}</div></div>`;
   }
   const searchBtn = () => { const n = S.filter.tokens.length + (S.filter.text.trim() ? 1 : 0);
-    return `<button type="button" class="icon-btn ${mode() === 'desktop' ? 'labeled' : ''} ${UI.search || n ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Filters" aria-expanded="${UI.search}">${ic('filter')}${mode() === 'desktop' ? 'Filter' : ''}${n && !UI.search ? `<span class="dot-badge">${n}</span>` : ''}</button>`; };
+    return `<button type="button" class="icon-btn labeled ${UI.search || n ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Filters" aria-expanded="${UI.search}">${ic('filter')}Filter${n && !UI.search ? `<span class="dot-badge">${n}</span>` : ''}</button>`; };
   function filterChips() {
     const cnt = type => S.filter.tokens.filter(t => t.type === type).length;
     const chip = (menu, label) => `<button type="button" class="chip ${cnt(menu) ? 'on' : ''}" data-action="f-menu" data-menu="${menu}">${label}${cnt(menu) ? ' · ' + cnt(menu) : ''} <span class="caret">▾</span></button>`;
@@ -514,7 +514,7 @@
   function mListHTML() {
     const toks = activeTokens();
     const list = colTasks(S.mstatus, toks);
-    return (list.length && S.mstatus === 'upnext' ? `<div class="m-sort">${sortNote('upnext')}</div>` : '') + (list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`);
+    return (list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`);
   }
   const incoming = () => S.tasks.filter(t => t.source !== 'keeper' && !t.dismissed && S.channels.includes(t.source)).sort((a, b) => b.captured - a.captured);
   function statusLabel(s) { const c = D.COLUMNS.find(c => c.id === s); return c ? c.name : s; }
@@ -579,13 +579,15 @@
     let body;
     if (S.screen === 'feed') body = `${feedHead()}<div id="feedPage">${feedPageHTML()}</div>`;
     else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Task Feed">${ic('back')}</button><h1>Settings</h1></div>${sourcesHTML()}`;
-    else body = `${greeting()}${filterBar()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
+    else body = `${greeting()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
       <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
+      <div class="m-tools">${searchBtn()}<span id="mSort">${S.mstatus === 'upnext' ? sortNote('upnext') : ''}</span></div>
+      ${filterBar()}
       <div class="m-list col-body" id="mList" data-col="${S.mstatus}">${mListHTML()}</div>
       <p class="m-hint">Swipe right to mark done · hold to drag</p>`;
     return `<div class="m-home">
       <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
-        ${S.screen === 'board' ? searchBtn() : ''}<button type="button" class="icon-btn ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources" aria-label="Settings">${ic('gear')}</button><img class="m-me" src="maya.svg" alt="Maya"></div>
+        <button type="button" class="icon-btn ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources" aria-label="Settings">${ic('gear')}</button><img class="m-me" src="maya.svg" alt="Maya"></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
@@ -621,6 +623,7 @@
     if (UI.drag && UI.drag.active) { UI.pending = true; return; }
     const b = $('#board'); if (b) b.classList.toggle('done-collapsed', !S.doneOpen); if (b) { const sl = b.scrollLeft; b.innerHTML = boardHTML(); b.scrollLeft = sl; }
     const mt = $('#mTabs'); if (mt) { const sl = mt.scrollLeft; mt.innerHTML = mTabsHTML(); mt.scrollLeft = sl; }
+    const ms = $('#mSort'); if (ms) ms.innerHTML = S.mstatus === 'upnext' ? sortNote('upnext') : '';
     const ml = $('#mList'); if (ml) { ml.dataset.col = S.mstatus; ml.innerHTML = mListHTML(); }
     const fpg = $('#feedPage'); if (fpg) fpg.innerHTML = feedPageHTML();
     const rv = $('#rvSlot'); if (rv) rv.innerHTML = reviewStrip();
