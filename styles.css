@@ -1032,3 +1032,19 @@ body{background:#EEF0EE}
 /* smoother swirl: blur the colour fields, clip to a crisp circle */
 .orb-swirl{inset:-10%;overflow:visible;border-radius:0;filter:blur(9px) saturate(1.1);clip-path:circle(41.7% at 50% 50%)}
 .orb-swirl.two{filter:blur(14px);opacity:.55;background:conic-gradient(from 30deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.6) 70deg,rgba(242,181,68,.35) 150deg,rgba(14,106,93,.45) 240deg,rgba(255,255,255,0) 360deg)}
+
+/* orb v3: clip on a static circle, rotate the colour fields inside it (no square edges while spinning) */
+.orb-swirl,.orb-swirl.two{inset:0;border-radius:50%;overflow:hidden;clip-path:circle(50% at 50% 50%);filter:none;background:none!important;animation:none!important}
+.orb-swirl::before{content:"";position:absolute;inset:-12%;filter:blur(9px) saturate(1.1);animation:orbspin 14s linear infinite;
+  background:
+    radial-gradient(circle at 24% 28%,#F2B544 0%,rgba(242,181,68,0) 40%),
+    radial-gradient(circle at 16% 66%,#EE9367 0%,rgba(238,147,103,0) 36%),
+    radial-gradient(circle at 76% 24%,#CFF0E5 0%,rgba(207,240,229,0) 44%),
+    radial-gradient(circle at 64% 74%,#0E6A5D 0%,rgba(14,106,93,0) 52%),
+    radial-gradient(circle at 50% 50%,#23A584 0%,#5FC2A7 55%,#A6DFCD 100%)}
+.orb-swirl.two{mix-blend-mode:soft-light;opacity:.55}
+.orb-swirl.two::before{filter:blur(14px);animation:orbspin 9s linear infinite reverse;
+  background:conic-gradient(from 30deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.6) 70deg,rgba(242,181,68,.35) 150deg,rgba(14,106,93,.45) 240deg,rgba(255,255,255,0) 360deg)}
+.orb.rec .orb-swirl::before{animation-duration:5s}
+.orb.rec .orb-swirl.two::before{animation-duration:3.5s}
+@media (prefers-reduced-motion:reduce){.orb-swirl::before{animation:none!important}}
