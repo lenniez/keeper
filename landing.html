@@ -556,6 +556,50 @@
   }
   /* ---------- revision 13: mint tray logo ---------- */
   .mark{background:url("keeper-logo.svg") center/100% no-repeat!important;box-shadow:0 0 0 1px rgba(18,117,103,.12)}
+  /* ---------- revision 14 ---------- */
+  .wrap{width:min(1160px,100% - 48px)}
+  @media (min-width:1280px){.wrap{width:min(1160px,100% - 96px)}}
+  @media (max-width:520px){.wrap{width:calc(100% - 36px)}}
+  #what .diff h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  @media (max-width:1200px){#what .diffs{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+  @media (max-width:520px){#what .diffs{grid-template-columns:1fr!important}}
+  #what .diffs .diff:nth-child(1) .ic{background:var(--brand-soft);color:var(--brand)}
+  #what .diffs .diff:nth-child(2) .ic{background:#EEEAF3;color:#4A4458}
+  #what .diffs .diff:nth-child(3) .ic{background:var(--mari-soft);color:var(--mari-ink)}
+  #what .diffs .diff:nth-child(4) .ic{background:var(--brand-soft);color:var(--brand)}
+  .steps .step:nth-child(1) .k{background:linear-gradient(135deg,#127567,#1C8F6B)!important}
+  .steps .step:nth-child(2) .k{background:linear-gradient(135deg,#E9A93A,#F2C063)!important;color:#5A3D05}
+  .steps .step:nth-child(3) .k{background:linear-gradient(135deg,#BC4E2B,#E98A55)!important}
+  /* privacy: tighter, two balanced columns */
+  #trust{padding:72px 0}
+  #trust .trust{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:36px;align-items:center}
+  #trust .sec-h h2{font-size:clamp(26px,2.6vw,34px);white-space:normal}
+  #trust .trust-list{gap:10px}
+  #trust .tr{padding:12px}
+  #trust .perm{padding:18px;gap:6px}
+  #trust .perm .opt{padding:8px 12px}
+  @media (max-width:900px){#trust .trust{grid-template-columns:1fr}}
+  /* mobile polish */
+  @media (max-width:600px){
+    section{padding:56px 0}
+    .hero{padding:28px 0 24px}
+    .hero h1{font-size:38px}
+    .ctas .btn{flex:1 1 auto}
+    .sec-h h2{font-size:28px;line-height:1.15}
+    .sec-h p{font-size:17px}
+    .proof{gap:14px;flex-direction:column}
+    .chips{gap:6px}
+    .chip{font-size:14px}
+    .feat h3{font-size:24px}
+    .crop{min-height:260px}
+    .tms{gap:12px}
+    .stats{gap:10px}
+    .steps .step .phone{width:min(230px,100%)}
+    nav.top .wrap{gap:12px}
+    nav.top .btn{padding:8px 12px;font-size:14px}
+    .kept{padding:40px 20px}
+    footer.big .meta{flex-direction:column;align-items:flex-start;gap:6px}
+  }
 </style>
 </head>
 <body>
@@ -608,7 +652,7 @@
       <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#00832D" d="M27 24l4.4 5 5.6 3.7 1-8.6-1-8.4-5.7 3.2z"/><path fill="#0066DA" d="M4 31.6V38a3 3 0 0 0 3 3h6.4l1.3-4.8-1.3-4.6-4.4-1.3z"/><path fill="#E94235" d="M13.4 7L4 16.4l4.8 1.3 4.6-1.3 1.3-4.4z"/><path fill="#2684FC" d="M13.4 16.4H4v15.2h9.4z"/><path fill="#00AC47" d="M42 11.3l-5 4.4v16.9l5 4.1c.8.6 2 0 2-1V12.3c0-1-1.2-1.6-2-1zM27 24v7.6H13.4V41h20.1a3 3 0 0 0 3-3v-5.6z"/><path fill="#FFBA00" d="M33.5 7H13.4v9.4H27V24l9.6-8V10a3 3 0 0 0-3-3z"/></svg></span>Google Meet</span>
     </div>
     <div class="proof">
-      <div class="who"><span class="stack"><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cjordans"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cjordans)"><rect width="120" height="120" fill="#ECEAF0"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1E1B26"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#D9A47E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#D9A47E"/><path d="M38 48c2-14 11-22 22-22s20 8 22 22c-4-4-12-7-22-7s-18 3-22 7z" fill="#1E1620"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><g fill="none" stroke="#2B1F3A" stroke-width="2"><circle cx="52" cy="60" r="6"/><circle cx="68" cy="60" r="6"/><path d="M58 60h4"/></g><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofias)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadias)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheos"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheos)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span></span><span>Join a community of <b>20,000+</b> solo operators</span></div>
+      <div class="who"><span class="stack"><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cjordans"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cjordans)"><rect width="120" height="120" fill="#ECEAF0"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1E1B26"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#D9A47E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#D9A47E"/><path d="M38 48c2-14 11-22 22-22s20 8 22 22c-4-4-12-7-22-7s-18 3-22 7z" fill="#1E1620"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><g fill="none" stroke="#2B1F3A" stroke-width="2"><circle cx="52" cy="60" r="6"/><circle cx="68" cy="60" r="6"/><path d="M58 60h4"/></g><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofias)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadias)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheos"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheos)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span></span><span>Join our community of <b>20,000+</b> users</span></div>
       <span class="div" aria-hidden="true"></span>
       <div class="rating"><span class="big">4.8</span><span><span class="stars" aria-hidden="true">★★★★★</span><br>average from 1,900+ reviews</span></div>
     </div>
@@ -623,24 +667,24 @@
     </div>
     <div class="diffs">
       <article class="diff rev">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8l-6 6-3-3M4 4h16v16H4z"/></svg></div>
-        <h3>No data entry</h3>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h6M4 12h6M4 18h6M14 12h6M10 6c3 0 3 6 4 6M10 18c3 0 3-6 4-6"/></svg></div>
+        <h3>Pulls tasks from channels</h3>
         <p>Typing up to-dos is nobody’s favorite part of the job. Keeper hears “I’ll send that over Friday” and puts it on your list with the right client, date and source.</p>
-      </article>
-      <article class="diff rev">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
-        <h3>Takes the repetitive tasks off your list</h3>
-        <p>For routine work like “send the file” replies and finding a meeting time, Keeper drafts it or books it. You approve in one tap.</p>
-      </article>
-      <article class="diff rev">
-        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
-        <h3>Voice when your hands are full</h3>
-        <p>Between site visits? Say it out loud. Keeper asks only for what’s missing and reads it back. No thumbs required.</p>
       </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></div>
         <h3>Sorted before you sit down</h3>
         <p>One prioritized list is waiting before your coffee is cool enough to drink: what’s due, what’s overdue, and what’s already drafted.</p>
+      </article>
+      <article class="diff rev">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+        <h3>Voice mode, hands-free</h3>
+        <p>Between site visits? Say it out loud. Keeper asks only for what’s missing and reads it back. No thumbs required.</p>
+      </article>
+      <article class="diff rev">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
+        <h3>Handles repetitive tasks</h3>
+        <p>For routine work like “send the file” replies and finding a meeting time, Keeper drafts it or books it. You approve in one tap.</p>
       </article>
     </div>
     <div class="what-shots">
@@ -654,7 +698,7 @@
 <section id="day">
   <div class="wrap">
     <div class="sec-h rev">
-      <h2>A Tuesday with Keeper.</h2>
+      <h2>A day in the life with Keeper.</h2>
       <p>Meet Maya, an independent brand strategist with five clients and one very full phone.</p>
     </div>
     <div class="day">
@@ -720,11 +764,11 @@
 
 <section class="privacy" id="trust">
   <div class="wrap trust">
-    <div class="sec-h trust-h rev" style="margin-bottom:0">
-      <h2>You’re in control, and your data stays yours.</h2>
-      <p>Keeper reads to find tasks. It won’t send a thing without your say-so.</p>
-    </div>
-    <div class="rev">
+    <div class="rev trust-l">
+      <div class="sec-h" style="margin-bottom:22px">
+        <h2>You’re in control, and your data stays yours.</h2>
+        <p>Keeper reads to find tasks. It won’t send a thing without your say-so.</p>
+      </div>
       <div class="trust-list" style="margin-top:0">
         <div class="tr"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span><b>Never used to train AI</b><span>Not by us, not by our AI providers.</span></span></div>
         <div class="tr"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span><span><b>Never sends without permission</b><span>You choose: draft only, or automatic.</span></span></div>
