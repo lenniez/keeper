@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CTA gradient options</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap">
+<style>
+  :root{--ink:#1E1B26;--ink-2:#5F596D;--line:#ECE9F1;--cream:#FCF8F3}
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 16px;background:var(--cream);font-family:"Instrument Sans",system-ui,sans-serif;color:var(--ink)}
+  h1{margin:0 0 4px;font-size:28px;letter-spacing:-.02em}
+  p.sub{margin:0 0 24px;color:var(--ink-2);font-size:16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;max-width:1240px}
+  .opt{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+  .opt h2{margin:0;font-size:17px;display:flex;align-items:center;gap:8px}
+  .num{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:7px;background:var(--ink);color:#fff;font-size:13px}
+  .opt p{margin:0;color:var(--ink-2);font-size:15px;line-height:1.4}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .on-dark{background:#1E1B26;border-radius:14px;padding:16px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:12px;padding:13px 20px;font-weight:600;font-size:16px;color:#fff;border:0;text-decoration:none;cursor:pointer;transition:transform .15s,filter .15s,background-position .5s}
+  .btn:hover{transform:translateY(-1px);filter:saturate(1.08) brightness(1.03)}
+  .ghost{background:#fff;color:var(--ink);border:1px solid #DDD8E5}
+  .codes{font-size:13px;color:var(--ink-2);font-family:ui-monospace,Menlo,monospace}
+  .tag{font-size:12px;font-weight:700;color:#0F5E54;background:#E2F4F1;border-radius:999px;padding:2px 8px}
+
+  /* 1 current flat */
+  .g0{background:#17796C;box-shadow:0 12px 24px -12px rgba(23,121,108,.65)}
+  /* 2 tonal teal: deep to bright, top-light */
+  .g1{background:linear-gradient(180deg,#1F9585 0%,#126A5F 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 12px 24px -12px rgba(18,106,95,.7)}
+  /* 3 teal to sea green */
+  .g2{background:linear-gradient(135deg,#127567 0%,#1C8F6B 100%);box-shadow:0 12px 24px -12px rgba(28,143,107,.7)}
+  /* 4 teal to ocean blue */
+  .g3{background:linear-gradient(135deg,#136E66 0%,#1F6F8B 100%);box-shadow:0 12px 24px -12px rgba(31,111,139,.6)}
+  /* 5 sunrise: teal with a warm marigold glow edge */
+  .g4{background:radial-gradient(120% 140% at 100% 0%,rgba(233,169,58,.55) 0%,rgba(233,169,58,0) 45%),linear-gradient(135deg,#126A5F,#17796C);box-shadow:0 12px 24px -12px rgba(18,106,95,.7)}
+  /* 6 animated shimmer on hover */
+  .g5{background:linear-gradient(110deg,#126A5F 0%,#17796C 40%,#2AA08F 50%,#17796C 60%,#126A5F 100%);background-size:250% 100%;background-position:100% 0;box-shadow:0 12px 24px -12px rgba(18,106,95,.7)}
+  .g5:hover{background-position:0 0}
+  /* 7 glassy pill */
+  .g6{border-radius:999px;background:linear-gradient(180deg,#24A090 0%,#147164 55%,#0F5E54 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.12),0 12px 24px -12px rgba(15,94,84,.8)}
+  /* 8 teal to terracotta (bold) */
+  .g7{background:linear-gradient(120deg,#147164 0%,#3D7A63 45%,#B5603A 100%);box-shadow:0 12px 24px -12px rgba(120,80,50,.6)}
+</style>
+</head>
+<body>
+<h1>CTA gradient options</h1>
+<p class="sub">Each shown on cream and on the dark closing panel, next to the secondary button. Hover to see motion. White text passes contrast on all of them.</p>
+<div class="grid" id="g"></div>
+<script>
+  const O = [
+    ['g0','Current: flat teal','Baseline for comparison. Clean, but a bit flat next to the soft hero.','#17796C'],
+    ['g1','Tonal teal (top light)','Same hue, lighter at the top like light from above. Feels tactile and premium without looking “designed”.','#1F9585 → #126A5F','Recommended'],
+    ['g2','Teal → sea green','A gentle shift toward green. Fresh and optimistic; reads as “go”.','#127567 → #1C8F6B'],
+    ['g3','Teal → ocean blue','Cooler and more techy. Trustworthy, but less warm than the rest of the page.','#136E66 → #1F6F8B'],
+    ['g4','Sunrise glow','Teal with a soft marigold glow in the corner. Ties in the warm accents; the most “human” option.','#126A5F + marigold glow'],
+    ['g5','Shimmer on hover','Mostly flat at rest; a light sweep passes across on hover. Subtle delight, still efficient.','#126A5F / #2AA08F sweep'],
+    ['g6','Glassy pill','Rounded pill with a glossy highlight. Friendly and app-like; closer to iOS buttons.','#24A090 → #0F5E54'],
+    ['g7','Teal → terracotta','The boldest: blends both brand colors. Distinctive, but busy and can muddy in the middle.','#147164 → #B5603A']
+  ];
+  document.getElementById('g').innerHTML = O.map(([c,n,d,codes,tag],i) => `
+    <section class="opt">
+      <h2><span class="num">${i+1}</span>${n}${tag ? ` <span class="tag">${tag}</span>` : ''}</h2>
+      <div class="row"><a class="btn ${c}" href="#">Try Keeper free</a><a class="btn ghost" href="#">How to set it up</a></div>
+      <div class="row on-dark"><a class="btn ${c}" href="#">Try Keeper free</a></div>
+      <p>${d}</p>
+      <span class="codes">${codes}</span>
+    </section>`).join('');
+</script>
+</body>
+</html>
