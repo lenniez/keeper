@@ -585,7 +585,7 @@
       <p class="m-hint">Swipe right to mark done · hold to drag</p>`;
     return `<div class="m-home">
       <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
-        ${S.screen === 'board' ? searchBtn() : ''}<img class="m-me" src="maya.svg" alt="Maya"></div>
+        ${S.screen === 'board' ? searchBtn() : ''}<button type="button" class="icon-btn ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources" aria-label="Settings">${ic('gear')}</button><img class="m-me" src="maya.svg" alt="Maya"></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
