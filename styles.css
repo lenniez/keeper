@@ -592,9 +592,9 @@ img.av{object-fit:cover;padding:0;background:#EDE6FD}
 .device.is-mobile .m-nav button{font-size:15px}
 .orig-acts{flex-wrap:wrap}.orig-acts .linkish,.open-app{white-space:nowrap}
 /* empty add-task screen: prompt and mic centred together */
-.sheet.ask.empty .ask-msgs{display:none}
-.sheet.ask.empty .vstage{flex:1;justify-content:center;gap:16px}
-.sheet.ask.empty .ask-empty{margin:0 0 20px}
+.sheet.ask.blank .ask-msgs{display:none}
+.sheet.ask.blank .vstage{flex:1;justify-content:center;gap:16px}
+.sheet.ask.blank .ask-empty{margin:0 0 20px}
 .sort-note{margin-left:auto;font-size:14px;color:var(--faint);font-weight:500;border:0;background:none;padding:0}
 button.sort-note{color:var(--brand-ink);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .m-sort{display:flex;justify-content:flex-end;margin-bottom:-2px}
@@ -904,3 +904,8 @@ a.shell-btn{text-decoration:none;color:inherit;display:inline-flex;align-items:c
 .priv ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .priv li{display:flex;gap:8px;align-items:flex-start;font-size:15px;color:var(--ink-2);line-height:1.4}
 .priv li .icon{width:16px;height:16px;color:var(--brand);margin-top:2px;stroke-width:2.4}
+/* wordmark: plain, confident sans (no italics) */
+.wordmark{font-family:var(--sans)!important;font-style:normal!important;font-weight:700;letter-spacing:-.035em}
+.m-top .wordmark,.d-brand .wordmark{font-size:21px}
+.shell-brand .wordmark{font-size:22px}
+.splash .wordmark{font-size:38px}

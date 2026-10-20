@@ -1061,7 +1061,7 @@
         <div class="sh-foot"><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
       </div>`;
     } else if (UI.sheet.type === 'ask') {
-      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask ${UI.ask.msgs.length ? '' : 'empty'}" role="dialog" aria-modal="true" aria-label="Add a task">
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet ask ${UI.ask.msgs.length ? '' : 'blank'}" role="dialog" aria-modal="true" aria-label="Add a task">
         <div class="grab"></div>
         <div class="sh-h"><span class="logo-mark" aria-hidden="true"></span><b>New task</b><button type="button" class="vbtn" data-action="voice" aria-label="Choose assistant voice">${ic('wave')}Voice</button><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="ask-msgs" id="askMsgs">${askMsgsHTML()}</div>
@@ -1108,7 +1108,7 @@
     return (A.msgs.length ? '' : `<div class="ask-empty">What do you need to keep track of?<small>Say it like you’d tell an assistant: “Send Jen the logo files by the 30th.”</small></div>`) + `<button type="button" class="orb ${A.listening || A.handsFree ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}>${ic('mic')}</button>
       ${A.listening && A.interim ? `<div class="vlive" id="vlive">${esc(A.interim)}</div>` : `<div class="vcap">${cap}</div>`}`;
   }
-  function paintVoice() { const v = $('#vstage'); if (v) { v.innerHTML = vstageHTML(); v.classList.toggle('compact', UI.ask.msgs.length > 0); const sh = v.closest('.sheet'); if (sh) sh.classList.toggle('empty', !UI.ask.msgs.length); } }
+  function paintVoice() { const v = $('#vstage'); if (v) { v.innerHTML = vstageHTML(); v.classList.toggle('compact', UI.ask.msgs.length > 0); const sh = v.closest('.sheet'); if (sh) sh.classList.toggle('blank', !UI.ask.msgs.length); } }
   function askMsgsHTML() {
     const A = UI.ask; const last = A.msgs.length - 1;
     if (!A.msgs.length) return '';

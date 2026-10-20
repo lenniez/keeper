@@ -20,7 +20,7 @@
     color-scheme:light;
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
+  html{scroll-behavior:smooth;overflow-x:hidden}
   body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   a{color:inherit}
   em{font-family:var(--serif);font-weight:400}
@@ -228,6 +228,65 @@
   }
   @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.rev,.kept .lines span{opacity:1;transform:none}}
 </style>
+<style>
+  /* ---------- revision: product shots, battlecard, compact problem ---------- */
+  .brand .word{font-family:var(--sans);font-style:normal;font-weight:700;letter-spacing:-.035em;font-size:24px}
+  .problem{padding:56px 0}
+  .ps{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:40px;align-items:center}
+  .ps h2{font-size:clamp(28px,3.4vw,40px);line-height:1.1;letter-spacing:-.03em;margin:12px 0 0;font-weight:600}
+  .ps h2 em{color:var(--brand);font-style:normal;font-family:var(--sans);font-weight:600}
+  .ps-list{display:flex;flex-direction:column;gap:10px}
+  .ps-row{display:grid;grid-template-columns:1fr 24px 1fr;gap:12px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:16px}
+  .ps-row .pr{color:var(--ink-2)}
+  .ps-row .ar{color:var(--brand)}
+  .ps-row .so{font-weight:600}
+  .shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:start}
+  .shot{margin:0;display:flex;flex-direction:column;gap:16px}
+  .phone{border:8px solid #17141F;border-radius:40px;overflow:hidden;box-shadow:0 40px 60px -34px rgba(40,20,100,.5);background:#fff;aspect-ratio:390/844}
+  .phone img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+  .shot figcaption b{display:block;font-size:19px;letter-spacing:-.01em;margin-bottom:4px}
+  .shot figcaption span{color:var(--ink-2);font-size:16px}
+  .shot .tagline{display:inline-block;font-size:13px;font-weight:600;color:var(--brand-ink);background:var(--brand-soft);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+  .desk{margin-top:40px;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 40px 80px -40px rgba(40,20,100,.45)}
+  .desk img{width:100%;display:block}
+  .desk-cap{margin-top:14px;color:var(--ink-2);font-size:16px;text-align:center}
+  .battle{background:#fff;border-block:1px solid var(--line)}
+  .bc-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:20px;background:#fff}
+  table.bc{width:100%;border-collapse:collapse;min-width:760px;font-size:15px}
+  .bc th,.bc td{padding:14px 16px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+  .bc tbody tr:last-child th,.bc tbody tr:last-child td{border-bottom:0}
+  .bc thead th{font-size:15px;font-weight:600;background:#FAF9FC}
+  .bc thead th small{display:block;font-weight:500;color:var(--faint);font-size:13px}
+  .bc tbody th{text-align:left;font-weight:500;color:var(--ink)}
+  .bc .us{background:var(--brand-soft)}
+  .bc thead .us{background:var(--brand);color:#fff}
+  .bc thead .us small{color:#E5DCFC}
+  .bc .yes{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff}
+  .bc .yes svg{width:15px;height:15px}
+  .bc td:not(.us) .yes{background:#E9E6EF;color:var(--ink-2)}
+  .bc .no{color:var(--line-2);font-weight:700}
+  .bc .part{display:block;font-weight:600;color:var(--ink-2);font-size:14px}
+  .bc .p small{color:var(--faint);font-size:13px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .bc tbody th,.bc thead th:first-child{position:sticky;left:0;background:#fff;z-index:1}
+  .bc thead th:first-child{background:#FAF9FC}
+  .bc-hint{display:none;margin:0 0 10px;color:var(--faint);font-size:14px}
+  @media (max-width:800px){.bc-hint{display:block}.bc tbody th{min-width:150px}}
+  .bc-note{margin:14px 2px 0;color:var(--faint);font-size:14px}
+  .bc-sum{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:20px}
+  .bc-card{border:1px solid var(--line);border-radius:16px;padding:18px;background:var(--bg)}
+  .bc-card b{display:block;margin-bottom:4px}
+  .bc-card span{color:var(--ink-2);font-size:16px}
+  .bc-card.us{border-color:var(--brand);background:var(--brand-soft)}
+  .tms{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .tm{padding:20px}
+  .tm blockquote{font-size:16px}
+  .uc{align-self:flex-start;font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--brand-ink);background:var(--brand-soft);border-radius:999px;padding:3px 10px}
+  .kept{margin-bottom:24px}
+  @media (max-width:1100px){.tms{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:900px){.ps,.shots{grid-template-columns:1fr}.ps-row{grid-template-columns:1fr;gap:4px}.ps-row .ar{display:none}.bc-sum{grid-template-columns:1fr}.shot{max-width:360px;margin-inline:auto}}
+  @media (max-width:600px){.tms{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="proto">You’re viewing the Keeper landing page concept. <a href="index.html">← Back to the prototype</a></div>
@@ -236,9 +295,9 @@
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Keeper home"><span class="mark" aria-hidden="true"></span><span class="word">keeper</span></a>
     <ul>
-      <li><a href="#why">Why Keeper</a></li>
+      <li><a href="#product">Product</a></li>
+      <li><a href="#compare">Compare</a></li>
       <li><a href="#how">How it works</a></li>
-      <li><a href="#control">You’re in control</a></li>
       <li><a href="#love">Customers</a></li>
       <li><a href="#privacy">Privacy</a></li>
     </ul>
@@ -251,7 +310,7 @@
     <div>
       <span class="eyebrow">For freelancers, consultants and anyone who runs the whole show</span>
       <h1>Promises made.<br>Promises <em>kept.</em></h1>
-      <p class="lead">Keeper listens across your email, Slack, texts and calls, catches every commitment you make, and gets the work started for you. You never type a task again.</p>
+      <p class="lead">Keeper tracks every commitment you make across email, Slack, texts and calls, puts it on one simple board, and takes the simplest, repetitive tasks off your list. You’ll never type up a task again.</p>
       <div class="ctas"><a class="btn primary" href="index.html">Try Keeper free</a><a class="btn ghost" href="#how">See how it works</a></div>
       <p class="reassure">Connect your channels in about a minute. Your data is never used to train AI models.</p>
     </div>
@@ -271,7 +330,7 @@
     </div>
   </div>
   <div class="wrap" style="display:block">
-    <p class="works">Keeps watch across</p>
+    <p class="works">Tracks your tasks across</p>
     <div class="chips" style="margin-top:12px">
       <span class="chip"><span class="ch" style="background:#FBE9E8;color:#D6453D"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg></span>Gmail</span>
       <span class="chip"><span class="ch" style="background:#E5EEFA;color:#1C6FD1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="12" r="3"/></svg></span>Outlook</span>
@@ -281,7 +340,7 @@
       <span class="chip"><span class="ch" style="background:#E3F3F1;color:#0E8A7E"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span>Google Meet</span>
     </div>
     <div class="proof">
-      <div class="who"><span class="stack"><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadias)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cmarcuss"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cmarcuss)"><rect width="120" height="120" fill="#E3EEFC"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#2F6FD0"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#C98E6E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#C98E6E"/><path d="M38 50c0-18 10-28 23-28s23 10 22 26c-6-6-14-9-22-9-9 0-17 4-23 11z" fill="#3A2A20"/><path d="M44 66c4 12 28 12 32 0v6c0 9-7 14-16 14s-16-5-16-14z" fill="#3A2A20"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofias)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheos"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheos)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span></span><span>Join a community of <b>20,000+</b> solo operators</span></div>
+      <div class="who"><span class="stack"><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cjordans"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cjordans)"><rect width="120" height="120" fill="#ECEAF0"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1E1B26"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#D9A47E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#D9A47E"/><path d="M38 48c2-14 11-22 22-22s20 8 22 22c-4-4-12-7-22-7s-18 3-22 7z" fill="#1E1620"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><g fill="none" stroke="#2B1F3A" stroke-width="2"><circle cx="52" cy="60" r="6"/><circle cx="68" cy="60" r="6"/><path d="M58 60h4"/></g><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofias)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadias)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheos"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheos)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span></span><span>Join a community of <b>20,000+</b> solo operators</span></div>
       <span class="div" aria-hidden="true"></span>
       <div class="rating"><span class="big">4.8</span><span><span class="stars" aria-hidden="true">★★★★★</span><br>average from 1,900+ reviews</span></div>
     </div>
@@ -289,68 +348,99 @@
 </header>
 
 <section class="problem" id="problem">
-  <div class="wrap">
-    <div class="sec-h rev">
-      <span class="eyebrow">The problem</span>
-      <h2>You’re the strategist, the account manager <em>and</em> the assistant.</h2>
-      <p>When you work for yourself, every client brings their own inbox, Slack and phone number. The work is the easy part. Keeping track of what you promised is the job nobody pays you for.</p>
+  <div class="wrap ps">
+    <div class="rev">
+      <span class="eyebrow">Problem → solution</span>
+      <h2>When you’re the strategist, the account manager and the assistant, you need a to-do list that <em>updates itself</em>.</h2>
     </div>
-    <div class="pains">
-      <div class="pain rev"><div class="n">6</div><h3>apps to check before you start</h3><p>Requests land in email, DMs, texts and call notes. Mornings go to digging for what actually needs doing.</p></div>
-      <div class="pain rev"><div class="n">“I’ll send it”</div><h3>said on a call, gone by dinner</h3><p>The promises you make on the go are the ones that slip, because there’s no moment to write them down.</p></div>
-      <div class="pain rev"><div class="n">Sunday</div><h3>night, catching up again</h3><p>Task apps want you to feed them. Keeping the list current becomes one more job, so you quit the app.</p></div>
+    <div class="ps-list">
+      <div class="ps-row rev"><span class="pr">Requests are scattered across 6 apps</span><span class="ar" aria-hidden="true">→</span><span class="so">One board, filled in from every channel</span></div>
+      <div class="ps-row rev"><span class="pr">Promises made on calls slip by dinner</span><span class="ar" aria-hidden="true">→</span><span class="so">Caught the moment you say them</span></div>
+      <div class="ps-row rev"><span class="pr">Updating a project management app is yet another job</span><span class="ar" aria-hidden="true">→</span><span class="so">Nothing to type; routine replies come pre-drafted</span></div>
     </div>
-    <p class="quote rev">“Updating my project management app is yet another job.”<span>Sound familiar? That’s who we built Keeper for.</span></p>
   </div>
 </section>
 
-<section id="why">
+<section id="product">
+  <div class="wrap">
+    <div class="sec-h rev">
+      <span class="eyebrow">The product</span>
+      <h2>Designed for people who work <em>on the go</em>.</h2>
+      <p>Most task tools are built for a desk. Keeper is built for the car, the site visit and the five minutes between calls.</p>
+    </div>
+    <div class="shots">
+      <figure class="shot rev"><div class="phone"><img src="img/m-board.png" alt="Keeper mobile board showing tasks with drafted replies ready to approve" loading="lazy"></div>
+        <figcaption><span class="tagline">Mobile first</span><b>Your whole day on one screen</b><span>Tasks are sorted by due date, with the ones Keeper can help with flagged and ready to approve. Swipe right to finish.</span></figcaption></figure>
+      <figure class="shot rev"><div class="phone"><img src="img/m-voice.png" alt="Keeper voice capture screen with a large microphone button" loading="lazy"></div>
+        <figcaption><span class="tagline">Voice mode</span><b>Say it, don’t type it</b><span>Tap once and talk. Keeper turns a ramble into a clean task, asks only for what’s missing, and reads it back.</span></figcaption></figure>
+      <figure class="shot rev"><div class="phone"><img src="img/m-task.png" alt="A task showing the original email it came from and a drafted reply" loading="lazy"></div>
+        <figcaption><span class="tagline">Pulled from your channels</span><b>Every task shows where it came from</b><span>See the exact line from the email, Slack or text that created it, open the original in one tap, and review Keeper’s draft.</span></figcaption></figure>
+    </div>
+    <div class="desk rev"><img src="img/d-board.png" alt="Keeper desktop board with Up Next, In Progress and Done columns" loading="lazy"></div>
+    <p class="desk-cap">And a full board on desktop for when you’re back at your desk.</p>
+  </div>
+</section>
+
+<section id="why" style="padding-top:24px">
   <div class="wrap">
     <div class="sec-h rev">
       <span class="eyebrow">Why Keeper</span>
-      <h2>The task list that <em>writes itself</em>, then gets to work.</h2>
+      <h2>A to-do list that fills itself in, and clears the small stuff.</h2>
       <p>Other tools wait for you to type. Keeper starts from the conversations you’re already having.</p>
     </div>
     <div class="diffs">
-      <article class="diff hero-diff rev">
-        <div>
-          <span class="tag">Only in Keeper</span>
-          <div class="ic" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h6M4 12h6M4 18h6M14 12h6M10 6c3 0 3 6 4 6M10 18c3 0 3-6 4-6"/></svg></div>
-          <h3>Every channel. One list.</h3>
-          <p>Note-takers catch meetings. Inbox tools catch email. Keeper catches commitments across all of it, merges duplicates, and links every task back to the exact message it came from.</p>
-        </div>
-        <div class="compare" aria-label="What each kind of tool catches">
-          <div class="cmp"><b>Meeting note-takers</b><span class="no">Calls only</span></div>
-          <div class="cmp"><b>Email assistants</b><span class="no">Email only</span></div>
-          <div class="cmp"><b>Task apps</b><span class="no">What you type</span></div>
-          <div class="cmp us"><b>Keeper</b><span class="yes">Email · Slack · texts · calls</span></div>
-        </div>
-      </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8l-6 6-3-3M4 4h16v16H4z"/></svg></div>
-        <h3>Zero data entry</h3>
-        <p>You never add a task by hand. Keeper hears “I’ll send that over Friday” and puts it on your board with the right client, date and source.</p>
+        <h3>No data entry</h3>
+        <p>You never add a task by hand unless you want to. Keeper hears “I’ll send that over Friday” and puts it on your board with the right client, date and source.</p>
       </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
-        <h3>It does the work, not just the list</h3>
-        <p>Keeper drafts the reply, finds a time on your calendar and books the meeting. You review, tap send, and move on.</p>
+        <h3>Takes the repetitive tasks off your list</h3>
+        <p>For simple, routine work like “send the file” replies and finding a meeting time, Keeper drafts it or books it. You approve in one tap and get back to the work only you can do.</p>
       </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
-        <h3>Built for life on the go</h3>
-        <p>Between site visits? Say it out loud. Keeper turns a ramble into a clean task, asks only what’s missing, and reads it back.</p>
+        <h3>Voice when your hands are full</h3>
+        <p>Between site visits? Say it out loud. Keeper asks only for what’s missing and reads the task back.</p>
       </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></div>
         <h3>Sorted before you sit down</h3>
-        <p>Your morning starts with one prioritized list: what’s due today, what’s overdue, and what Keeper already handled overnight.</p>
+        <p>Your morning starts with one prioritized list: what’s due today, what’s overdue, and what’s already drafted for you.</p>
       </article>
     </div>
   </div>
 </section>
 
-<section id="how" style="padding-top:24px">
+<section class="battle" id="compare">
+  <div class="wrap">
+    <div class="sec-h rev">
+      <span class="eyebrow">Only in Keeper</span>
+      <h2>The only tool that tracks every channel <em>and</em> gets your tasks started.</h2>
+      <p>Note-takers catch meetings. Email assistants catch email. Task apps catch what you type. Keeper does all of it, for one person running a whole business.</p>
+    </div>
+    <p class="bc-hint">Swipe to compare →</p>
+    <div class="bc-wrap rev">
+      <table class="bc">
+        <thead><tr><th scope="col" style="text-align:left">What you need</th>
+          <th scope="col" class="us">Keeper<small>Every channel</small></th>
+          <th scope="col">Otter.ai<small>Meeting notes</small></th>
+          <th scope="col">Motion<small>AI calendar</small></th>
+          <th scope="col">Superhuman<small>AI email</small></th>
+          <th scope="col">Todoist<small>Task app</small></th></tr></thead>
+        <tbody><tr><th scope="row">Finds tasks in email automatically</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Forward to add</small></td><td class="p"><span class="part">Partial</span><small>Reminders only</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Finds tasks in Slack and texts</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Finds tasks in calls and meetings</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="y"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Meeting notes</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">No manual task entry needed</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Calls only</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Drafts routine replies for you</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Recap emails</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="y"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Books meetings on your calendar</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="y"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="p"><span class="part">Partial</span><small>Shares times</small></td><td class="n"><span class="no">—</span><span class="sr">No</span></td></tr><tr><th scope="row">Built mobile-first for solo operators</th><td class="y us"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span><span class="sr">Yes</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="n"><span class="no">—</span><span class="sr">No</span></td><td class="p"><span class="part">Partial</span><small>Mobile app, manual</small></td></tr></tbody>
+      </table>
+    </div>
+    <p class="bc-note">Based on each product’s publicly listed features as of October 2026. Competitor tools change often.</p>
+    <div class="bc-sum">
+      <div class="bc-card rev"><b>Everyone else covers one channel</b><span>So you still copy tasks between apps, or forget them.</span></div>
+      <div class="bc-card us rev"><b>Keeper covers all of them, then helps</b><span>Multichannel tracking plus drafted replies and booked meetings, in one app.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="how">
   <div class="wrap">
     <div class="sec-h rev">
       <span class="eyebrow">How it works</span>
@@ -359,9 +449,9 @@
     <div class="steps">
       <div class="step rev"><span class="k">1</span><h3>Connect your channels</h3><p>Turn on the inboxes, workspaces and calls you use. Clients can text a business number so your personal one stays private.</p>
         <div class="mini" aria-hidden="true"><div class="row">Gmail<span class="tog"></span></div><div class="row">Slack<span class="tog"></span></div><div class="row">Business texts<span class="tog"></span></div></div></div>
-      <div class="step rev"><span class="k">2</span><h3>Keeper catches what you owe</h3><p>Every commitment lands on your board with its client, due date and a link to the original message. Keep it or dismiss it.</p>
-        <div class="mini" aria-hidden="true"><q><mark>Can we get the final guidelines PDF this week</mark> so the printer can start?</q><div class="acts"><span>Dismiss</span><span class="p">Keep</span></div></div></div>
-      <div class="step rev"><span class="k">3</span><h3>Approve, send, done</h3><p>Keeper drafts the reply or books the meeting. Approve it in one tap, or let Keeper handle routine ones on its own.</p>
+      <div class="step rev"><span class="k">2</span><h3>Keeper finds what you owe</h3><p>Every commitment lands on your board with its client, due date and a link to the original message. Add it or dismiss it.</p>
+        <div class="mini" aria-hidden="true"><q><mark>Can we get the final guidelines PDF this week</mark> so the printer can start?</q><div class="acts"><span>Dismiss</span><span class="p">Add</span></div></div></div>
+      <div class="step rev"><span class="k">3</span><h3>Approve the easy ones</h3><p>For routine replies and scheduling, Keeper prepares a draft or a booking. Approve it in one tap, or let it handle those on its own.</p>
         <div class="mini" aria-hidden="true"><span class="badge">✦ Draft ready</span><div><b>Hi Dana,</b> as promised, here’s the final brand guidelines PDF…</div><div class="acts"><span>Edit</span><span class="p">Send reply</span></div></div></div>
     </div>
   </div>
@@ -370,32 +460,25 @@
 <section id="love" style="padding-top:24px">
   <div class="wrap">
     <div class="sec-h rev">
-      <span class="eyebrow">Loved by solo operators</span>
-      <h2>20,000 people who run the whole show. <em>Keeping every promise.</em></h2>
+      <span class="eyebrow">Customers</span>
+      <h2>Join 20,000 solo operators who love Keeper.</h2>
     </div>
     <div class="tms">
-      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;Clients text me at 10pm, email me at 7am and grab me on site. Keeper catches all of it. I haven&rsquo;t dropped a single request since I switched.&rdquo;</blockquote>
-        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadia"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadia)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Nadia Okoro</b><small>Interior designer · Okoro Studio</small></span></figcaption></figure>
-      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;It booked three showings while I was driving between listings. This is the first productivity app that actually does the work.&rdquo;</blockquote>
+      <figure class="tm rev"><span class="uc">Founders</span><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>“I’m sales, support and product. Customer emails and Slack DMs land on one list, and the easy replies are drafted before I open my laptop.”</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cjordan"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cjordan)"><rect width="120" height="120" fill="#ECEAF0"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1E1B26"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#D9A47E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#D9A47E"/><path d="M38 48c2-14 11-22 22-22s20 8 22 22c-4-4-12-7-22-7s-18 3-22 7z" fill="#1E1620"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><g fill="none" stroke="#2B1F3A" stroke-width="2"><circle cx="52" cy="60" r="6"/><circle cx="68" cy="60" r="6"/><path d="M58 60h4"/></g><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Jordan Kim</b><small>Founder · one-person SaaS studio</small></span></figcaption></figure>
+      <figure class="tm rev"><span class="uc">Brand strategists</span><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>“Five client Slacks, two inboxes, endless calls. This is the one place they all meet, and the drafted replies actually sound like me.”</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofia"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofia)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Sofia Reyes</b><small>Brand strategist · 5 clients</small></span></figcaption></figure>
+      <figure class="tm rev"><span class="uc">Freelancers</span><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>“Clients text me at 10pm, email at 7am and grab me on site. I haven’t dropped a single request since I switched.”</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadia"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadia)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Nadia Okoro</b><small>Freelance interior designer</small></span></figcaption></figure>
+      <figure class="tm rev"><span class="uc">Creatives</span><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>“I haven’t typed up a to-do in two months. Brand deals, shoots and edits all show up on their own.”</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheo"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheo)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Theo Lindqvist</b><small>Photographer · 240K followers</small></span></figcaption></figure>
+      <figure class="tm rev"><span class="uc">Independent agents</span><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>“It booked three showings while I was driving between listings. The scheduling back-and-forth is just gone.”</blockquote>
         <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cmarcus"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cmarcus)"><rect width="120" height="120" fill="#E3EEFC"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#2F6FD0"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#C98E6E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#C98E6E"/><path d="M38 50c0-18 10-28 23-28s23 10 22 26c-6-6-14-9-22-9-9 0-17 4-23 11z" fill="#3A2A20"/><path d="M44 66c4 12 28 12 32 0v6c0 9-7 14-16 14s-16-5-16-14z" fill="#3A2A20"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Marcus Bell</b><small>Real estate agent · Brooklyn</small></span></figcaption></figure>
-      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;Five client Slacks, two inboxes, endless calls. Keeper is the one place they all meet, and its drafted replies sound like me.&rdquo;</blockquote>
-        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofia"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofia)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Sofia Reyes</b><small>Fractional design lead · 5 clients</small></span></figcaption></figure>
-      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;I haven&rsquo;t typed a to-do in two months. Promises kept, clients kept, and my weekends are mine again.&rdquo;</blockquote>
-        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheo"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheo)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Theo Lindqvist</b><small>Photographer and creator · 240K followers</small></span></figcaption></figure>
     </div>
     <div class="stats">
       <div class="stat rev"><b>20,000+</b><span>solo operators on Keeper</span></div>
-      <div class="stat rev"><b>3.1M</b><span>commitments kept so far</span></div>
+      <div class="stat rev"><b>3.1M</b><span>commitments tracked so far</span></div>
       <div class="stat rev"><b>6 hrs</b><span>saved per week, on average</span></div>
-    </div>
-  </div>
-</section>
-
-<section style="padding-top:24px">
-  <div class="wrap">
-    <div class="kept" id="kept">
-      <div class="lines"><span>Promises <em>kept.</em></span><span>Clients <em>kept.</em></span><span>Weekends <em>kept.</em></span></div>
-      <p>Nothing you promised slips through, so the people who pay you keep coming back, and your evenings stay yours. This one’s a keeper.</p>
     </div>
   </div>
 </section>
@@ -405,11 +488,11 @@
     <div class="rev">
       <span class="eyebrow">You’re in control</span>
       <h2 style="font-size:clamp(34px,4.4vw,52px);line-height:1.05;letter-spacing:-.03em;margin:14px 0 14px;font-weight:600">Hands-off when you want it. <em style="color:var(--brand)">Hands-on</em> when it matters.</h2>
-      <p style="font-size:19px;color:var(--ink-2);margin:0">Decide exactly how much Keeper does for you, channel by channel.</p>
+      <p style="font-size:19px;color:var(--ink-2);margin:0">Decide exactly how much Keeper does for you.</p>
       <ul class="ticks">
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Keeper reads to find tasks. It never sends without the permission you set.</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Every task links back to its source, so you can always check the original.</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Anything Keeper sends or books is logged on the task.</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Keeper reads to find tasks. It never sends without the permission you set.</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Every task links back to its source, so you can always check the original.</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>Anything Keeper sends or books is logged on the task.</li>
       </ul>
     </div>
     <div class="perm rev" aria-label="Example agent permission settings">
@@ -427,31 +510,38 @@
   <div class="wrap">
     <div class="sec-h rev">
       <span class="eyebrow">Privacy</span>
-      <h2>Your client work is <em>yours to keep.</em></h2>
+      <h2>Your data is <em>yours to keep.</em></h2>
       <p>Keeper reads your conversations so you don’t have to. That takes trust, so we built it to earn it.</p>
     </div>
     <div class="privs">
       <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Never used to train AI</h3><p>Your messages, files and client details are never used to train our models or anyone else’s. Our AI providers are contractually barred from it too.</p></div>
       <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div><h3>Encrypted and private</h3><p>Data is encrypted in transit and at rest, and only you can see your board. No one at Keeper reads your messages.</p></div>
-      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><h3>Reads only what it needs</h3><p>Keeper scans for commitments and keeps just the snippet that created each task. It never sends, deletes or edits anything without your permission.</p></div>
-      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></div><h3>Leave anytime, take nothing with us</h3><p>Disconnect a channel and Keeper stops reading instantly. Delete your account and everything goes with it.</p></div>
+      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></div><h3>Reads only what it needs</h3><p>Keeper scans for commitments and stores just the snippet that created each task. It never sends, deletes or edits anything without your permission.</p></div>
+      <div class="pv rev"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></div><h3>Leave anytime</h3><p>Disconnect a channel and Keeper stops reading instantly. Delete your account and everything goes with it.</p></div>
     </div>
-    <div class="promise rev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg><span>Our promise: your business information is <em>kept</em> private. It’s in the name.</span></div>
   </div>
 </section>
 
-<section class="final" style="padding-top:24px">
+<section class="final">
   <div class="wrap rev">
-    <h2>Your next promise is already in your inbox.<br><em>Keep it.</em></h2>
-    <p>Set up takes about a minute. No tasks to type, ever. Your data stays private.</p>
+    <h2>Your next promise is already in your inbox.</h2>
+    <p>Set up takes about a minute. No tasks to type up, ever. Your data stays private.</p>
     <div class="ctas"><a class="btn primary" href="index.html">Try Keeper free</a><a class="btn ghost" href="#how">How it works</a></div>
   </div>
 </section>
 
-<footer>
-  <div class="wrap"><span style="display:flex;align-items:center;gap:8px"><span class="mark" style="width:22px;height:22px;border-radius:6px" aria-hidden="true"></span>Keeper · every commitment, kept.</span><span>Concept landing page for a prototype. Names and examples are illustrative.</span></div>
-</footer>
+<section style="padding:0 0 24px">
+  <div class="wrap">
+    <div class="kept" id="kept">
+      <div class="lines"><span>Promises <em>kept.</em></span><span>Clients <em>kept.</em></span><span>Weekends <em>kept.</em></span></div>
+      <p>Nothing you promised slips through, so the people who pay you come back, and your evenings stay yours.</p>
+    </div>
+  </div>
+</section>
 
+<footer>
+  <div class="wrap"><span style="display:flex;align-items:center;gap:8px"><span class="mark" style="width:22px;height:22px;border-radius:6px" aria-hidden="true"></span>Keeper · every commitment, tracked.</span><span>Concept landing page for a prototype. Names and examples are illustrative.</span></div>
+</footer>
 <script>
   (function () {
     var nav = document.getElementById('nav');
