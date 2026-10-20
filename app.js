@@ -345,8 +345,33 @@
     if (S.onboarded && S.step === 3) { /* noop */ }
   }
 
+  /* first-run review: approve or reject everything Keeper found before it reaches the board */
+  const foundTasks = () => S.tasks.filter(t => !t.dismissed && t.status !== 'done' && t.source !== 'keeper' && S.channels.includes(t.source)).sort((a, b) => b.captured - a.captured);
+  function onbReviewHTML(steps) {
+    const list = foundTasks(), pick = S.onbPick || {};
+    const kept = list.filter(t => pick[t.id] === 'keep').length, decided = list.filter(t => pick[t.id]).length;
+    const rows = list.map(t => {
+      const p = pick[t.id], who = t.requester && t.requester !== 'maya' ? personName(t.requester) : 'You';
+      return `<article class="ob-rv ${p || ''}" data-tid="${t.id}">
+        <div class="rv-top">${srcIcons(t)}<span>${esc(who)} · ${esc(srcLabel(t.source))}</span></div>
+        <div class="ob-title">${esc(t.title)}</div>
+        ${t.snippet ? `<div class="rv-snip">“${esc(origin(t).text)}”</div>` : ''}
+        <div class="ob-acts">
+          <button type="button" class="ob-btn no ${p === 'skip' ? 'on' : ''}" data-action="ob-pick" data-v="skip" aria-pressed="${p === 'skip'}">${ic('x')}Reject</button>
+          <button type="button" class="ob-btn yes ${p === 'keep' ? 'on' : ''}" data-action="ob-pick" data-v="keep" aria-pressed="${p === 'keep'}">${ic('check')}Approve</button>
+        </div></article>`;
+    }).join('');
+    return `<div class="onb"><div class="onb-inner">${steps(3)}
+      <h2>Keeper found ${list.length} tasks</h2>
+      <p class="lead">Approve the ones you owe someone. Rejected tasks won’t be added to your board.</p>
+      <div class="ob-bar"><span>${decided} of ${list.length} reviewed</span><button type="button" class="linkish" data-action="ob-all">Approve all</button></div>
+      <div class="ob-list">${rows}</div>
+      <div class="onb-foot ob-foot"><button class="btn-primary" data-action="ob-finish" ${kept ? '' : 'disabled'}>Add ${kept} task${kept === 1 ? '' : 's'} to my board</button>
+        <span class="small">${decided < list.length ? 'Anything you skip now stays in To review.' : 'You can change these later.'}</span></div>
+    </div></div>`;
+  }
   function renderOnboarding() {
-    const steps = n => '<div class="steps">' + [0, 1, 2].map(i => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
+    const steps = n => '<div class="steps">' + [0, 1, 2, 3].map(i => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
     if (S.step === 0) return `<div class="onb"><div class="onb-inner">
       <div class="onb-hero"><span class="logo-mark" aria-hidden="true"></span>
       <h1>Every commitment, <em>kept.</em></h1>
@@ -371,6 +396,7 @@
         <span class="small">Prototype: connections are simulated</span></div>
       </div></div>`;
     }
+    if (S.step === 3) return onbReviewHTML(steps);
     const counts = S.channels.map(k => S.tasks.filter(t => t.source === k).length);
     const rows = S.channels.map((k, i) => `<div class="scan-row" style="--k:${i}">${srcIc(k)}<b>${esc(D.SOURCES[k].label)}</b><span class="bar"><i style="--k:${i}"></i></span><span class="cnt">${counts[i] || 1} found</span></div>`).join('');
     return `<div class="onb"><div class="onb-inner">${steps(2)}
@@ -1175,12 +1201,19 @@
         if (S.step < 2) { S.step++; save(); render(); }
         if (S.step === 2) setTimeout(() => {
           if (S.step !== 2) return;
-          S.onboarded = true; S.step = 3; S.screen = 'board'; save(); render();
-          const n = S.tasks.filter(t => t.status !== 'done' && (S.channels.includes(t.source) || t.source === 'keeper')).length;
-          toast(`${n} open tasks caught across ${S.channels.length} channels`, { title: 'You’re all set' });
-          scheduleLive();
+          S.step = 3; S.onbPick = {}; save(); render();
         }, 2600);
         break;
+      case 'ob-pick': { const id = tidOf(a); S.onbPick = S.onbPick || {}; S.onbPick[id] = S.onbPick[id] === a.dataset.v ? undefined : a.dataset.v; save(); const sc = $('.onb') && $('.onb').scrollTop; render(); if ($('.onb')) $('.onb').scrollTop = sc; break; }
+      case 'ob-all': { S.onbPick = S.onbPick || {}; foundTasks().forEach(t => { if (!S.onbPick[t.id]) S.onbPick[t.id] = 'keep'; }); save(); const sc = $('.onb') && $('.onb').scrollTop; render(); if ($('.onb')) $('.onb').scrollTop = sc; break; }
+      case 'ob-finish': {
+        const pick = S.onbPick || {}; let kept = 0;
+        foundTasks().forEach(t => { const p = pick[t.id]; if (p === 'keep') { t.triage = false; t.low = false; kept++; } else if (p === 'skip') { t.dismissed = true; t.triage = false; } else t.triage = true; });
+        S.onboarded = true; S.screen = 'board'; S.onbPick = null; save(); render();
+        toast(`${kept} task${kept === 1 ? '' : 's'} added to your board`, { title: 'You’re all set' });
+        scheduleLive();
+        break;
+      }
       case 'chan': {
         const k = a.dataset.k, i = S.channels.indexOf(k);
         if (i < 0) { startConnect(k); break; }
@@ -1422,7 +1455,7 @@
 
   /* ---------- boot ---------- */
   window.addEventListener('resize', () => { const was = device.classList.contains('is-mobile') ? 'mobile' : 'desktop'; if (was !== mode()) render(); else fitDevice(); });
-  if (S.onboarded && S.step === 2) { S.onboarded = true; S.step = 3; }
+  if (!S.onboarded && S.step === 3 && !S.onbPick) S.onbPick = {};
   if (!S.onboarded && S.step === 2) S.step = 1;
   render();
   /* app-style launch screen on phones */
