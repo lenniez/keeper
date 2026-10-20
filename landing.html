@@ -606,6 +606,10 @@
   #product{padding-top:40px}
   .go-head{align-items:start}
   @media (min-width:901px){.go-head .sec-h{padding-top:28px}}
+  .works-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px 14px;margin-top:22px}
+  .works-row .works{margin:0;text-align:left;font-size:15px;color:var(--faint)}
+  .works-row .chips{margin:0;justify-content:flex-start}
+  .feat.f2 .crop,.feat.f3 .crop{margin-left:auto!important;margin-right:auto!important}
 </style>
 </head>
 <body>
@@ -630,7 +634,7 @@
   <div class="wrap">
     <div>
       <h1>The only to-do list that <em>updates itself.</em></h1>
-      <p class="lead">Keeper turns your email, Slack, texts and calls into one to-do list, and handles the simple tasks for you. Built for freelancers, consultants and independent agents.</p>
+      <p class="lead">Keeper turns your email, Slack, texts and calls into one to-do list with AI, and handles the simple tasks for you. Built for freelancers, consultants and independent agents.</p>
       <div class="ctas"><a class="btn primary" href="index.html">Try Keeper free</a><a class="btn ghost" href="#setup">How to set it up</a></div>
     </div>
     <div class="visual flow" aria-label="Messages from email, texts, Slack and calls flowing into one to-do list">
@@ -648,15 +652,6 @@
     </div>
   </div>
   <div class="wrap" style="display:block">
-    <p class="works">Tracks your tasks across</p>
-    <div class="chips" style="margin-top:12px">
-      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M6 38h7V22L4 15v20a3 3 0 0 0 2 3z"/><path fill="#34A853" d="M35 38h7a3 3 0 0 0 2-3V15l-9 7z"/><path fill="#FBBC04" d="M35 11v11l9-7v-3c0-3.7-4.2-5.8-7.2-3.6z"/><path fill="#EA4335" d="M13 22V11l11 8.3L35 11v11l-11 8.3z"/><path fill="#C5221F" d="M4 12v3l9 7V11l-1.8-1.6C8.2 7.2 4 9.3 4 12z"/></svg></span>Gmail</span>
-      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="18" y="8" width="26" height="32" rx="3" fill="#28A8EA"/><path fill="#0078D4" d="M18 24h26v13a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3z"/><rect x="4" y="13" width="22" height="22" rx="3" fill="#0A64C2"/><ellipse cx="15" cy="24" rx="5.2" ry="6.3" fill="none" stroke="#fff" stroke-width="2.6"/></svg></span>Outlook</span>
-      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#E01E5A" d="M14 29a4 4 0 1 1-4-4h4zm2 0a4 4 0 0 1 8 0v10a4 4 0 0 1-8 0z"/><path fill="#36C5F0" d="M20 14a4 4 0 1 1 4-4v4zm0 2a4 4 0 0 1 0 8H10a4 4 0 0 1 0-8z"/><path fill="#2EB67D" d="M34 20a4 4 0 1 1 4 4h-4zm-2 0a4 4 0 0 1-8 0V10a4 4 0 0 1 8 0z"/><path fill="#ECB22E" d="M28 34a4 4 0 1 1-4 4v-4zm0-2a4 4 0 0 1 0-8h10a4 4 0 0 1 0 8z"/></svg></span>Slack</span>
-      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#34C759"/><path fill="#fff" d="M24 12c-7.7 0-14 5-14 11.2 0 3.6 2.1 6.8 5.4 8.8L14 37l6.2-3.3c1.2.3 2.5.5 3.8.5 7.7 0 14-5 14-11.2S31.7 12 24 12z"/></svg></span>Business texts</span>
-      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#0B5CFF"/><rect x="10" y="16" width="19" height="16" rx="4" fill="#fff"/><path fill="#fff" d="M31 21.5l7-4.5v14l-7-4.5z"/></svg></span>Zoom</span>
-      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#00832D" d="M27 24l4.4 5 5.6 3.7 1-8.6-1-8.4-5.7 3.2z"/><path fill="#0066DA" d="M4 31.6V38a3 3 0 0 0 3 3h6.4l1.3-4.8-1.3-4.6-4.4-1.3z"/><path fill="#E94235" d="M13.4 7L4 16.4l4.8 1.3 4.6-1.3 1.3-4.4z"/><path fill="#2684FC" d="M13.4 16.4H4v15.2h9.4z"/><path fill="#00AC47" d="M42 11.3l-5 4.4v16.9l5 4.1c.8.6 2 0 2-1V12.3c0-1-1.2-1.6-2-1zM27 24v7.6H13.4V41h20.1a3 3 0 0 0 3-3v-5.6z"/><path fill="#FFBA00" d="M33.5 7H13.4v9.4H27V24l9.6-8V10a3 3 0 0 0-3-3z"/></svg></span>Google Meet</span>
-    </div>
     <div class="proof">
       <div class="who"><span class="stack"><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cjordans"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cjordans)"><rect width="120" height="120" fill="#ECEAF0"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1E1B26"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#D9A47E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#D9A47E"/><path d="M38 48c2-14 11-22 22-22s20 8 22 22c-4-4-12-7-22-7s-18 3-22 7z" fill="#1E1620"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><g fill="none" stroke="#2B1F3A" stroke-width="2"><circle cx="52" cy="60" r="6"/><circle cx="68" cy="60" r="6"/><path d="M58 60h4"/></g><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofias)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadias)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheos"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheos)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span></span><span>Join our community of <b>20,000+</b> users</span></div>
       <span class="div" aria-hidden="true"></span>
@@ -669,7 +664,16 @@
   <div class="wrap">
     <div class="sec-h rev">
       <h2>One list for everything you’ve promised.</h2>
-      <p>Connect the channels your clients already use (yes, even the client who only texts). Keeper finds the commitments and lines them up by due date.</p>
+      <p>Connect the channels your clients already use (yes, even the client who only texts). Keeper uses AI to find the commitments and lines them up by due date.</p>
+    <div class="works-row"><span class="works">Tracks your tasks across</span>
+    <div class="chips">
+      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#4285F4" d="M6 38h7V22L4 15v20a3 3 0 0 0 2 3z"/><path fill="#34A853" d="M35 38h7a3 3 0 0 0 2-3V15l-9 7z"/><path fill="#FBBC04" d="M35 11v11l9-7v-3c0-3.7-4.2-5.8-7.2-3.6z"/><path fill="#EA4335" d="M13 22V11l11 8.3L35 11v11l-11 8.3z"/><path fill="#C5221F" d="M4 12v3l9 7V11l-1.8-1.6C8.2 7.2 4 9.3 4 12z"/></svg></span>Gmail</span>
+      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="18" y="8" width="26" height="32" rx="3" fill="#28A8EA"/><path fill="#0078D4" d="M18 24h26v13a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3z"/><rect x="4" y="13" width="22" height="22" rx="3" fill="#0A64C2"/><ellipse cx="15" cy="24" rx="5.2" ry="6.3" fill="none" stroke="#fff" stroke-width="2.6"/></svg></span>Outlook</span>
+      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#E01E5A" d="M14 29a4 4 0 1 1-4-4h4zm2 0a4 4 0 0 1 8 0v10a4 4 0 0 1-8 0z"/><path fill="#36C5F0" d="M20 14a4 4 0 1 1 4-4v4zm0 2a4 4 0 0 1 0 8H10a4 4 0 0 1 0-8z"/><path fill="#2EB67D" d="M34 20a4 4 0 1 1 4 4h-4zm-2 0a4 4 0 0 1-8 0V10a4 4 0 0 1 8 0z"/><path fill="#ECB22E" d="M28 34a4 4 0 1 1-4 4v-4zm0-2a4 4 0 0 1 0-8h10a4 4 0 0 1 0 8z"/></svg></span>Slack</span>
+      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#34C759"/><path fill="#fff" d="M24 12c-7.7 0-14 5-14 11.2 0 3.6 2.1 6.8 5.4 8.8L14 37l6.2-3.3c1.2.3 2.5.5 3.8.5 7.7 0 14-5 14-11.2S31.7 12 24 12z"/></svg></span>Business texts</span>
+      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="11" fill="#0B5CFF"/><rect x="10" y="16" width="19" height="16" rx="4" fill="#fff"/><path fill="#fff" d="M31 21.5l7-4.5v14l-7-4.5z"/></svg></span>Zoom</span>
+      <span class="chip"><span class="lg"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#00832D" d="M27 24l4.4 5 5.6 3.7 1-8.6-1-8.4-5.7 3.2z"/><path fill="#0066DA" d="M4 31.6V38a3 3 0 0 0 3 3h6.4l1.3-4.8-1.3-4.6-4.4-1.3z"/><path fill="#E94235" d="M13.4 7L4 16.4l4.8 1.3 4.6-1.3 1.3-4.4z"/><path fill="#2684FC" d="M13.4 16.4H4v15.2h9.4z"/><path fill="#00AC47" d="M42 11.3l-5 4.4v16.9l5 4.1c.8.6 2 0 2-1V12.3c0-1-1.2-1.6-2-1zM27 24v7.6H13.4V41h20.1a3 3 0 0 0 3-3v-5.6z"/><path fill="#FFBA00" d="M33.5 7H13.4v9.4H27V24l9.6-8V10a3 3 0 0 0-3-3z"/></svg></span>Google Meet</span>
+    </div></div>
     </div>
     <div class="diffs">
       <article class="diff rev">
@@ -694,8 +698,8 @@
       </article>
     </div>
     <div class="what-shots">
-      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-settings.png?v=1020c" alt="Settings showing Gmail, Slack, business texts and Zoom connected" loading="lazy"></div></div><figcaption><b>Every channel feeds in</b>Gmail, Outlook, Slack, business texts, Zoom and Meet.</figcaption></figure>
-      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-board.png?v=1020c" alt="The Keeper board on a phone, with tasks sorted by due date" loading="lazy"></div></div><figcaption><b>Get one list</b>Every commitment, sorted by due date, with drafts ready to approve.</figcaption></figure>
+      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-onb.png?v=1020d" alt="Settings showing Gmail, Slack, business texts and Zoom connected" loading="lazy"></div></div><figcaption><b>Every channel feeds in</b>Gmail, Outlook, Slack, business texts, Zoom and Meet.</figcaption></figure>
+      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-list.png?v=1020d" alt="The Keeper board on a phone, with tasks sorted by due date" loading="lazy"></div></div><figcaption><b>Get one list</b>Every commitment, sorted by due date, with the original message one tap away.</figcaption></figure>
     </div>
     <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
   </div>
@@ -728,11 +732,11 @@
     </div>
     <div class="steps">
       <div class="step rev"><span class="k">1</span><h3>Connect your channels</h3><p>Turn on the inboxes, workspaces and calls you use. It takes about as long as making toast. Clients can text a business number so your personal one stays private.</p>
-        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-onb.png?v=1020c" alt="Choosing which channels Keeper tracks" loading="lazy"></div></div></div>
+        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-onb.png?v=1020d" alt="Choosing which channels Keeper tracks" loading="lazy"></div></div></div>
       <div class="step rev"><span class="k">2</span><h3>Review what Keeper found</h3><p>Every commitment lands with its client, due date and a link to the original message. Keep it or dismiss it.</p>
-        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-review.png?v=1020c" alt="Reviewing the tasks Keeper found, with Keep and Dismiss buttons" loading="lazy"></div></div></div>
-      <div class="step rev"><span class="k">3</span><h3>Approve the easy ones</h3><p>For routine replies and scheduling, Keeper prepares a draft or a booking. Approve it in one tap, or let it handle those on its own.</p>
-        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-draft.png?v=1020c" alt="A reply Keeper drafted, ready to send" loading="lazy"></div></div></div>
+        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-review.png?v=1020d" alt="Reviewing the tasks Keeper found, with Keep and Dismiss buttons" loading="lazy"></div></div></div>
+      <div class="step rev"><span class="k">3</span><h3>Let Keeper handle the easy ones</h3><p>For routine replies and scheduling, Keeper prepares a draft or a booking. Approve it in one tap, or let it handle those on its own.</p>
+        <div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-draft.png?v=1020d" alt="A reply Keeper drafted, ready to send" loading="lazy"></div></div></div>
     </div>
   </div>
 </section>
@@ -753,15 +757,15 @@
     <div class="feat-grid">
       <article class="feat f1 rev">
         <div class="feat-txt"><span class="tagline">Pulled from your channels</span><h3>See where every task came from</h3><p>The exact line from the email, Slack or text that created it, with the original one tap away.</p></div>
-        <div class="crop"><img src="img/m-task.png?v=1020c" alt="A task showing the original email it came from, with an Open in Gmail button" loading="lazy" style="width:100%;transform:translate(0%,-50%)"></div>
+        <div class="crop"><img src="img/m-task.png?v=1020d" alt="A task showing the original email it came from, with an Open in Gmail button" loading="lazy" style="width:100%;transform:translate(0%,-50%)"></div>
       </article>
       <article class="feat f2 rev">
         <div class="feat-txt"><span class="tagline">Mobile first</span><h3>Your day on one screen</h3><p>Sorted by due date. Swipe right to finish a task.</p></div>
-        <div class="crop"><img src="img/m-board.png?v=1020c" alt="The Keeper list on a phone, with drafts ready to approve" loading="lazy" style="width:72%;left:14%;transform:translate(0%,-32.8%)"></div>
+        <div class="crop"><img src="img/m-board.png?v=1020d" alt="The Keeper list on a phone, with drafts ready to approve" loading="lazy" style="width:72%;left:14%;transform:translate(0%,-32.8%)"></div>
       </article>
       <article class="feat f3 rev">
         <div class="feat-txt"><span class="tagline">Voice mode</span><h3>Say it, don’t type it</h3><p>Tap once and talk. Keeper turns a ramble into a clean task and reads it back.</p></div>
-        <div class="crop"><img src="img/m-voice.png?v=1020c" alt="Keeper voice capture screen with a large microphone button" loading="lazy" style="width:100%;transform:translate(0%,-27%)"></div>
+        <div class="crop"><img src="img/m-voice.png?v=1020d" alt="Keeper voice capture screen with a large microphone button" loading="lazy" style="width:100%;transform:translate(0%,-27%)"></div>
       </article>
     </div>
     <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
