@@ -980,3 +980,55 @@ body{background:#EEF0EE}
 .sheet{background:#fff}
 .splash{background:#fff}
 .card{box-shadow:0 1px 2px rgba(20,30,25,.05)}
+
+
+/* ================= Voice orb: soft, swirling brand gradient (ChatGPT-style) ================= */
+.orb{position:relative;overflow:visible;background:none!important;box-shadow:none!important;width:150px;height:150px;isolation:isolate}
+.orb .icon{display:none}
+.orb-glow{position:absolute;inset:-22%;border-radius:50%;z-index:-1;filter:blur(26px);opacity:.55;
+  background:radial-gradient(circle at 30% 35%,rgba(242,192,99,.9),transparent 55%),radial-gradient(circle at 70% 70%,rgba(28,143,107,.9),transparent 60%)}
+.orb-swirl{position:absolute;inset:0;border-radius:50%;overflow:hidden;
+  background:
+    radial-gradient(circle at 26% 30%,#F6C46A 0%,rgba(246,196,106,0) 42%),
+    radial-gradient(circle at 18% 64%,#F4A886 0%,rgba(244,168,134,0) 38%),
+    radial-gradient(circle at 74% 26%,#DDF3EC 0%,rgba(221,243,236,0) 46%),
+    radial-gradient(circle at 62% 72%,#127567 0%,rgba(18,117,103,0) 55%),
+    radial-gradient(circle at 50% 50%,#3FB394 0%,#7CC3B8 60%,#BFE6D9 100%);
+  animation:orbspin 14s linear infinite}
+.orb-swirl.two{mix-blend-mode:soft-light;opacity:.8;animation:orbspin 9s linear infinite reverse;
+  background:conic-gradient(from 0deg,rgba(255,255,255,.0),rgba(255,255,255,.55),rgba(233,169,58,.35),rgba(18,117,103,.45),rgba(255,255,255,0))}
+.orb-sheen{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.55),rgba(255,255,255,0) 40%);
+  box-shadow:inset 0 -10px 30px rgba(15,94,84,.25)}
+.orb::after{content:"";position:absolute;inset:0;border-radius:50%;opacity:.18;mix-blend-mode:overlay;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
+@keyframes orbspin{to{transform:rotate(360deg)}}
+.orb.rec{animation:orbbreathe 2.4s ease-in-out infinite}
+.orb.rec .orb-swirl{animation-duration:5s}
+.orb.rec .orb-swirl.two{animation-duration:3.5s}
+.orb.rec .orb-glow{opacity:.8}
+@keyframes orbbreathe{50%{transform:scale(1.06)}}
+.vstage.compact .orb{width:60px;height:60px}
+.vstage.compact .orb-glow{filter:blur(12px)}
+@media (prefers-reduced-motion:reduce){.orb-swirl,.orb.rec{animation:none!important}}
+
+/* onboarding: larger secondary text and buttons on phones (iOS body 17 / callout 16) */
+.device.is-mobile .onb .chan-txt span,.device.is-mobile .onb .priv li,.device.is-mobile .onb .rv-snip,.device.is-mobile .onb .scan-row .cnt,.device.is-mobile .onb .rv-top{font-size:16px}
+.device.is-mobile .onb .ob-btn{font-size:17px;padding:11px 10px}
+.device.is-mobile .onb .ob-bar,.device.is-mobile .onb .ob-bar .linkish,.device.is-mobile .onb-foot .small{font-size:16px}
+.device.is-mobile .onb .priv-h b{font-size:17px}
+.device.is-mobile .onb .scan-row b{font-size:17px}
+.device.is-mobile .onb h1{font-size:40px;line-height:1.05}
+.device.is-mobile .onb .ob-title{font-size:18px}
+
+.orb-glow{inset:-12%;filter:blur(18px);opacity:.45}
+.orb-swirl{background:
+    radial-gradient(circle at 24% 28%,#F2B544 0%,rgba(242,181,68,0) 40%),
+    radial-gradient(circle at 16% 66%,#EE9367 0%,rgba(238,147,103,0) 36%),
+    radial-gradient(circle at 76% 24%,#CFF0E5 0%,rgba(207,240,229,0) 44%),
+    radial-gradient(circle at 64% 74%,#0E6A5D 0%,rgba(14,106,93,0) 52%),
+    radial-gradient(circle at 50% 50%,#23A584 0%,#5FC2A7 55%,#A6DFCD 100%)}
+.orb-sheen{box-shadow:inset 0 -12px 30px rgba(15,94,84,.3),0 0 0 1px rgba(15,94,84,.08)}
+/* smoother swirl: blur the colour fields, clip to a crisp circle */
+.orb-swirl{inset:-10%;overflow:visible;border-radius:0;filter:blur(9px) saturate(1.1);clip-path:circle(41.7% at 50% 50%)}
+.orb-swirl.two{filter:blur(14px);opacity:.55;background:conic-gradient(from 30deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.6) 70deg,rgba(242,181,68,.35) 150deg,rgba(14,106,93,.45) 240deg,rgba(255,255,255,0) 360deg)}

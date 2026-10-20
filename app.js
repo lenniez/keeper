@@ -400,7 +400,7 @@
         const s = D.SOURCES[k], on = S.channels.includes(k);
         const extra = k === 'sms' ? '<span class="num">' + bizNum() + '</span>' : '';
         return `<button type="button" class="chan ${on ? 'on' : ''}" data-action="chan" data-k="${k}" aria-pressed="${on}">
-          <span class="src-ic" style="--c:${s.color}">${ic(k)}</span>
+          ${srcIc(k)}
           <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${extra}</span>
           <span class="tog" aria-hidden="true"></span></button>`;
       }).join('');
@@ -565,7 +565,7 @@
   /* title row for the Task Feed: live indicator plus a small link to channel settings */
   function feedHead() {
     const on = S.channels.filter(k => D.SOURCES[k]);
-    return `<div class="feed-h"><h1>Task Feed</h1>
+    return `<div class="feed-h"><h1>Live Feed</h1>
       <p class="feed-meta"><span class="live-dot" aria-hidden="true"></span><span>Live from ${on.length} channel${on.length === 1 ? '' : 's'}</span><span class="dot-sep" aria-hidden="true">·</span><button type="button" class="linkish" data-action="go" data-screen="sources">Manage</button></p></div>`;
   }
   function sourcesHTML() {
@@ -578,7 +578,7 @@
           ${srcIc(k)}
           <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">' + bizNum() + '</span>' : ''}</span>
           <span class="tog" aria-hidden="true"></span></button>`;
-      }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p></section>
+      }).join('')}<p class="note">Prototype: connections are simulated. The Live Feed only shows tasks from channels that are on.</p></section>
       <section class="set-sec"><h2 class="sec-h">Assistant voice</h2>
       <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</b><span>The voice Keeper uses when you add tasks by voice</span></span>${ic('chev')}</button></section>
       ${agentSettings()}
@@ -589,7 +589,7 @@
   function renderMobile() {
     let body;
     if (S.screen === 'feed') body = `${feedHead()}<div id="feedPage">${feedPageHTML()}</div>`;
-    else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Task Feed">${ic('back')}</button><h1>Settings</h1></div>${sourcesHTML()}`;
+    else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Live Feed">${ic('back')}</button><h1>Settings</h1></div>${sourcesHTML()}`;
     else body = `${greeting()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
       <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
       <div class="m-tools">${searchBtn()}<span id="mSort">${S.mstatus === 'upnext' ? sortNote('upnext') : ''}</span></div>
@@ -601,9 +601,9 @@
         <button type="button" class="icon-btn ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources" aria-label="Settings">${ic('gear')}</button><img class="m-me" src="maya.svg" alt="Maya"></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
-        <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}List</button>
+        <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}To Do List</button>
         <button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>
-        <button class="${S.screen === 'feed' || S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="feed" ${S.screen === 'sources' ? 'data-sub="1"' : ''}><span class="navi">${ic('feed')}${badge('navBadge')}</span>Task Feed</button>
+        <button class="${S.screen === 'feed' || S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="feed" ${S.screen === 'sources' ? 'data-sub="1"' : ''}><span class="navi">${ic('feed')}${badge('navBadge')}</span>Live Feed</button>
       </nav>
     </div>`;
   }
@@ -612,15 +612,15 @@
     if (S.screen === 'feed') main = `<div class="screen">${feedHead()}<div id="feedPage">${feedPageHTML()}</div></div>`;
     else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Settings</h1></div>${sourcesHTML()}</div>`;
     else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
-        <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Task Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
+        <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Live Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
         <button class="btn-ask" data-action="ask">${ic('plus')} Add task</button></div></div>
       ${filterBar()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
       <div class="board ${S.doneOpen ? '' : 'done-collapsed'}" id="board">${boardHTML()}</div>`;
     return `<div class="d-layout">
       <aside class="d-side">
         <div class="d-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
-        <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}List</button>
-        <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Task Feed<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
+        <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}To Do List</button>
+        <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Live Feed<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
         <button class="d-nav ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('gear')}Settings</button>
         <div class="d-me"><img class="m-me" src="maya.svg" alt=""><span><b>Maya</b></span></div>
       </aside>
@@ -989,7 +989,7 @@
     const bits = [c.draft && pl(c.draft, 'reply drafted', 'replies drafted'), c.autosent && pl(c.autosent, 'reply sent automatically', 'replies sent automatically'),
       c.times && pl(c.times, 'meeting ready to book', 'meetings ready to book'), (c.autobooked || 0) + (c.booked || 0) && pl((c.autobooked || 0) + (c.booked || 0), 'meeting booked and marked done', 'meetings booked and marked done')].filter(Boolean);
     const todo = (c.draft || 0) + (c.times || 0);
-    return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Approve Keeper’s drafts</b><span>${bits.join(' · ')}.${todo ? ' Review and send.' : ''}</span></span>${ic('chev')}</button>`;
+    return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Approve Keeper’s work</b><span>${bits.join(' · ')}.${todo ? ' Review and send.' : ''}</span></span>${ic('chev')}</button>`;
   }
   function agentSettings() {
     if (!vision()) return '';
@@ -1021,7 +1021,7 @@
       const d = taskDetail(t);
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task details" data-tid="${t.id}">
         <div class="grab"></div>
-        <div class="sh-h">${spill(t.triage ? 'triage' : t.status)}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h"><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="sh-body">${d.body}</div>
         <div class="sh-foot">${d.foot}</div>
       </div>`;
@@ -1056,9 +1056,9 @@
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Assistant voice"><div class="grab"></div>${voiceSheetHTML()}</div>`;
     } else if (UI.sheet.type === 'inc') {
       const list = incoming().slice(0, 12);
-      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task Feed">
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Live Feed">
         <div class="grab"></div>
-        <div class="sh-h"><span class="live-dot"></span><b>Task Feed</b><span class="lab">Live</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h"><span class="live-dot"></span><b>Live Feed</b><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="inc-list"><div class="feed-list">${list.map(t => feedRow(t, { status: true })).join('')}</div></div>
         <div class="sh-foot"><button class="btn-ghost" data-action="go" data-screen="feed">Open full feed</button></div>
       </div>`;
@@ -1107,7 +1107,7 @@
   function vstageHTML() {
     const A = UI.ask;
     const cap = A.listening || A.handsFree ? (A.speaking ? 'Keeper is talking…' : 'Listening… keep talking') : SR ? (A.msgs.length ? 'Tap to answer' : 'Tap to talk') : 'Voice needs Chrome, Edge or Safari. Type below.';
-    return (A.msgs.length ? '' : `<div class="ask-empty">What do you need to keep track of?<small>Say it like you’d tell an assistant: “Send Jen the logo files by the 30th.”</small></div>`) + `<button type="button" class="orb ${A.listening || A.handsFree ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}>${ic('mic')}</button>
+    return (A.msgs.length ? '' : `<div class="ask-empty">What do you need to keep track of?<small>Say it like you’d tell an assistant: “Send Jen the logo files by the 30th.”</small></div>`) + `<button type="button" class="orb ${A.listening || A.handsFree ? 'rec' : ''}" data-action="mic" aria-label="${A.listening ? 'Stop listening' : 'Start talking'}" ${SR ? '' : 'disabled'}><span class="orb-glow" aria-hidden="true"></span><span class="orb-swirl" aria-hidden="true"></span><span class="orb-swirl two" aria-hidden="true"></span><span class="orb-sheen" aria-hidden="true"></span></button>
       ${A.listening && A.interim ? `<div class="vlive" id="vlive">${esc(A.interim)}</div>` : `<div class="vcap">${cap}</div>`}`;
   }
   function paintVoice() { const v = $('#vstage'); if (v) { v.innerHTML = vstageHTML(); v.classList.toggle('compact', UI.ask.msgs.length > 0); const sh = v.closest('.sheet'); if (sh) sh.classList.toggle('blank', !UI.ask.msgs.length); } }
