@@ -173,6 +173,31 @@
   .promise em{color:var(--brand-2)}
   @media (max-width:900px){.privs{grid-template-columns:1fr 1fr}}
   @media (max-width:520px){.privs{grid-template-columns:1fr}}
+  /* social proof */
+  .proof{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;margin-top:40px}
+  .proof .stack{display:flex}
+  .av{width:48px;height:48px;border-radius:50%;overflow:hidden;flex:none;display:block;box-shadow:0 0 0 3px #fff}
+  .av svg{width:100%;height:100%;display:block}
+  .av.sm{width:36px;height:36px}
+  .av.sm + .av.sm{margin-left:-10px}
+  .proof .who{display:flex;align-items:center;gap:12px;font-size:16px;color:var(--ink-2)}
+  .proof .who b{color:var(--ink)}
+  .rating{display:flex;align-items:center;gap:10px;font-size:16px;color:var(--ink-2)}
+  .rating .big{font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.02em}
+  .stars{color:#F2B33D;letter-spacing:2px;font-size:18px}
+  .proof .div{width:1px;height:36px;background:var(--line-2)}
+  .tms{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .tm{margin:0;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:14px}
+  .tm blockquote{margin:0;font-size:17px;line-height:1.5;color:var(--ink);flex:1}
+  .tm figcaption{display:flex;align-items:center;gap:12px}
+  .tm figcaption b{display:block;font-size:16px}
+  .tm figcaption small{color:var(--ink-2);font-size:14px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+  .stat{background:var(--brand-soft);border-radius:18px;padding:22px;text-align:center}
+  .stat b{display:block;font-size:clamp(30px,3.6vw,44px);letter-spacing:-.03em;color:var(--brand-ink);line-height:1.1}
+  .stat span{color:var(--ink-2);font-size:16px}
+  @media (max-width:1000px){.tms{grid-template-columns:1fr 1fr}}
+  @media (max-width:600px){.tms,.stats{grid-template-columns:1fr}.proof .div{display:none}}
   /* final */
   .final{text-align:center}
   .final h2{font-size:clamp(36px,5vw,60px);line-height:1.04;letter-spacing:-.03em;margin:0 0 16px;font-weight:600}
@@ -214,6 +239,7 @@
       <li><a href="#why">Why Keeper</a></li>
       <li><a href="#how">How it works</a></li>
       <li><a href="#control">You’re in control</a></li>
+      <li><a href="#love">Customers</a></li>
       <li><a href="#privacy">Privacy</a></li>
     </ul>
     <a class="btn primary" href="index.html">Try Keeper</a>
@@ -253,6 +279,11 @@
       <span class="chip"><span class="ch" style="background:#E6F4EC;color:#1F9254"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 5h16v11H9l-5 4z"/></svg></span>Business texts</span>
       <span class="chip"><span class="ch" style="background:#E7F0FE;color:#2D7FF9"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="7" width="12" height="10" rx="2"/><path d="M15 11l6-3v8l-6-3z"/></svg></span>Zoom</span>
       <span class="chip"><span class="ch" style="background:#E3F3F1;color:#0E8A7E"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></span>Google Meet</span>
+    </div>
+    <div class="proof">
+      <div class="who"><span class="stack"><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadias)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cmarcuss"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cmarcuss)"><rect width="120" height="120" fill="#E3EEFC"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#2F6FD0"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#C98E6E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#C98E6E"/><path d="M38 50c0-18 10-28 23-28s23 10 22 26c-6-6-14-9-22-9-9 0-17 4-23 11z" fill="#3A2A20"/><path d="M44 66c4 12 28 12 32 0v6c0 9-7 14-16 14s-16-5-16-14z" fill="#3A2A20"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofias"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofias)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span class="av sm"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheos"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheos)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span></span><span>Join a community of <b>20,000+</b> solo operators</span></div>
+      <span class="div" aria-hidden="true"></span>
+      <div class="rating"><span class="big">4.8</span><span><span class="stars" aria-hidden="true">★★★★★</span><br>average from 1,900+ reviews</span></div>
     </div>
   </div>
 </header>
@@ -332,6 +363,30 @@
         <div class="mini" aria-hidden="true"><q><mark>Can we get the final guidelines PDF this week</mark> so the printer can start?</q><div class="acts"><span>Dismiss</span><span class="p">Keep</span></div></div></div>
       <div class="step rev"><span class="k">3</span><h3>Approve, send, done</h3><p>Keeper drafts the reply or books the meeting. Approve it in one tap, or let Keeper handle routine ones on its own.</p>
         <div class="mini" aria-hidden="true"><span class="badge">✦ Draft ready</span><div><b>Hi Dana,</b> as promised, here’s the final brand guidelines PDF…</div><div class="acts"><span>Edit</span><span class="p">Send reply</span></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="love" style="padding-top:24px">
+  <div class="wrap">
+    <div class="sec-h rev">
+      <span class="eyebrow">Loved by solo operators</span>
+      <h2>20,000 people who run the whole show. <em>Keeping every promise.</em></h2>
+    </div>
+    <div class="tms">
+      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;Clients text me at 10pm, email me at 7am and grab me on site. Keeper catches all of it. I haven&rsquo;t dropped a single request since I switched.&rdquo;</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cnadia"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cnadia)"><rect width="120" height="120" fill="#FCE9DF"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#D97757"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#8D5A3B" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#8D5A3B"/><g fill="#1E1620"><circle cx="42" cy="42" r="12"/><circle cx="55" cy="32" r="13"/><circle cx="70" cy="34" r="12"/><circle cx="80" cy="46" r="10"/><circle cx="38" cy="56" r="9"/><circle cx="82" cy="58" r="8"/></g><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Nadia Okoro</b><small>Interior designer · Okoro Studio</small></span></figcaption></figure>
+      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;It booked three showings while I was driving between listings. This is the first productivity app that actually does the work.&rdquo;</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="cmarcus"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#cmarcus)"><rect width="120" height="120" fill="#E3EEFC"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#2F6FD0"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#C98E6E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#C98E6E"/><path d="M38 50c0-18 10-28 23-28s23 10 22 26c-6-6-14-9-22-9-9 0-17 4-23 11z" fill="#3A2A20"/><path d="M44 66c4 12 28 12 32 0v6c0 9-7 14-16 14s-16-5-16-14z" fill="#3A2A20"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Marcus Bell</b><small>Real estate agent · Brooklyn</small></span></figcaption></figure>
+      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;Five client Slacks, two inboxes, endless calls. Keeper is the one place they all meet, and its drafted replies sound like me.&rdquo;</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="csofia"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#csofia)"><rect width="120" height="120" fill="#EFE8FD"/><path d="M30 62c-4-26 10-44 31-44s34 16 31 42c-1 12 2 22 8 30H22c6-8 9-17 8-28z" fill="#5B3A29"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#6E4BD8"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#E2B08E" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#E2B08E"/><path d="M39 54c2-17 12-25 24-25 12 0 20 8 19 22-8-1-17-6-22-13-4 8-12 14-21 16z" fill="#5B3A29"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Sofia Reyes</b><small>Fractional design lead · 5 clients</small></span></figcaption></figure>
+      <figure class="tm rev"><div class="stars" aria-label="5 out of 5 stars">★★★★★</div><blockquote>&ldquo;I haven&rsquo;t typed a to-do in two months. Promises kept, clients kept, and my weekends are mine again.&rdquo;</blockquote>
+        <figcaption><span class="av"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><clipPath id="ctheo"><circle cx="60" cy="60" r="60"/></clipPath></defs><g clip-path="url(#ctheo)"><rect width="120" height="120" fill="#E4F4EA"/><path d="M16 120c2-22 20-34 44-34s42 12 44 34z" fill="#1F9254"/><path d="M51 74h18v16c0 5-4 8-9 8s-9-3-9-8z" fill="#F1C9A8" opacity=".85"/><ellipse cx="60" cy="58" rx="20" ry="23" fill="#F1C9A8"/><circle cx="60" cy="22" r="11" fill="#C99A4C"/><path d="M38 52c0-17 10-26 22-26s22 9 22 25c-6-5-14-8-22-8-9 0-16 3-22 9z" fill="#C99A4C"/><ellipse cx="52" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><ellipse cx="68" cy="60" rx="2.2" ry="2.6" fill="#2B1F3A"/><path d="M53 70c4 3.5 10 3.5 14 0" stroke="#7A3E30" stroke-width="2.4" fill="none" stroke-linecap="round"/></g></svg></span><span><b>Theo Lindqvist</b><small>Photographer and creator · 240K followers</small></span></figcaption></figure>
+    </div>
+    <div class="stats">
+      <div class="stat rev"><b>20,000+</b><span>solo operators on Keeper</span></div>
+      <div class="stat rev"><b>3.1M</b><span>commitments kept so far</span></div>
+      <div class="stat rev"><b>6 hrs</b><span>saved per week, on average</span></div>
     </div>
   </div>
 </section>
