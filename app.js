@@ -5,7 +5,7 @@
   const $ = (s, el) => (el || document).querySelector(s);
   const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
   const app = $('#app'), device = $('#device');
-  const STORE = 'keeper-demo-v1';
+  const STORE = 'keeper-demo-v2';
   const DAY = 86400000;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -63,6 +63,9 @@
     cal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
+    down: '<path d="M6 9l6 6 6-6"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.6v.3M12 17h.01"/>',
+    merge: '<path d="M6 4v5a5 5 0 0 0 5 5h7M14 10l4 4-4 4M6 20v-3"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
     lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
     play: '<path d="M8 5l11 7-11 7z"/>',
@@ -73,8 +76,15 @@
   /* colour is reserved for actions: sources, people and projects are neutral */
   const srcLabel = s => (D.SOURCES[s] || D.SOURCES.keeper).label;
   const srcIc = s => '<span class="src-ic" style="--c:' + (D.SOURCES[s] || D.SOURCES.keeper).color + '" title="' + esc(srcLabel(s)) + '">' + ic(s) + '</span>';
-  const sdot = st => '<span class="sdot"></span>';
-  const spill = st => '<span class="spill s-' + st + '">' + esc(statusLabel(st)) + '</span>';
+  const SICON = {
+    upnext: '<circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+    inprogress: '<circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/>',
+    blocked: '<circle cx="8" cy="8" r="6.4" fill="currentColor"/><path d="M5 8h6" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>',
+    done: '<circle cx="8" cy="8" r="6.4" fill="currentColor"/><path d="M5.2 8.2l1.9 1.9 3.7-4" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+    triage: '<circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="2.2 2"/>'
+  };
+  const sdot = st => '<svg class="sico" viewBox="0 0 16 16" aria-hidden="true">' + (SICON[st] || '') + '</svg>';
+  const spill = st => '<span class="spill s-' + st + '">' + sdot(st) + esc(st === 'triage' ? 'To review' : statusLabel(st)) + '</span>';
   const srcTag = s => '<span class="lab">' + srcIc(s) + esc(srcLabel(s)) + '</span>';
   const personName = k => (D.PEOPLE[k] ? D.PEOPLE[k].name : k) || '';
   const initials = n => n.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -89,22 +99,24 @@
     return Object.assign({
       id: nid(), title: t.title, source: t.source, category: t.category, project: t.project || null,
       requester: t.requester || null, collaborators: t.collaborators || [],
-      due: t.due == null ? null : iso(addDays(t.due)), status: t.status || 'backlog',
-      snippet: t.snippet || '', captured: Date.now() - (t.ago || 0) * 60000, fresh: false
+      due: t.due == null ? null : iso(addDays(t.due)), status: t.status || 'upnext',
+      snippet: t.snippet || '', captured: Date.now() - (t.ago || 0) * 60000, fresh: false,
+      triage: !!t.triage, low: !!t.low, dismissed: false,
+      also: (t.also || []).map(a => ({ source: a.source, snippet: a.snippet, captured: Date.now() - (a.ago || 0) * 60000 }))
     }, extra || {});
   }
   const narrow = () => window.innerWidth < 720;
   function fresh() {
-    return { onboarded: false, step: 0, channels: ['gmail', 'slack', 'sms', 'zoom'], screen: 'board', mode: 'mobile', mstatus: 'upnext',
+    return { onboarded: false, step: 0, channels: ['gmail', 'slack', 'sms', 'zoom'], screen: 'board', mode: 'mobile', mstatus: 'inprogress',
       tasks: D.SEED.map(t => mkTask(t)), incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
   }
   function load() {
-    try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = 'upnext'; s.live = true; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
+    try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = 'inprogress'; s.live = true; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
     return null;
   }
   let S = load() || fresh();
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
-  const UI = { expand: {}, feedSel: null, sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
+  const UI = { expand: {}, srcTab: {}, editField: null, feedSel: null, sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
   const filterOn = () => !!(S.filter.text.trim() || S.filter.tokens.length);
   const mode = () => (narrow() ? 'mobile' : S.mode);
   const task = id => S.tasks.find(t => t.id === id);
@@ -228,7 +240,7 @@
     Object.keys(FIRST).forEach(f => { const m = text.match(new RegExp('\\b' + f + '\\b', 'i')); if (m) out.push({ key: FIRST[f], index: m.index }); });
     return out.sort((a, b) => a.index - b.index);
   }
-  const COLWORDS = [['upnext', 'up next|next up'], ['backlog', 'backlog|later|someday'], ['inprogress', 'in progress|doing|working on'], ['blocked', 'blocked|waiting']];
+  const COLWORDS = [['upnext', 'up next|next up|backlog|later|someday'], ['inprogress', 'in progress|doing|working on'], ['blocked', 'blocked|waiting']];
   function parseCol(text) {
     for (const [id, words] of COLWORDS) {
       const m = text.match(new RegExp('\\s*(?:,|\\band\\b|\\bthen\\b)?\\s*\\b(?:(?:add|put|move|file|drop)(?: (?:it|this))? )?(?:to|in|into|on|under)\\s+(?:the\\s+|my\\s+)?(?:' + words + ')(?:\\s+(?:column|list|lane))?\\b', 'i'));
@@ -370,25 +382,24 @@
   }
 
   function summary() {
-    const open = S.tasks.filter(t => t.status !== 'done');
+    const open = S.tasks.filter(t => live(t) && t.status !== 'done');
     const today = open.filter(t => t.due && daysOut(t.due) === 0).length;
     const over = open.filter(t => t.due && daysOut(t.due) < 0).length;
-    const blocked = open.filter(t => t.status === 'blocked').length;
-    const sep = '<span class="sep">·</span>';
-    return `<b>${today}</b> due today${over ? sep + `<span class="bad"><b>${over}</b> overdue</span>` : ''}${blocked ? sep + `<b>${blocked}</b> blocked` : ''}${sep}<b>${open.length}</b> open`;
+    const on = v => S.filter.tokens.some(t => t.type === 'due' && t.value === v);
+    const btn = (v, n, label, cls) => `<button type="button" class="sum-btn ${cls || ''} ${on(v) ? 'on' : ''}" data-action="f-due" data-v="${v}" aria-pressed="${on(v)}"><b>${n}</b> ${label}</button>`;
+    return btn('today', today, 'due today') + (over ? btn('overdue', over, 'overdue', 'bad') : '');
   }
   function greeting() {
     const h = new Date().getHours();
     const g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
-    const date = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    return `<div class="greet"><div class="date">${esc(date)}</div><h1>${g}, <em>Maya</em></h1><div class="sum" id="summary">${summary()}</div></div>`;
+    return `<div class="greet"><h1>${g}, <em>Maya</em></h1><div class="sum" id="summary">${summary()}</div></div>`;
   }
   const searchBtn = () => { const n = S.filter.tokens.length + (S.filter.text.trim() ? 1 : 0);
     return `<button type="button" class="icon-btn ${mode() === 'desktop' ? 'labeled' : ''} ${UI.search || n ? 'on' : ''}" id="searchBtn" data-action="search" aria-label="Filters" aria-expanded="${UI.search}">${ic('filter')}${mode() === 'desktop' ? 'Filter' : ''}${n && !UI.search ? `<span class="dot-badge">${n}</span>` : ''}</button>`; };
   function filterChips() {
     const cnt = type => S.filter.tokens.filter(t => t.type === type).length;
     const chip = (menu, label) => `<button type="button" class="chip ${cnt(menu) ? 'on' : ''}" data-action="f-menu" data-menu="${menu}">${label}${cnt(menu) ? ' · ' + cnt(menu) : ''} <span class="caret">▾</span></button>`;
-    return chip('project', 'Project') + chip('person', 'People') + chip('source', 'Channel');
+    return chip('due', 'Due date') + chip('project', 'Project') + chip('person', 'People') + chip('source', 'Channel');
   }
   /* collapsed to a filter icon; opens filters with the plain-language search beneath */
   function filterBar() {
@@ -410,23 +421,44 @@
       + '<button type="button" class="linkish" data-action="f-clear">Clear</button>';
   }
 
+  const srcIcons = t => '<span class="src-stack">' + [t.source].concat((t.also || []).map(a => a.source)).filter((v, i, a) => a.indexOf(v) === i).map(srcIc).join('') + '</span>';
+  /* triage card: accept or dismiss what Keeper caught */
+  function reviewCard(t) {
+    const from = t.requester && t.requester !== 'maya' ? personName(t.requester) : 'You';
+    return `<article class="rv ${t.low ? 'low' : ''} ${t.fresh ? 'fresh' : ''}" data-tid="${t.id}">
+      <div class="rv-top">${srcIcons(t)}<span>${esc(from)} · ${esc(srcLabel(t.source))} · ${agoText(t.captured)}</span></div>
+      ${t.low ? `<div class="maybe">${ic('help')}Possible task · Keeper isn’t sure this is a request</div>` : ''}
+      <button type="button" class="rv-title" data-action="open" data-id="${t.id}">${esc(t.title)}</button>
+      ${t.snippet ? `<div class="rv-snip">“${esc(origin(t).text)}”</div>` : ''}
+      <div class="rv-acts"><button type="button" class="btn-ghost" data-action="rv-dismiss">${t.low ? 'Not a task' : 'Dismiss'}</button><button type="button" class="btn-primary" data-action="rv-add">${ic('check')}Add to Up Next</button></div>
+    </article>`;
+  }
+  function reviewStrip() {
+    const list = toReview();
+    if (!list.length) return '';
+    if (mode() === 'mobile') return `<button type="button" class="rv-banner" data-action="review"><span class="rv-count">${list.length}</span><span class="o-txt"><b>${list.length === 1 ? 'New task' : 'New tasks'} to review</b><span>Keeper caught ${list.length === 1 ? 'this' : 'these'}. Add or dismiss.</span></span>${ic('chev')}</button>`;
+    return `<section class="rv-strip"><div class="rv-h"><h2>To review <span class="n">${list.length}</span></h2><span>Keeper caught these. Add them to your board or dismiss.</span>${list.length > 3 ? `<button type="button" class="linkish" data-action="review">See all</button>` : ''}</div>
+      <div class="rv-row">${list.slice(0, 3).map(reviewCard).join('')}</div></section>`;
+  }
   function cardHTML(t) {
     const di = dueInfo(t.due, t.status);
     const who = t.requester && t.requester !== 'maya' ? personName(t.requester) : 'You';
     const where = [projName(t.project), who].filter(Boolean).join(' · ');
     return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.status === 'blocked' ? 'blocked' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
       <div class="card-title">${esc(t.title)}</div>
-      <div class="card-meta"><span class="where">${srcIc(t.source)}<span>${esc(where)}</span></span>
+      <div class="card-meta"><span class="where">${srcIcons(t)}<span>${esc(where)}</span></span>
         <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
     </article>`;
   }
   /* Backlog sorts by due date (no date last) until the user reorders it by hand */
   const byDue = (x, y) => (x.due ? fromISO(x.due).getTime() : Infinity) - (y.due ? fromISO(y.due).getTime() : Infinity);
+  const live = t => !t.dismissed && !t.triage;
+  const toReview = () => S.tasks.filter(t => t.triage && !t.dismissed && (t.source === 'keeper' || S.channels.includes(t.source))).sort((a, b) => b.captured - a.captured);
   function colTasks(id, toks) {
-    const list = S.tasks.filter(t => t.status === id && matches(t, toks || []));
-    return id === 'backlog' && !(S.manual && S.manual.backlog) ? list.slice().sort(byDue) : list;
+    const list = S.tasks.filter(t => live(t) && t.status === id && matches(t, toks || []));
+    return id === 'upnext' && !(S.manual && S.manual.upnext) ? list.slice().sort(byDue) : list;
   }
-  const sortNote = id => id !== 'backlog' ? '' : S.manual && S.manual.backlog
+  const sortNote = id => id !== 'upnext' ? '' : S.manual && S.manual.upnext
     ? `<button type="button" class="sort-note" data-action="sort-due">Sort by due date</button>` : `<span class="sort-note">By due date</span>`;
   function boardHTML() {
     const toks = activeTokens();
@@ -445,16 +477,16 @@
   function mTabsHTML() {
     const toks = activeTokens();
     return D.COLUMNS.map(c => {
-      const n = S.tasks.filter(t => t.status === c.id && matches(t, toks)).length;
+      const n = colTasks(c.id, toks).length;
       return `<button type="button" class="mtab s-${c.id} ${S.mstatus === c.id ? 'on' : ''}" data-action="mtab" data-tab="${c.id}">${sdot(c.id)}${esc(c.name)}<span class="n">${n}</span></button>`;
     }).join('');
   }
   function mListHTML() {
     const toks = activeTokens();
     const list = colTasks(S.mstatus, toks);
-    return (list.length && S.mstatus === 'backlog' ? `<div class="m-sort">${sortNote('backlog')}</div>` : '') + (list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`);
+    return (list.length && S.mstatus === 'upnext' ? `<div class="m-sort">${sortNote('upnext')}</div>` : '') + (list.length ? list.map(cardHTML).join('') : `<div class="empty">${toks.length ? 'No matching tasks here' : 'Nothing in ' + esc(statusLabel(S.mstatus))}</div>`);
   }
-  const incoming = () => S.tasks.filter(t => t.source !== 'keeper' && S.channels.includes(t.source)).sort((a, b) => b.captured - a.captured);
+  const incoming = () => S.tasks.filter(t => t.source !== 'keeper' && !t.dismissed && S.channels.includes(t.source)).sort((a, b) => b.captured - a.captured);
   function statusLabel(s) { const c = D.COLUMNS.find(c => c.id === s); return c ? c.name : s; }
   function feedRow(t, opts) {
     const di = dueInfo(t.due, t.status);
@@ -463,9 +495,10 @@
     return `<button type="button" class="frow ${t.fresh ? 'new' : ''} ${mode() === 'desktop' && UI.feedSel === t.id ? 'sel' : ''}" data-action="open" data-id="${t.id}">
       ${srcIc(t.source)}
       <span class="frow-txt"><span class="frow-title">${t.fresh ? '<span class="newtag">NEW</span> ' : ''}${esc(t.title)}</span>
+        ${t.low && t.triage ? `<span class="maybe">${ic('help')}Possible task</span>` : ''}
         <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''}</span>
         ${opts && opts.snip && t.snippet ? `<span class="snip">“${esc(t.snippet)}”</span>` : ''}
-        <span class="frow-foot">${opts && opts.status ? spill(t.status) : ''}<span class="due ${di.cls}">${esc(di.label)}</span><span class="ago">${agoText(t.captured)}</span></span>
+        <span class="frow-foot">${opts && opts.status ? spill(t.triage ? 'triage' : t.status) : ''}${t.also && t.also.length ? `<span class="merged">${ic('merge')}${t.also.length + 1} sources</span>` : ''}<span class="due ${di.cls}">${esc(di.label)}</span><span class="ago">${agoText(t.captured)}</span></span>
       </span>
     </button>`;
   }
@@ -486,13 +519,13 @@
     if (sel) UI.feedSel = sel.id;
     const d = sel && taskDetail(sel);
     return `<div class="feed-split"><div class="feed-col">${body}</div>
-      <aside class="feed-detail" data-tid="${sel ? sel.id : ''}">${sel ? `<div class="fd-h">${spill(sel.status)}</div><div class="fd-body">${d.body}</div><div class="fd-foot">${d.foot}</div>` : '<div class="empty">Select a task to see details</div>'}</aside></div>`;
+      <aside class="feed-detail" data-tid="${sel ? sel.id : ''}">${sel ? `<div class="fd-h">${spill(sel.triage ? 'triage' : sel.status)}</div><div class="fd-body">${d.body}</div><div class="fd-foot">${d.foot}</div>` : '<div class="empty">Select a task to see details</div>'}</aside></div>`;
   }
   /* title row for the Task Feed: live indicator plus a small link to channel settings */
   function feedHead() {
     const on = S.channels.filter(k => D.SOURCES[k]);
-    return `<div class="page-h feed-h"><h1>Task Feed</h1><div class="feed-sub"><span class="live-pill"><span class="live-dot"></span>Live</span>
-      <button type="button" class="manage-btn" data-action="go" data-screen="sources"><span class="chan-ics">${on.map(srcIc).join('')}</span>Manage channels</button></div></div>`;
+    return `<div class="feed-h"><h1>Task Feed</h1>
+      <p class="feed-meta"><span class="live-dot" aria-hidden="true"></span><span>Live from ${on.length} channel${on.length === 1 ? '' : 's'}</span><span class="dot-sep" aria-hidden="true">·</span><button type="button" class="linkish" data-action="go" data-screen="sources">Manage</button></p></div>`;
   }
   function sourcesHTML() {
     const keys = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'];
@@ -515,10 +548,10 @@
     let body;
     if (S.screen === 'feed') body = `${feedHead()}<div id="feedPage">${feedPageHTML()}</div>`;
     else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Task Feed">${ic('back')}</button><h1>Settings</h1></div>${sourcesHTML()}`;
-    else body = `${greeting()}${filterBar()}
+    else body = `${greeting()}${filterBar()}<div id="rvSlot">${reviewStrip()}</div>
       <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
       <div class="m-list col-body" id="mList" data-col="${S.mstatus}">${mListHTML()}</div>
-      <p class="m-hint">Tap to edit · hold and drag onto a tab to move</p>`;
+      <p class="m-hint">Swipe right to mark done · hold to drag</p>`;
     return `<div class="m-home">
       <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
         ${S.screen === 'board' ? searchBtn() : ''}<img class="m-me" src="maya.svg" alt="Maya"></div>
@@ -537,7 +570,7 @@
     else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
         <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Task Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
         <button class="btn-ask" data-action="ask">${ic('plus')} Add task</button></div></div>
-      ${filterBar()}
+      ${filterBar()}<div id="rvSlot">${reviewStrip()}</div>
       <div class="board ${S.doneOpen ? '' : 'done-collapsed'}" id="board">${boardHTML()}</div>`;
     return `<div class="d-layout">
       <aside class="d-side">
@@ -558,6 +591,7 @@
     const mt = $('#mTabs'); if (mt) { const sl = mt.scrollLeft; mt.innerHTML = mTabsHTML(); mt.scrollLeft = sl; }
     const ml = $('#mList'); if (ml) { ml.dataset.col = S.mstatus; ml.innerHTML = mListHTML(); }
     const fpg = $('#feedPage'); if (fpg) fpg.innerHTML = feedPageHTML();
+    const rv = $('#rvSlot'); if (rv) rv.innerHTML = reviewStrip();
     const sm = $('#summary'); if (sm) sm.innerHTML = summary();
     const tk = $('#tokens'); if (tk) tk.innerHTML = tokensHTML();
     const sb = $('#searchBtn'); if (sb) sb.classList.toggle('on', UI.search || filterOn());
@@ -565,7 +599,7 @@
     const sb2 = $('#searchBtn'); if (sb2 && !UI.search) sb2.outerHTML = searchBtn();
     const nb = $('#navBadge'); if (nb) { nb.textContent = S.unseen; nb.hidden = !S.unseen; }
     const ic2 = $('#incCount'); if (ic2) ic2.textContent = S.unseen ? S.unseen + ' new' : '';
-    if (UI.sheet && (UI.sheet.type === 'task' || UI.sheet.type === 'inc')) renderLayer(true);
+    if (UI.sheet && (UI.sheet.type === 'task' || UI.sheet.type === 'inc' || UI.sheet.type === 'review')) renderLayer(true);
   }
 
   /* ---------- original source (deeplink) ---------- */
@@ -586,10 +620,14 @@
     const fromName = speaker ? (key ? personName(key) : speaker) : personName(t.requester) || 'Unknown';
     return { text, fromKey, fromName, mine: fromKey === 'maya' };
   }
-  function origBlock(t) {
-    if (t.source === 'keeper' || !t.snippet) return '';
-    const o = origin(t), meta = ORIGIN[t.source] || {}, open = !!UI.expand[t.id];
-    return `<div class="orig-b ${open ? 'open' : ''}">
+  const srcVariant = (t, i) => !i || !t.also || !t.also[i - 1] ? t : Object.assign({}, t, t.also[i - 1]);
+  function origBlock(t0) {
+    if (t0.source === 'keeper' || !t0.snippet) return '';
+    const idx = UI.srcTab[t0.id] || 0, t = srcVariant(t0, idx);
+    const all = [t0.source].concat((t0.also || []).map(a => a.source));
+    const tabs = all.length > 1 ? `<div class="src-tabs" role="tablist"><span class="merged">${ic('merge')}Merged from ${all.length} messages</span>${all.map((s, i) => `<button type="button" role="tab" aria-selected="${i === idx}" class="${i === idx ? 'on' : ''}" data-action="src-tab" data-i="${i}">${srcIc(s)}${esc(srcLabel(s))}</button>`).join('')}</div>` : '';
+    const o = origin(t), meta = ORIGIN[t.source] || {}, open = !!UI.expand[t0.id];
+    return `<div class="orig-b ${open ? 'open' : ''}">${tabs}
       <div class="orig-h">${srcIc(t.source)}<span>${esc(o.mine ? 'You' : o.fromName)} · ${esc(srcLabel(t.source))} · ${agoText(t.captured)}</span></div>
       ${open ? sourceView(t) : `<button type="button" class="orig-snip" data-action="expand" aria-expanded="false">“${esc(o.text)}”</button>`}
       <div class="orig-acts"><button type="button" class="linkish" data-action="expand">${open ? 'Show less' : 'Show full ' + esc(meta.noun || 'message')}</button>
@@ -734,17 +772,20 @@
   function taskDetail(t) {
     const req = t.requester && t.requester !== 'maya' ? `<span class="person">${av(t.requester)}${esc(personName(t.requester))}</span>` : `<span class="person">${av('maya')}You</span>`;
     const quick = [['Today', 0], ['Tomorrow', 1], ['Friday', daysToDow(5, true)], ['Next Mon', daysToDow(1, false)]];
+    const di = dueInfo(t.due, t.status);
+    const dueText = t.due ? di.label + (Math.abs(daysOut(t.due)) < 7 && !/\d/.test(di.label) ? ' · ' + shortDate(fromISO(t.due)) : '') : 'No due date';
+    const ed = UI.editField;
+    const statusRow = t.triage ? `<dt>Status</dt><dd>${spill('triage')}</dd>` : `<dt>Status</dt><dd><button type="button" class="sel ${ed === 'status' ? 'open' : ''}" data-action="edit" data-f="status" aria-expanded="${ed === 'status'}">${spill(t.status)}<span class="caret">${ic('down')}</span></button></dd>
+      ${ed === 'status' ? `<dd class="pop"><div class="opts" role="listbox">${D.COLUMNS.map(c => `<button type="button" role="option" aria-selected="${t.status === c.id}" class="opt ${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${spill(c.id)}${t.status === c.id ? ic('check') : ''}</button>`).join('')}</div></dd>` : ''}`;
+    const dueRow = `<dt>Due</dt><dd><button type="button" class="sel ${ed === 'due' ? 'open' : ''}" data-action="edit" data-f="due" aria-expanded="${ed === 'due'}"><span class="due ${di.cls}">${esc(dueText)}</span><span class="caret">${ic('down')}</span></button></dd>
+      ${ed === 'due' ? `<dd class="pop"><div class="duebox">${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
+        <button type="button" class="chip ${!t.due ? 'on' : ''}" data-action="set-due" data-n="none">No date</button><input type="date" class="dueInput" value="${t.due || ''}" aria-label="Pick a date"></div></dd>` : ''}`;
     return {
-      body: `${origBlock(t)}
+      body: `${t.low && t.triage ? `<div class="maybe big">${ic('help')}Possible task. Keeper isn’t sure this is a request.</div>` : ''}${origBlock(t)}
           <h2 class="sh-title">${esc(t.title)}</h2>
-          <dl class="fields"><dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
-          <div><div class="fl">Status</div><div class="statuses">${D.COLUMNS.map(c => `<button type="button" class="s-${c.id} ${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${sdot(c.id)}${esc(c.name)}</button>`).join('')}</div></div>
-          <div><div class="fl">Due date</div><div class="duebox">
-            <input type="date" class="dueInput" value="${t.due || ''}" aria-label="Due date">
-            ${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
-            <button type="button" class="chip ${!t.due ? 'on' : ''}" data-action="set-due" data-n="none">No date</button>
-          </div></div>`,
-      foot: t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`
+          <dl class="fields">${statusRow}${dueRow}<dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>`,
+      foot: t.triage ? `<button class="btn-ghost" data-action="rv-dismiss">${t.low ? 'Not a task' : 'Dismiss'}</button><button class="btn-primary" data-action="rv-add">${ic('check')} Add to Up Next</button>`
+        : t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`
     };
   }
   /* ---------- sheets ---------- */
@@ -756,7 +797,7 @@
       const d = taskDetail(t);
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task details" data-tid="${t.id}">
         <div class="grab"></div>
-        <div class="sh-h">${spill(t.status)}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h">${spill(t.triage ? 'triage' : t.status)}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="sh-body">${d.body}</div>
         <div class="sh-foot">${d.foot}</div>
       </div>`;
@@ -768,6 +809,13 @@
         <div class="sh-h"><button class="back" data-action="open" data-id="${t.id}" aria-label="Back to task">${ic('back')}</button><span class="lab">${srcIc(t.source)}Original ${esc(o.noun || 'message')}</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="sh-body">${sourceView(t)}<p class="sv-note">${esc(o.note || '')}</p></div>
         ${o.url ? `<div class="sh-foot"><a class="btn-primary" href="${o.url}" target="_blank" rel="noopener">${esc(o.cta)} ${ic('ext')}</a></div>` : ''}
+      </div>`;
+    } else if (UI.sheet.type === 'review') {
+      const list = toReview();
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Tasks to review">
+        <div class="grab"></div>
+        <div class="sh-h"><b class="sh-name">To review</b><span class="n">${list.length}</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-body rv-list">${list.map(reviewCard).join('') || '<div class="empty">All caught up.</div>'}</div>
       </div>`;
     } else if (UI.sheet.type === 'connect') {
       layer.innerHTML = `<div class="scrim"></div><div class="sheet connect" role="dialog" aria-modal="true" aria-label="Connect ${esc(D.SOURCES[UI.sheet.k].label)}">${connectHTML(UI.sheet.k)}</div>`;
@@ -799,7 +847,13 @@
     if (UI.sheet.type === 'ask') { const m = $('#askMsgs'); if (m) m.scrollTop = m.scrollHeight; }
   }
   const tidOf = el => { const h = el.closest('[data-tid]'); return h ? h.dataset.tid : UI.sheet && UI.sheet.id; };
-  function openSheet(s) { UI.sheet = s; const l = $('#layer'); if (l) l.classList.remove('open'); renderLayer(); }
+  function afterReview() {
+    refresh();
+    if (UI.sheet && UI.sheet.type === 'task') { closeSheet(); return; }
+    if (UI.sheet && UI.sheet.type === 'review') { if (!toReview().length) closeSheet(); else renderLayer(true); }
+  }
+  function openSheet(s) { UI.editField = null; return openSheet0(s); }
+  function openSheet0(s) { UI.sheet = s; const l = $('#layer'); if (l) l.classList.remove('open'); renderLayer(); }
   function closeSheet() {
     stopListening();
     const l = $('#layer'); if (!l) return;
@@ -810,7 +864,7 @@
 
   /* ---------- assistant: voice first, type as fallback ---------- */
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const ADDCOLS = ['upnext', 'backlog', 'inprogress', 'blocked'];
+  const ADDCOLS = ['upnext', 'inprogress', 'blocked'];
   function startAsk(voice) {
     UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice || mode() === 'mobile', handsFree: !!voice, interim: '' };
     openSheet({ type: 'ask' });
@@ -946,11 +1000,11 @@
     if (A.awaiting === 'review') {
       if (ADDWORDS.test(text)) return setTimeout(() => (d.requesterSet && d.dueSet ? addDraft() : askMissing()), 200);
       if (/^change the date$/i.test(text)) { A.awaiting = 'due-edit'; pushMsg({ from: 'k', text: 'What’s the new due date?', chips: ['Today', 'Tomorrow', 'Friday', 'Next week', 'No due date'], datePick: true }); say('What’s the new due date?', true); return; }
-      if (/^change the column$/i.test(text)) { A.awaiting = 'col-edit'; pushMsg({ from: 'k', text: 'Which column?', chips: ADDCOLS.map(statusLabel) }); say('Which column? Up next, backlog, in progress, or blocked?', true); return; }
+      if (/^change the column$/i.test(text)) { A.awaiting = 'col-edit'; pushMsg({ from: 'k', text: 'Which column?', chips: ADDCOLS.map(statusLabel) }); say('Which column? Up next, in progress, or blocked?', true); return; }
       if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
       if (NOCHANGE.test(text) || /^yes,? (it'?s|that'?s|looks)/i.test(text)) return setTimeout(askMissing, 300);
       if (/^(yes|yeah|yep|sure)\b/i.test(text)) { pushMsg({ from: 'k', text: 'What should I change? Say a new date, a person, a column, or “call it…” for a new title.' }); say('What should I change?', true); return; }
-      pushMsg({ from: 'k', text: 'Sorry, I didn’t catch a change. Try “due next Tuesday”, “for Marcus”, “put it in backlog” or “call it…”.' }); say('Sorry, what should I change?', true); return;
+      pushMsg({ from: 'k', text: 'Sorry, I didn’t catch a change. Try “due next Tuesday”, “for Marcus”, “move it to in progress” or “call it…”.' }); say('Sorry, what should I change?', true); return;
     }
     if (A.awaiting === 'due-edit' || A.awaiting === 'col-edit') {
       if (applyChanges(text, d)) return setTimeout(() => askReview(true), 300);
@@ -1027,10 +1081,19 @@
     while (S.incomingIdx < total) {
       const tpl = D.INCOMING[S.incomingIdx++];
       if (!S.channels.includes(tpl.source)) continue;
-      const t = mkTask(Object.assign({}, tpl, { status: 'backlog', ago: 0 }));
+      if (tpl.dupOf) {
+        const orig = S.tasks.find(x => x.title === tpl.dupOf && !x.dismissed);
+        if (!orig) continue;
+        orig.also = (orig.also || []).concat({ source: tpl.source, snippet: tpl.snippet, captured: Date.now() });
+        orig.fresh = true; save(); refresh();
+        toast(esc(orig.title), { title: 'Duplicate merged', id: orig.id, sub: srcIc(tpl.source) + 'Same request from ' + esc(personName(tpl.requester)) + ' · ' + esc(D.SOURCES[tpl.source].label) });
+        setTimeout(() => { orig.fresh = false; refresh(); }, 6000);
+        return;
+      }
+      const t = mkTask(Object.assign({}, tpl, { status: 'upnext', ago: 0, triage: true }));
       t.fresh = true;
       S.tasks.push(t); S.unseen = (S.unseen || 0) + 1; save(); refresh();
-      toast(esc(t.title), { title: 'New task kept', id: t.id, sub: srcIc(t.source) + 'From ' + esc(personName(t.requester) || 'you') + ' · ' + esc(D.SOURCES[t.source].label) });
+      toast(esc(t.title), { title: t.low ? 'Possible task to review' : 'New task kept', id: t.id, sub: srcIc(t.source) + 'From ' + esc(personName(t.requester) || 'you') + ' · ' + esc(D.SOURCES[t.source].label) });
       setTimeout(() => { t.fresh = false; refresh(); }, 6000);
       return;
     }
@@ -1066,6 +1129,7 @@
   function openMenu(btn, kind) {
     closeMenu();
     let items = [];
+    if (kind === 'due') items = DUEWORDS.map(([v, , label]) => ({ type: 'due', value: v, label }));
     if (kind === 'project') items = Object.keys(D.PROJECTS).map(k => ({ type: 'project', value: k, label: D.PROJECTS[k].name }));
     if (kind === 'person') items = Object.keys(D.PEOPLE).filter(k => D.PEOPLE[k].role === 'client').map(k => ({ type: 'person', value: k, label: D.PEOPLE[k].name }));
     if (kind === 'source') items = ['gmail', 'outlook', 'slack', 'sms', 'zoom', 'meet'].map(k => ({ type: 'source', value: k, label: D.SOURCES[k].label }));
@@ -1104,7 +1168,7 @@
     if (!a) return;
     const act = a.dataset.action;
     switch (act) {
-      case 'sort-due': S.manual = Object.assign({}, S.manual, { backlog: false }); save(); refresh(); break;
+      case 'sort-due': S.manual = Object.assign({}, S.manual, { upnext: false }); save(); refresh(); break;
       case 'mode': S.mode = a.dataset.mode; save(); render(); break;
       case 'scope': $$('.seg-scope button').forEach(b => b.setAttribute('aria-pressed', String(b === a))); break;
       case 'about': $('#about').hidden = false; break;
@@ -1139,8 +1203,14 @@
         openSheet({ type: 'task', id: a.dataset.id }); break;
       case 'done-toggle': S.doneOpen = !S.doneOpen; save(); refresh(); break;
       case 'close': if (UI.sheet && UI.sheet.type === 'voice' && UI.prevAsk && UI.ask) { UI.prevAsk = false; UI.sheet = { type: 'ask' }; renderLayer(true); break; } closeSheet(); break;
-      case 'set-status': { const t = task(tidOf(a)); t.status = a.dataset.v; save(); refresh(); renderLayer(true); toast('Moved to ' + esc(statusLabel(t.status))); break; }
-      case 'set-due': { const t = task(tidOf(a)); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); save(); refresh(); renderLayer(true); toast(t.due ? 'Due ' + esc(dueInfo(t.due, t.status).label.toLowerCase()) : 'Due date cleared'); break; }
+      case 'set-status': { const t = task(tidOf(a)); t.status = a.dataset.v; UI.editField = null; save(); refresh(); renderLayer(true); break; }
+      case 'set-due': { const t = task(tidOf(a)); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); UI.editField = null; save(); refresh(); renderLayer(true); break; }
+      case 'edit': UI.editField = UI.editField === a.dataset.f ? null : a.dataset.f; refresh(); if (UI.sheet) renderLayer(true); break;
+      case 'rv-add': { const t = task(tidOf(a)); t.triage = false; t.low = false; t.fresh = true; save(); afterReview(); setTimeout(() => { t.fresh = false; refresh(); }, 2500); break; }
+      case 'rv-dismiss': { const t = task(tidOf(a)); t.dismissed = true; t.triage = false; save(); afterReview(); break; }
+      case 'review': openSheet({ type: 'review' }); break;
+      case 'src-tab': UI.srcTab[tidOf(a)] = +a.dataset.i; UI.expand[tidOf(a)] = false; refresh(); if (UI.sheet) renderLayer(true); break;
+      case 'f-due': toggleToken({ type: 'due', value: a.dataset.v, label: a.dataset.v === 'today' ? 'Due today' : 'Overdue' }); break;
       case 'f-clear': S.filter = { text: '', tokens: [] }; save(); render(); break;
       case 'f-clear-text': S.filter.text = ''; save(); { const i = $('#fInput'); if (i) { i.value = ''; i.focus(); } a.hidden = true; } refresh(); break;
       case 'src': openSheet({ type: 'src', id: a.dataset.id }); break;
@@ -1200,7 +1270,7 @@
     if (e.target.id === 'askDate' && e.target.value && UI.ask && UI.ask.awaiting === 'due-edit') { const d = fromISO(e.target.value); UI.ask.draft.due = daysOut(e.target.value); UI.ask.draft.dueSet = true; pushMsg({ from: 'me', text: d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) }); setTimeout(() => askReview(true), 300); return; }
     if (e.target.id === 'askDate' && e.target.value && UI.ask) { const d = fromISO(e.target.value); askSubmit(d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), false); return; }
     if (e.target.id === 'draftDue' && UI.ask && UI.ask.draft) { UI.ask.draft.due = e.target.value ? daysOut(e.target.value) : null; paintMsgs(); return; }
-    if (e.target.classList.contains('dueInput')) { const t = task(tidOf(e.target)); t.due = e.target.value || null; save(); refresh(); renderLayer(true); toast(t.due ? 'Due date updated' : 'Due date cleared'); }
+    if (e.target.classList.contains('dueInput')) { const t = task(tidOf(e.target)); t.due = e.target.value || null; UI.editField = null; save(); refresh(); renderLayer(true); }
   });
   document.addEventListener('submit', e => {
     if (e.target.id === 'askForm') { e.preventDefault(); const i = $('#askInput'); const v = i.value; i.value = ''; askSubmit(v); }
@@ -1225,6 +1295,8 @@
     const d = UI.drag; if (!d || e.pointerId !== d.pid) return;
     d.x = e.clientX; d.y = e.clientY;
     const dist = Math.hypot(d.x - d.x0, d.y - d.y0);
+    if (d.swipe) { moveSwipe(d); return; }
+    if (!d.active && canSwipe(d) && d.x - d.x0 > 10 && Math.abs(d.x - d.x0) > Math.abs(d.y - d.y0) * 1.4) { clearTimeout(d.timer); startSwipe(d); return; }
     if (!d.active) {
       if (d.touch) { if (dist > 10) { clearTimeout(d.timer); UI.drag = null; } return; }
       if (dist > 5) beginDrag(d); else return;
@@ -1235,6 +1307,7 @@
   const endPointer = e => {
     const d = UI.drag; if (!d || (e.pointerId !== undefined && e.pointerId !== d.pid)) return;
     clearTimeout(d.timer);
+    if (d.swipe) { endSwipe(d, e.type !== 'pointercancel'); UI.suppressClick = true; setTimeout(() => (UI.suppressClick = false), 60); UI.drag = null; return; }
     if (d.active) { finishDrag(d, e.type !== 'pointercancel'); UI.suppressClick = true; setTimeout(() => (UI.suppressClick = false), 50); }
     d.card.classList.remove('lp');
     UI.drag = null;
@@ -1242,6 +1315,34 @@
   };
   document.addEventListener('pointerup', endPointer);
   document.addEventListener('pointercancel', endPointer);
+  /* swipe right on a phone card to mark it done (Gmail-style reveal) */
+  const canSwipe = d => mode() === 'mobile' && d.card.closest('#mList') && !d.card.classList.contains('done') && !d.card.closest('.dragging');
+  function startSwipe(d) {
+    d.swipe = true;
+    const wrap = document.createElement('div'); wrap.className = 'swipe-wrap';
+    const bg = document.createElement('div'); bg.className = 'swipe-bg'; bg.innerHTML = '<span class="sw-ic">' + ic('check') + '</span><span>Mark as done</span>';
+    d.card.before(wrap); wrap.append(bg, d.card);
+    d.wrap = wrap; d.w = d.card.getBoundingClientRect().width / (UI.scale || 1);
+    d.card.classList.add('swiping');
+  }
+  function moveSwipe(d) {
+    const dx = Math.max(0, (d.x - d.x0) / (UI.scale || 1));
+    const eased = dx > d.w ? d.w + (dx - d.w) * 0.2 : dx;
+    d.card.style.transform = 'translateX(' + eased + 'px)';
+    d.wrap.style.setProperty('--p', Math.min(1, dx / (d.w * 0.4)).toFixed(3));
+    d.wrap.classList.toggle('armed', dx > d.w * 0.4);
+  }
+  function endSwipe(d, commit) {
+    const armed = commit && d.wrap.classList.contains('armed');
+    d.card.classList.remove('swiping');
+    d.card.style.transition = 'transform .22s ease';
+    if (!armed) { d.card.style.transform = ''; setTimeout(() => refresh(), 230); return; }
+    d.card.style.transform = 'translateX(' + (d.w + 40) + 'px)';
+    const h = d.wrap.getBoundingClientRect().height / (UI.scale || 1);
+    d.wrap.style.height = h + 'px';
+    setTimeout(() => { d.wrap.classList.add('gone'); d.wrap.style.height = '0px'; }, 200);
+    setTimeout(() => { const t = task(d.id); if (t) { t.status = 'done'; save(); } refresh(); }, 460);
+  }
   function beginDrag(d) {
     d.active = true;
     const r = d.card.getBoundingClientRect(), z = UI.scale || 1;
@@ -1296,17 +1397,16 @@
     if (commit && d.tab) {
       S.tasks.splice(S.tasks.indexOf(t), 1);
       t.status = d.tab; S.tasks.push(t); save();
-      if (from !== d.tab) toast('Moved to ' + esc(statusLabel(d.tab)));
     } else if (commit) {
       const body = d.ph.parentNode, col = body && body.closest('[data-col]');
       if (col) {
         const to = col.dataset.col;
-        if (from === 'backlog' && to === 'backlog' && !(S.manual && S.manual.backlog)) {
+        if (from === 'upnext' && to === 'upnext' && !(S.manual && S.manual.upnext)) {
           /* first manual reorder: lock in the due-date order, then apply the move */
-          const sorted = S.tasks.filter(x => x.status === 'backlog').sort(byDue);
-          const slots = []; S.tasks.forEach((x, i) => { if (x.status === 'backlog') slots.push(i); });
+          const sorted = S.tasks.filter(x => x.status === 'upnext').sort(byDue);
+          const slots = []; S.tasks.forEach((x, i) => { if (x.status === 'upnext') slots.push(i); });
           slots.forEach((slot, k) => { S.tasks[slot] = sorted[k]; });
-          S.manual = Object.assign({}, S.manual, { backlog: true });
+          S.manual = Object.assign({}, S.manual, { upnext: true });
         }
         const next = d.ph.nextElementSibling && d.ph.nextElementSibling.classList.contains('card') ? d.ph.nextElementSibling.dataset.id : null;
         S.tasks.splice(S.tasks.indexOf(t), 1);
@@ -1314,7 +1414,6 @@
         if (next) S.tasks.splice(S.tasks.findIndex(x => x.id === next), 0, t);
         else { let last = -1; S.tasks.forEach((x, i) => { if (x.status === to) last = i; }); S.tasks.splice(last + 1, 0, t); }
         save();
-        if (from !== to) toast('Moved to ' + esc(statusLabel(to)));
       }
     }
     d.ghost.remove(); d.ph.remove();
