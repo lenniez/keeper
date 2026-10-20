@@ -361,6 +361,48 @@
   section#what{padding-top:72px}
   @media (max-width:520px){.flow{height:560px!important}.flow .board{overflow:hidden}}
   .phone .screen img{aspect-ratio:780/1446;object-fit:cover;object-position:top}
+  /* ---------- revision 5: warmer, varied palette ---------- */
+  :root{--peach:#F6A472;--peach-soft:#FDEEE4;--teal:#1F9A8A;--teal-soft:#E2F4F1;--sun:#E9A93A;--sun-soft:#FCF2DE;--sky:#3D86E0;--sky-soft:#E4EFFC;--cream:#FCF8F3}
+  body{background:var(--cream)}
+  .hero::before{background:radial-gradient(45% 55% at 82% 28%,#FCE3D3 0%,transparent 70%),radial-gradient(40% 50% at 62% 70%,#E7E0FB 0%,transparent 70%),radial-gradient(35% 45% at 8% 8%,#FFF1E3 0%,transparent 70%)}
+  nav.top{background:rgba(252,248,243,.88)}
+  .battle,.privacy{background:#fff}
+  .diffs .diff:nth-child(1) .ic{background:var(--peach-soft);color:#C8642E}
+  .diffs .diff:nth-child(2) .ic{background:var(--brand-soft);color:var(--brand)}
+  .diffs .diff:nth-child(3) .ic{background:var(--teal-soft);color:var(--teal)}
+  .diffs .diff:nth-child(4) .ic{background:var(--sun-soft);color:#B97F12}
+  .trust-list .tr:nth-child(1) .ic{background:var(--teal-soft);color:var(--teal)}
+  .trust-list .tr:nth-child(2) .ic{background:var(--peach-soft);color:#C8642E}
+  .trust-list .tr:nth-child(3) .ic{background:var(--sky-soft);color:var(--sky)}
+  .trust-list .tr:nth-child(4) .ic{background:var(--sun-soft);color:#B97F12}
+  .stats .stat:nth-child(1){background:var(--peach-soft)}.stats .stat:nth-child(1) b{color:#B4521D}
+  .stats .stat:nth-child(2){background:var(--teal-soft)}.stats .stat:nth-child(2) b{color:#13786B}
+  .stats .stat:nth-child(3){background:var(--sun-soft)}.stats .stat:nth-child(3) b{color:#9A6A0E}
+  .tms .tm:nth-child(1) .uc{border-color:var(--peach)}
+  .tms .tm:nth-child(2) .uc{border-color:var(--brand)}
+  .tms .tm:nth-child(3) .uc{border-color:var(--teal)}
+  .tms .tm:nth-child(4) .uc{border-color:var(--sun)}
+  .tms .tm:nth-child(5) .uc{border-color:var(--sky)}
+  .steps .step:nth-child(1) .k{background:#C8642E}
+  .steps .step:nth-child(2) .k{background:var(--teal)}
+  .steps .step:nth-child(3) .k{background:var(--brand)}
+  .tagline{color:var(--ink-2)}
+  .flow .wires path{stroke:#E9B79A}
+  .hero h1 em{color:var(--brand)}
+  /* bigger, natural phone screenshots */
+  .phone{width:min(266px,100%)}
+  .phone .island{width:76px;margin-left:-38px;height:22px;top:16px}
+  .phone .status{height:34px;font-size:12px}
+  .steps .step .phone{width:min(246px,100%)}
+  .shots{gap:20px}
+  /* quieter closing panel (about 20% smaller) */
+  .kept{padding:56px 36px;border-radius:26px}
+  .kept .lines{font-size:clamp(32px,4.8vw,62px);gap:2px}
+  .kept p{font-size:16px;margin-top:22px;max-width:460px}
+  .kept .sec-cta{margin-top:24px}
+  .kept .sec-cta .btn{padding:11px 18px;font-size:15px}
+  .kept::after{background:radial-gradient(50% 50% at 50% 50%,rgba(246,164,114,.35),transparent 70%)}
+  .kept .lines em{color:#F6B98F}
 </style>
 </head>
 <body>
@@ -386,7 +428,6 @@
       <h1>A to-do list that <em>updates itself.</em></h1>
       <p class="lead">Keeper turns your email, Slack, texts and calls into one to-do list, and handles the simple tasks for you. Built for freelancers, consultants and independent agents.</p>
       <div class="ctas"><a class="btn primary" href="index.html">Try Keeper free</a><a class="btn ghost" href="#setup">How to set it up</a></div>
-      <p class="reassure">Connect your channels in about a minute. Your data is never used to train AI models.</p>
     </div>
     <div class="visual flow" aria-label="Messages from email, texts, Slack and calls flowing into one to-do list">
       <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
@@ -423,14 +464,14 @@
 <section id="what">
   <div class="wrap">
     <div class="sec-h rev">
-      <h2>One board for everything you’ve promised.</h2>
+      <h2>One list for everything you’ve promised.</h2>
       <p>Connect the channels your clients already use. Keeper finds the commitments in them and lines them up by due date.</p>
     </div>
     <div class="diffs">
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8l-6 6-3-3M4 4h16v16H4z"/></svg></div>
         <h3>No data entry</h3>
-        <p>You never add a task by hand unless you want to. Keeper hears “I’ll send that over Friday” and puts it on your board with the right client, date and source.</p>
+        <p>You never add a task by hand unless you want to. Keeper hears “I’ll send that over Friday” and puts it on your list with the right client, date and source.</p>
       </article>
       <article class="diff rev">
         <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></div>
@@ -450,9 +491,9 @@
     </div>
     <div class="what-shots">
       <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-feed.png" alt="The Task Feed showing new tasks from each channel" loading="lazy"></div></div><figcaption><b>Every channel feeds in</b>Gmail, Outlook, Slack, business texts, Zoom and Meet.</figcaption></figure>
-      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-board.png" alt="The Keeper board on a phone, with tasks sorted by due date" loading="lazy"></div></div><figcaption><b>Get one board</b>Every commitment, sorted by due date, with drafts ready to approve.</figcaption></figure>
+      <figure class="what-shot rev"><div class="phone"><span class="btn-l1" aria-hidden="true"></span><span class="btn-l2" aria-hidden="true"></span><span class="btn-l3" aria-hidden="true"></span><span class="btn-r" aria-hidden="true"></span><div class="island" aria-hidden="true"></div><div class="screen"><div class="status" aria-hidden="true"><b>9:41</b><span class="sig"></span></div><img src="img/m-board.png" alt="The Keeper board on a phone, with tasks sorted by due date" loading="lazy"></div></div><figcaption><b>Get one list</b>Every commitment, sorted by due date, with drafts ready to approve.</figcaption></figure>
     </div>
-    <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a><small>Free to start. Set up in about a minute.</small></div>
+    <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
   </div>
 </section>
 
@@ -484,7 +525,7 @@
       <div class="trust-list" style="margin-top:0">
         <div class="tr"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><span><b>Never used to train AI</b><span>Not by us, not by our AI providers.</span></span></div>
         <div class="tr"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg></span><span><b>Never sends without permission</b><span>You choose: draft only, or automatic.</span></span></div>
-        <div class="tr"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><span><b>Encrypted and private</b><span>Only you can see your board.</span></span></div>
+        <div class="tr"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span><span><b>Encrypted and private</b><span>Only you can see your list.</span></span></div>
         <div class="tr"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></span><span><b>Leave anytime</b><span>Disconnect or delete everything in one tap.</span></span></div>
       </div>
     </div>
@@ -544,7 +585,7 @@
       <div class="stat rev"><b>3.1M</b><span>commitments tracked so far</span></div>
       <div class="stat rev"><b>6 hrs</b><span>saved per week, on average</span></div>
     </div>
-    <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a><small>Join them in about a minute.</small></div>
+    <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
   </div>
 </section>
 
