@@ -1676,7 +1676,7 @@
   if (mode() === 'mobile') {
     const sp = document.createElement('div');
     sp.className = 'splash'; sp.setAttribute('aria-hidden', 'true');
-    sp.innerHTML = '<span class="logo-mark"></span>';
+    sp.innerHTML = '<div class="splash-in"><span class="logo-mark"></span><span class="wordmark">keeper</span></div>';
     device.appendChild(sp);
     setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); }, 1600);
   }

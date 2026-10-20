@@ -888,3 +888,5 @@ button.sort-note{color:var(--brand-ink);font-weight:600;text-decoration:underlin
 .m-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:-6px}
 .m-tools .icon-btn.labeled{height:34px;padding:0 12px;font-size:15px}
 .m-tools .icon-btn .dot-badge{position:static;margin-left:2px;border:0;min-width:20px;height:20px}
+.splash-in{display:flex;flex-direction:column;align-items:center;gap:18px}
+.splash .wordmark{font-size:44px;color:var(--ink);animation:rise .6s .2s both}
