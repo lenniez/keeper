@@ -174,7 +174,7 @@
         if (v === 'nodate') return !tk.due;
         if (!tk.due) return false;
         const n = daysOut(tk.due), toSun = 7 - today0().getDay();
-        return v === 'overdue' ? n < 0 && tk.status !== 'done' : v === 'today' ? n === 0 : v === 'tomorrow' ? n === 1
+        return v === 'overdue' ? n < 0 && tk.status !== 'done' : v === 'today' ? n === 0 && tk.status !== 'done' : v === 'tomorrow' ? n === 1
           : v === 'thisweek' ? n >= 0 && n < toSun : v === 'nextweek' ? n >= toSun && n < toSun + 7 : true;
       })
       && ok('text', v => v.split(' ').every(w => (tk.title + ' ' + tk.snippet + ' ' + (D.PROJECTS[tk.project] || {}).name).toLowerCase().includes(w)));
@@ -1380,9 +1380,9 @@
   function closeMenu() { const m = $('#menu'); if (m) m.remove(); UI.menu = null; }
   /* mobile shows one status at a time: when filtering, land on a status that has results */
   function jumpToMatches() {
-    if (!$('#mList')) return;
+    if (!$('#mList')) { const toks = activeTokens(); if (toks.length && colTasks('done', toks).length && !D.COLUMNS.some(c => c.id !== 'done' && colTasks(c.id, toks).length)) S.doneOpen = true; return; }
     const toks = activeTokens(); if (!toks.length) return;
-    const has = s => S.tasks.some(t => t.status === s && matches(t, toks));
+    const has = s => colTasks(s, toks).length > 0;
     if (!has(S.mstatus)) { const c = D.COLUMNS.find(c => has(c.id)); if (c) S.mstatus = c.id; }
   }
   function toggleToken(tok) {
