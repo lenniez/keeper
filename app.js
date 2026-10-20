@@ -977,7 +977,7 @@
     const bits = [c.draft && pl(c.draft, 'reply drafted', 'replies drafted'), c.autosent && pl(c.autosent, 'reply sent automatically', 'replies sent automatically'),
       c.times && pl(c.times, 'meeting ready to book', 'meetings ready to book'), (c.autobooked || 0) + (c.booked || 0) && pl((c.autobooked || 0) + (c.booked || 0), 'meeting booked and marked done', 'meetings booked and marked done')].filter(Boolean);
     const todo = (c.draft || 0) + (c.times || 0);
-    return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Keeper did the legwork</b><span>${bits.join(' · ')}.${todo ? ' Review and send.' : ''}</span></span>${ic('chev')}</button>`;
+    return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Approve Keeper’s drafts</b><span>${bits.join(' · ')}.${todo ? ' Review and send.' : ''}</span></span>${ic('chev')}</button>`;
   }
   function agentSettings() {
     if (!vision()) return '';
