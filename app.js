@@ -63,6 +63,8 @@
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
     down: '<path d="M6 9l6 6 6-6"/>',
+    clip: '<path d="M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.6v.3M12 17h.01"/>',
     merge: '<path d="M6 4v5a5 5 0 0 0 5 5h7M14 10l4 4-4 4M6 20v-3"/>',
     gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
@@ -324,6 +326,8 @@
     device.classList.toggle('is-mobile', m === 'mobile');
     device.classList.toggle('is-desktop', m === 'desktop');
     $$('.seg-view button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+    $$('.seg-scope button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.scope === (S.scope || 'mvp'))));
+    document.body.classList.toggle('vision', vision());
     fitDevice();
     const dt = $('#devToasts'); if (dt && m !== 'mobile') dt.innerHTML = '';
   }
@@ -357,14 +361,14 @@
         <div class="ob-title">${esc(t.title)}</div>
         ${t.snippet ? `<div class="rv-snip">“${esc(origin(t).text)}”</div>` : ''}
         <div class="ob-acts">
-          <button type="button" class="ob-btn no ${p === 'skip' ? 'on' : ''}" data-action="ob-pick" data-v="skip" aria-pressed="${p === 'skip'}">${ic('x')}Reject</button>
-          <button type="button" class="ob-btn yes ${p === 'keep' ? 'on' : ''}" data-action="ob-pick" data-v="keep" aria-pressed="${p === 'keep'}">${ic('check')}Approve</button>
+          <button type="button" class="ob-btn no ${p === 'skip' ? 'on' : ''}" data-action="ob-pick" data-v="skip" aria-pressed="${p === 'skip'}">${ic('x')}Dismiss</button>
+          <button type="button" class="ob-btn yes ${p === 'keep' ? 'on' : ''}" data-action="ob-pick" data-v="keep" aria-pressed="${p === 'keep'}">${ic('check')}Keep</button>
         </div></article>`;
     }).join('');
     return `<div class="onb"><div class="onb-inner">${steps(3)}
       <h2>Keeper found ${list.length} tasks</h2>
-      <p class="lead">Approve the ones you owe someone. Rejected tasks won’t be added to your board.</p>
-      <div class="ob-bar"><span>${decided} of ${list.length} reviewed</span><button type="button" class="linkish" data-action="ob-all">Approve all</button></div>
+      <p class="lead">Keep the ones you owe someone. Dismissed tasks won’t be added to your board.</p>
+      <div class="ob-bar"><span>${decided} of ${list.length} reviewed</span><button type="button" class="linkish" data-action="ob-all">Keep all</button></div>
       <div class="ob-list">${rows}</div>
       <div class="onb-foot ob-foot"><button class="btn-primary" data-action="ob-finish" ${kept ? '' : 'disabled'}>Add ${kept} task${kept === 1 ? '' : 's'} to my board</button>
         <span class="small">${decided < list.length ? 'Anything you skip now stays in To review.' : 'You can change these later.'}</span></div>
@@ -453,14 +457,14 @@
       <div class="rv-top">${srcIcons(t)}<span>${esc(from)} · ${esc(srcLabel(t.source))} · ${agoText(t.captured)}</span></div>
       <button type="button" class="rv-title" data-action="open" data-id="${t.id}">${esc(t.title)}</button>
       ${t.snippet ? `<div class="rv-snip">“${esc(origin(t).text)}”</div>` : ''}
-      <div class="rv-acts"><button type="button" class="btn-ghost" data-action="rv-dismiss">${t.low ? 'Not a task' : 'Dismiss'}</button><button type="button" class="btn-primary" data-action="rv-add">${ic('check')}Add to Up Next</button></div>
+      <div class="rv-acts"><button type="button" class="btn-ghost" data-action="rv-dismiss">Dismiss</button><button type="button" class="btn-primary" data-action="rv-add">${ic('check')}Keep</button></div>
     </article>`;
   }
   function reviewStrip() {
     const list = toReview();
     if (!list.length) return '';
-    if (mode() === 'mobile') return `<button type="button" class="rv-banner" data-action="review"><span class="rv-count">${list.length}</span><span class="o-txt"><b>${list.length === 1 ? 'New task' : 'New tasks'} to review</b><span>Keeper caught ${list.length === 1 ? 'this' : 'these'}. Add or dismiss.</span></span>${ic('chev')}</button>`;
-    return `<section class="rv-strip"><div class="rv-h"><h2>To review <span class="n">${list.length}</span></h2><span>Keeper caught these. Add them to your board or dismiss.</span>${list.length > 3 ? `<button type="button" class="linkish" data-action="review">See all</button>` : ''}</div>
+    if (mode() === 'mobile') return `<button type="button" class="rv-banner" data-action="review"><span class="rv-count">${list.length}</span><span class="o-txt"><b>${list.length === 1 ? 'New task' : 'New tasks'} to review</b><span>Keeper caught ${list.length === 1 ? 'this' : 'these'}. Keep or dismiss.</span></span>${ic('chev')}</button>`;
+    return `<section class="rv-strip"><div class="rv-h"><h2>To review <span class="n">${list.length}</span></h2><span>Keeper caught these. Keep them on your board or dismiss.</span>${list.length > 3 ? `<button type="button" class="linkish" data-action="review">See all</button>` : ''}</div>
       <div class="rv-row">${list.slice(0, 3).map(reviewCard).join('')}</div></section>`;
   }
   function cardHTML(t) {
@@ -469,6 +473,7 @@
     const where = [projName(t.project), who].filter(Boolean).join(' · ');
     return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
       <div class="card-title">${esc(t.title)}</div>
+      ${agentBadge(t)}
       <div class="card-meta"><span class="where">${srcIcons(t)}<span>${esc(where)}</span></span>
         <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
     </article>`;
@@ -521,7 +526,7 @@
 
         <span class="frow-meta">${req}${proj ? ' · ' + esc(proj) : ''}</span>
         ${opts && opts.snip && t.snippet ? `<span class="snip">“${esc(t.snippet)}”</span>` : ''}
-        <span class="frow-foot">${opts && opts.status ? spill(t.triage ? 'triage' : t.status) : ''}${t.also && t.also.length ? `<span class="merged">${ic('merge')}${t.also.length + 1} sources</span>` : ''}<span class="due ${di.cls}">${esc(di.label)}</span><span class="ago">${agoText(t.captured)}</span></span>
+        <span class="frow-foot">${opts && opts.status ? spill(t.triage ? 'triage' : t.status) : ''}${agentBadge(t)}${t.also && t.also.length ? `<span class="merged">${ic('merge')}${t.also.length + 1} sources</span>` : ''}<span class="due ${di.cls}">${esc(di.label)}</span><span class="ago">${agoText(t.captured)}</span></span>
       </span>
     </button>`;
   }
@@ -562,6 +567,7 @@
     }).join('')}<p class="note">Prototype: connections are simulated. The Task Feed only shows tasks from channels that are on.</p></section>
       <section class="set-col"><h2 class="sec-h first">Assistant</h2>
       <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>Assistant voice</b><span>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</span></span>${ic('chev')}</button>
+      ${agentSettings()}
       <h2 class="sec-h">Account</h2>
       <div class="chan acct"><img class="m-me" src="maya.svg" alt=""><span class="chan-txt"><b>Maya</b><span>maya@mayastudio.co</span></span></div></section></div>`;
   }
@@ -571,7 +577,7 @@
     let body;
     if (S.screen === 'feed') body = `${feedHead()}<div id="feedPage">${feedPageHTML()}</div>`;
     else if (S.screen === 'sources') body = `<div class="page-h"><button class="back" data-action="go" data-screen="feed" aria-label="Back to Task Feed">${ic('back')}</button><h1>Settings</h1></div>${sourcesHTML()}`;
-    else body = `${greeting()}${filterBar()}<div id="rvSlot">${reviewStrip()}</div>
+    else body = `${greeting()}${filterBar()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
       <div class="m-tabs" id="mTabs">${mTabsHTML()}</div>
       <div class="m-list col-body" id="mList" data-col="${S.mstatus}">${mListHTML()}</div>
       <p class="m-hint">Swipe right to mark done · hold to drag</p>`;
@@ -593,7 +599,7 @@
     else main = `<div class="d-head">${greeting()}<div class="d-acts">${searchBtn()}
         <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Task Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
         <button class="btn-ask" data-action="ask">${ic('plus')} Add task</button></div></div>
-      ${filterBar()}<div id="rvSlot">${reviewStrip()}</div>
+      ${filterBar()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
       <div class="board ${S.doneOpen ? '' : 'done-collapsed'}" id="board">${boardHTML()}</div>`;
     return `<div class="d-layout">
       <aside class="d-side">
@@ -615,6 +621,7 @@
     const ml = $('#mList'); if (ml) { ml.dataset.col = S.mstatus; ml.innerHTML = mListHTML(); }
     const fpg = $('#feedPage'); if (fpg) fpg.innerHTML = feedPageHTML();
     const rv = $('#rvSlot'); if (rv) rv.innerHTML = reviewStrip();
+    const ag = $('#agSlot'); if (ag) ag.innerHTML = agentStrip();
     const sm = $('#summary'); if (sm) sm.innerHTML = summary();
     const tk = $('#tokens'); if (tk) tk.innerHTML = tokensHTML();
     const sb = $('#searchBtn'); if (sb) sb.classList.toggle('on', UI.search || filterOn());
@@ -622,7 +629,7 @@
     const sb2 = $('#searchBtn'); if (sb2 && !UI.search) sb2.outerHTML = searchBtn();
     const nb = $('#navBadge'); if (nb) { nb.textContent = S.unseen; nb.hidden = !S.unseen; }
     const ic2 = $('#incCount'); if (ic2) ic2.textContent = S.unseen ? S.unseen + ' new' : '';
-    if (UI.sheet && (UI.sheet.type === 'task' || UI.sheet.type === 'inc' || UI.sheet.type === 'review')) renderLayer(true);
+    if (UI.sheet && (UI.sheet.type === 'task' || UI.sheet.type === 'inc' || UI.sheet.type === 'review' || UI.sheet.type === 'agents')) renderLayer(true);
   }
 
   /* ---------- original source (deeplink) ---------- */
@@ -806,11 +813,115 @@
     return {
       body: `${origBlock(t)}
           <h2 class="sh-title">${esc(t.title)}</h2>
-          <dl class="fields">${statusRow}${dueRow}<dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>`,
-      foot: t.triage ? `<button class="btn-ghost" data-action="rv-dismiss">${t.low ? 'Not a task' : 'Dismiss'}</button><button class="btn-primary" data-action="rv-add">${ic('check')} Add to Up Next</button>`
+          <dl class="fields">${statusRow}${dueRow}<dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
+          ${agentBlock(t)}`,
+      foot: t.triage ? `<button class="btn-ghost" data-action="rv-dismiss">Dismiss</button><button class="btn-primary" data-action="rv-add">${ic('check')} Keep</button>`
         : t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`
     };
   }
+  /* ================= Vision: Keeper agent prepares the work ================= */
+  const vision = () => S.scope === 'vision';
+  const AG = () => Object.assign({ draft: 'review', schedule: 'suggest' }, S.agent || {});
+  const SENDVIA = { gmail: 'Reply in the Gmail thread', outlook: 'Reply in the Outlook thread', slack: 'Reply in the Slack thread', sms: 'Text from your business line', zoom: 'Follow-up email', meet: 'Follow-up email', keeper: 'Email' };
+  /* which tasks the agent can do the work for */
+  function agentKind(t) {
+    if (!vision() || t.dismissed || t.triage || t.agentOff || t.status === 'done') return null;
+    const client = t.requester && D.PEOPLE[t.requester] && D.PEOPLE[t.requester].role === 'client';
+    if (!client) return null;
+    if (/^(schedule|reschedule|book|set up)\b/i.test(t.title) || t.category === 'Scheduling') return AG().schedule === 'off' ? null : 'schedule';
+    if (/^(send|share|reply|add|approve|update)\b/i.test(t.title)) return AG().draft === 'off' ? null : 'draft';
+    return null;
+  }
+  const agentTasks = () => S.tasks.filter(t => agentKind(t) && !(t.agent && t.agent.sent));
+  function agentBadge(t) {
+    const k = agentKind(t); if (!k) return '';
+    const st = t.agent || {};
+    if (st.sent) return `<span class="ag-badge sent">${ic('check')}${k === 'schedule' ? 'Invite sent' : 'Sent'}</span>`;
+    const auto = k === 'draft' ? AG().draft === 'auto' : AG().schedule === 'auto';
+    return `<span class="ag-badge ${auto ? 'auto' : ''}">${ic('spark')}${auto ? 'Sending automatically' : k === 'schedule' ? 'Times ready' : 'Draft ready'}</span>`;
+  }
+  /* turn the task into the object being delivered: "Send Jen the two logo options" -> "the two logo options" */
+  function objectOf(t) {
+    const first = t.requester && D.PEOPLE[t.requester] ? fn(t.requester) : '';
+    let o = t.title.replace(/^(send|share|add|approve|update)\s+/i, '');
+    if (first) o = o.replace(new RegExp('^' + first + '\\s+', 'i'), '');
+    if (!/^(the|a|an|my|our|your|three|two|\d)/i.test(o)) o = 'the ' + o;
+    return o.charAt(0).toLowerCase() + o.slice(1);
+  }
+  const fileName = t => (projName(t.project).split(' ')[0] + '_' + objectOf(t).replace(/^(the|a|an)\s+/i, '').replace(/[^a-z0-9]+/gi, '_').replace(/_+$/, '')).slice(0, 48) + (/deck|timeline|slides|appendix/i.test(t.title) ? '.key' : /status report/i.test(t.title) ? '.pdf' : /illustration|logo|color|site|sign/i.test(t.title) ? '.zip' : '.pdf');
+  const SLOTS = [[1, '10:00 AM'], [2, '2:00 PM'], [3, '11:30 AM']];
+  function slotDate(n) { const d = addDays(n); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); return d; }
+  const slotLabel = (n, time) => slotDate(n).toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' }) + ' · ' + time;
+  function agentDraft(t) {
+    const k = agentKind(t), st = t.agent || {}, first = fn(t.requester), proj = projName(t.project);
+    const extra = (st.context || []).map(c => c.label);
+    const due = t.due ? (daysOut(t.due) <= 1 ? dueInfo(t.due, 'upnext').label.toLowerCase() : fromISO(t.due).toLocaleDateString('en-US', { weekday: 'long' })) : '';
+    const v = (st.v || 0) % 2;
+    if (k === 'schedule') {
+      const what = /book|visit|shoot/i.test(t.title) ? (/shoot/i.test(t.title) ? 'the shoot' : 'the visit') : /review/i.test(t.title) ? 'the review' : 'a call';
+      const pick = st.slot == null ? null : SLOTS[st.slot];
+      const lines = SLOTS.map(([n, time]) => '• ' + slotLabel(n, time)).join('\n');
+      const body = v === 0
+        ? `Hi ${first},\n\n${pick ? `Confirming ${what} for ${slotLabel(pick[0], pick[1])}. I’ve sent a calendar invite.` : `Here are a few times that work for ${what}:\n\n${lines}\n\nDo any of these work? I’ll send an invite as soon as you pick one.`}${/okafor/.test(t.project || '') ? '\n\nI’ll plan to meet you at the new office on Bleecker St.' : ''}${extra.length ? '\n\nI’ve also attached ' + extra.join(', ') + '.' : ''}\n\nThanks,\nMaya`
+        : `Hey ${first}, ${pick ? `you’re booked for ${slotLabel(pick[0], pick[1])}. Invite on its way!` : `could any of these work for ${what}? ${SLOTS.map(([n, time]) => slotLabel(n, time)).join(', or ')}.`}${extra.length ? ' Also sharing ' + extra.join(', ') + '.' : ''}\n\nMaya`;
+      return { kind: k, body, via: SENDVIA[t.source], context: contextOf(t), attach: [] };
+    }
+    const obj = objectOf(t);
+    const plural = /s$|options|files|sizes|slides|assets|licenses/i.test(obj.split(' ').pop());
+    const also = t.also && t.also.length ? ' I saw your follow-up too, so this covers both messages.' : '';
+    const body = v === 0
+      ? `Hi ${first},\n\nAs promised, here ${plural ? 'are' : 'is'} ${obj}.${also}\n\n${extra.length ? 'I’ve also included ' + extra.join(', ') + ' for reference.\n\n' : ''}Let me know if anything needs a tweak.${t.due && daysOut(t.due) > 1 ? ` I can turn changes around before ${due}.` : ''}\n\nBest,\nMaya`
+      : `Hey ${first}! ${obj.charAt(0).toUpperCase() + obj.slice(1)} ${plural ? 'are' : 'is'} attached.${also}${extra.length ? ' Also linking ' + extra.join(', ') + '.' : ''} Shout if you want any changes.\n\nMaya`;
+    return { kind: k, body, via: SENDVIA[t.source], context: contextOf(t), attach: [fileName(t)] };
+  }
+  function contextOf(t) {
+    const out = [{ ic: t.source, label: (D.SOURCES[t.source] || {}).label + ' message from ' + fn(t.requester) }];
+    (t.also || []).forEach(a => out.push({ ic: a.source, label: D.SOURCES[a.source].label + ' follow-up' }));
+    out.push({ ic: 'feed', label: 'Past messages with ' + fn(t.requester) + ' about ' + projName(t.project) });
+    if (agentKind(t) === 'schedule') out.push({ ic: 'cal', label: 'Your calendar (free slots this week)' });
+    ((t.agent || {}).context || []).forEach(c => out.push({ ic: 'link', label: c.label }));
+    return out;
+  }
+  function agentBlock(t) {
+    const k = agentKind(t); if (!k) return '';
+    const st = t.agent || {}, d = agentDraft(t), auto = k === 'draft' ? AG().draft === 'auto' : AG().schedule === 'auto';
+    if (st.sent) return `<section class="ag sent"><div class="ag-h">${ic('check')}<b>${k === 'schedule' ? 'Invite sent' : 'Sent'}</b><span>${esc(d.via)} · just now</span></div><pre class="ag-body">${esc(st.text || d.body)}</pre></section>`;
+    const slots = k === 'schedule' ? `<div class="ag-slots"><div class="fl">Proposed times · from your calendar</div>${SLOTS.map(([n, time], i) => `<button type="button" class="chip ${st.slot === i ? 'on' : ''}" data-action="ag-slot" data-i="${i}">${esc(slotLabel(n, time))}</button>`).join('')}</div>` : '';
+    return `<section class="ag" id="agent">
+      <div class="ag-h">${ic('spark')}<b>${k === 'schedule' ? 'Keeper proposed times' : 'Keeper drafted a reply'}</b><span>${esc(d.via)}</span></div>
+      ${slots}
+      <div class="ag-to"><span>To</span>${av(t.requester)}${esc(personName(t.requester))}</div>
+      ${st.editing ? `<textarea class="ag-edit" aria-label="Edit draft">${esc(st.text || d.body)}</textarea>` : `<pre class="ag-body">${esc(st.text || d.body)}</pre>`}
+      ${d.attach.length ? `<div class="ag-att">${d.attach.map(f => `<span class="att">${ic('clip')}${esc(f)}<small>from Drive</small></span>`).join('')}</div>` : ''}
+      <details class="ag-ctx"><summary>Based on ${d.context.length} sources</summary><ul>${d.context.map(c => `<li>${P[c.ic] ? (D.SOURCES[c.ic] ? srcIc(c.ic) : `<span class="src-ic">${ic(c.ic)}</span>`) : ''}${esc(c.label)}</li>`).join('')}</ul></details>
+      ${UI.addCtx === t.id ? `<form class="ag-add" data-tid="${t.id}"><input type="text" placeholder="Paste a link or doc name" aria-label="Add a link or document"><button type="submit" class="btn-ghost">Add</button></form>` : ''}
+      <div class="ag-tools"><button type="button" class="linkish" data-action="ag-ctx">${ic('link')}Add link or doc</button><button type="button" class="linkish" data-action="ag-regen">${ic('spark')}Rewrite</button><button type="button" class="linkish" data-action="ag-edit">${st.editing ? 'Done editing' : 'Edit'}</button></div>
+      ${auto ? `<p class="ag-auto">${ic('bolt')}Keeper will send this at 5:00 PM unless you change it. <button type="button" class="linkish" data-action="go-agent">Agent settings</button></p>` : ''}
+      <div class="ag-acts"><button type="button" class="btn-ghost" data-action="ag-discard">Discard</button><button type="button" class="btn-primary" data-action="ag-send" ${k === 'schedule' && st.slot == null && AG().schedule !== 'auto' ? '' : ''}>${ic('send')}${k === 'schedule' ? (st.slot == null ? 'Send times' : 'Send invite') : d.via.startsWith('Reply') ? 'Send reply' : 'Send'}</button></div>
+    </section>`;
+  }
+  function agentStrip() {
+    const list = agentTasks(); if (!vision() || !list.length) return '';
+    const dr = list.filter(t => agentKind(t) === 'draft').length, sc = list.length - dr;
+    const txt = [dr ? `${dr} repl${dr === 1 ? 'y' : 'ies'} drafted` : '', sc ? `${sc} schedule${sc === 1 ? '' : 's'} proposed` : ''].filter(Boolean).join(' · ');
+    return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Keeper did the legwork</b><span>${txt}. Review and send.</span></span>${ic('chev')}</button>`;
+  }
+  function agentSettings() {
+    if (!vision()) return '';
+    const g = AG();
+    const opt = (key, v, label, sub) => `<button type="button" class="ag-opt ${g[key] === v ? 'on' : ''}" data-action="ag-set" data-k="${key}" data-v="${v}" aria-pressed="${g[key] === v}"><span class="radio"></span><span class="vt"><b>${label}</b><span>${sub}</span></span></button>`;
+    return `<h2 class="sec-h">Agent <span class="vis-tag">Vision</span></h2>
+      <div class="ag-set"><div class="fl">Replies and follow-ups</div>
+        ${opt('draft', 'off', 'Off', 'Keeper only lists tasks')}
+        ${opt('draft', 'review', 'Draft for my review', 'Keeper writes the reply; you send it')}
+        ${opt('draft', 'auto', 'Draft and send automatically', 'Sent at 5 PM unless you edit or stop it')}</div>
+      <div class="ag-set"><div class="fl">Meetings and visits</div>
+        ${opt('schedule', 'off', 'Off', 'No scheduling help')}
+        ${opt('schedule', 'suggest', 'Suggest times', 'Keeper proposes free slots; you confirm')}
+        ${opt('schedule', 'auto', 'Book automatically', 'Keeper sends invites for open slots')}</div>
+      <p class="note">Automatic actions only go to people you’ve worked with before, and every message is logged in the task.</p>`;
+  }
+
   /* ---------- sheets ---------- */
   function renderLayer(instant) {
     const layer = $('#layer'); if (!layer) return;
@@ -832,6 +943,15 @@
         <div class="sh-h"><button class="back" data-action="open" data-id="${t.id}" aria-label="Back to task">${ic('back')}</button><span class="lab">${srcIc(t.source)}Original ${esc(o.noun || 'message')}</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="sh-body">${sourceView(t)}<p class="sv-note">${esc(o.note || '')}</p></div>
         ${o.url ? `<div class="sh-foot"><a class="btn-primary" href="${o.url}" target="_blank" rel="noopener">${esc(o.cta)} ${ic('ext')}</a></div>` : ''}
+      </div>`;
+    } else if (UI.sheet.type === 'agents') {
+      const list = agentTasks();
+      layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Prepared by Keeper">
+        <div class="grab"></div>
+        <div class="sh-h"><b class="sh-name">Ready for you</b><span class="n">${list.length}</span><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-body ag-list">${list.map(t => { const d = agentDraft(t); return `<button type="button" class="ag-item" data-action="open-agent" data-id="${t.id}">
+          <span class="ag-row1">${agentBadge(t)}<span class="ag-via">${esc(d.via)}</span></span>
+          <b>${esc(t.title)}</b><span class="ag-prev">${esc(d.body.replace(/\s+/g, ' ').slice(0, 110))}…</span></button>`; }).join('') || '<div class="empty">Nothing waiting. Keeper will prepare drafts as tasks come in.</div>'}</div>
       </div>`;
     } else if (UI.sheet.type === 'review') {
       const list = toReview();
@@ -1193,10 +1313,10 @@
     switch (act) {
       case 'sort-due': S.manual = Object.assign({}, S.manual, { upnext: false }); save(); refresh(); break;
       case 'mode': S.mode = a.dataset.mode; save(); render(); break;
-      case 'scope': $$('.seg-scope button').forEach(b => b.setAttribute('aria-pressed', String(b === a))); break;
+      case 'scope': S.scope = a.dataset.scope; save(); UI.sheet = null; render(); break;
       case 'about': $('#about').hidden = false; break;
       case 'about-close': $('#about').hidden = true; break;
-      case 'reset': try { localStorage.removeItem(STORE); } catch (err) {} S = fresh(); UI.sheet = null; render(); toast('Demo reset'); break;
+      case 'reset': try { localStorage.removeItem(STORE); } catch (err) {} const sc = S.scope; S = fresh(); S.scope = sc; UI.sheet = null; render(); toast('Demo reset'); break;
       case 'onb-next':
         if (S.step < 2) { S.step++; save(); render(); }
         if (S.step === 2) setTimeout(() => {
@@ -1239,6 +1359,16 @@
       case 'rv-add': { const t = task(tidOf(a)); t.triage = false; t.low = false; t.fresh = true; save(); afterReview(); setTimeout(() => { t.fresh = false; refresh(); }, 2500); break; }
       case 'rv-dismiss': { const t = task(tidOf(a)); t.dismissed = true; t.triage = false; save(); afterReview(); break; }
       case 'review': openSheet({ type: 'review' }); break;
+      case 'agent-list': openSheet({ type: 'agents' }); break;
+      case 'open-agent': openSheet({ type: 'task', id: a.dataset.id }); setTimeout(() => { const el = $('.sheet #agent'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 360); break;
+      case 'ag-set': S.agent = Object.assign(AG(), { [a.dataset.k]: a.dataset.v }); save(); { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); } break;
+      case 'go-agent': S.screen = 'sources'; UI.sheet = null; save(); render(); break;
+      case 'ag-slot': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { slot: (t.agent || {}).slot === +a.dataset.i ? null : +a.dataset.i, text: null }); save(); refresh(); renderLayer(true); break; }
+      case 'ag-regen': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { v: ((t.agent || {}).v || 0) + 1, text: null, editing: false }); save(); refresh(); renderLayer(true); break; }
+      case 'ag-edit': { const t = task(tidOf(a)); const st = t.agent || {}; const ta = a.closest('.ag').querySelector('.ag-edit'); t.agent = Object.assign({}, st, { editing: !st.editing, text: ta ? ta.value : st.text }); save(); refresh(); renderLayer(true); const n = $('.ag-edit'); if (n) n.focus(); break; }
+      case 'ag-ctx': { const id = tidOf(a); UI.addCtx = UI.addCtx === id ? null : id; refresh(); renderLayer(true); const i = $('.ag-add input'); if (i) i.focus(); break; }
+      case 'ag-discard': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { text: null, editing: false, v: 0, slot: null, context: [] }); S.agent = S.agent || {}; t.agentOff = true; save(); refresh(); renderLayer(true); break; }
+      case 'ag-send': { const t = task(tidOf(a)); const ta = a.closest('.ag').querySelector('.ag-edit'); const d = agentDraft(t); t.agent = Object.assign({}, t.agent, { sent: true, text: ta ? ta.value : (t.agent || {}).text || d.body, editing: false }); if (t.status === 'upnext' && d.kind === 'draft') t.status = 'inprogress'; save(); refresh(); renderLayer(true); toast((d.kind === 'schedule' ? 'Times sent to ' : 'Reply sent to ') + esc(personName(t.requester)), { title: 'Sent by Keeper' }); break; }
       case 'src-tab': UI.srcTab[tidOf(a)] = +a.dataset.i; UI.expand[tidOf(a)] = false; refresh(); if (UI.sheet) renderLayer(true); break;
       case 'f-due': toggleToken({ type: 'due', value: a.dataset.v, label: a.dataset.v === 'today' ? 'Due today' : 'Overdue' }); break;
       case 'f-clear': S.filter = { text: '', tokens: [] }; save(); render(); break;
@@ -1303,6 +1433,7 @@
     if (e.target.classList.contains('dueInput')) { const t = task(tidOf(e.target)); t.due = e.target.value || null; UI.editField = null; save(); refresh(); renderLayer(true); }
   });
   document.addEventListener('submit', e => {
+    if (e.target.classList.contains('ag-add')) { e.preventDefault(); const v = e.target.querySelector('input').value.trim(); if (!v) return; const t = task(e.target.dataset.tid); t.agent = Object.assign({}, t.agent, { context: ((t.agent || {}).context || []).concat({ label: v.replace(/^https?:\/\//, '') }), text: null }); UI.addCtx = null; save(); refresh(); renderLayer(true); return; }
     if (e.target.id === 'askForm') { e.preventDefault(); const i = $('#askInput'); const v = i.value; i.value = ''; askSubmit(v); }
   });
   document.addEventListener('keydown', e => {
