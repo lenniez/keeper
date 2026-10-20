@@ -957,3 +957,10 @@ mark{background:#FCF2DE;box-shadow:inset 0 -2px 0 #F3D79C}
 .newtag{background:var(--mari);color:#3B2A05}
 .chip.on,.mtab.on:not([class*="s-"]){background:var(--ink);border-color:var(--ink)}
 .icon-btn.on{background:var(--ink);border-color:var(--ink)}
+
+/* real source logos */
+.src-ic.lg{background:none!important;box-shadow:none;border-radius:0;padding:0}
+.src-ic.lg svg,.src-ic.lg img{width:100%;height:100%;display:block}
+.src-stack .src-ic.lg + .src-ic.lg{margin-left:-4px;box-shadow:none}
+.chan .src-ic.lg,.frow .src-ic.lg,.orig .src-ic.lg,.cx-load .src-ic.lg{padding:2px}
+.toast .src-ic.lg{background:none}

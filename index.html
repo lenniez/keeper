@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Keeper · Prototype</title>
-<meta name="description" content="Keeper catches commitments from email, Slack, texts and calls and turns them into one task board. Clickable prototype.">
+<meta name="description" content="Keeper catches commitments from email, Slack, texts and calls and turns them into one to-do list. Clickable prototype.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap">
 <link rel="icon" type="image/svg+xml" href="keeper-logo.svg">
-<link rel="stylesheet" href="styles.css?v=20261020d">
+<link rel="stylesheet" href="styles.css?v=20261020e">
 </head>
 <body>
   <header class="shell-bar">
@@ -49,7 +49,7 @@
           <tr><td>Natural-language input &amp; filter</td><td>Rule-based parsing</td><td>An LLM API (small per-use cost)</td></tr>
           <tr><td>Voice entry &amp; spoken replies</td><td>Real: browser speech recognition and the device’s own voices (pick one under Channels → Assistant voice)</td><td>Works in Chrome, Edge and Safari; not Firefox. Truly human-sounding voices need a paid voice service (e.g. OpenAI or ElevenLabs, roughly $0.01–0.03 per reply)</td></tr>
           <tr><td>Link to the original message</td><td>Mock preview; “Open in…” goes to the app’s home page</td><td>Gmail, Outlook and Slack give each message its own link, so the button opens that exact message. Business texts and call transcripts are stored by Keeper, so they open inside Keeper. iMessage can’t be linked into: Apple offers no way to read or open a specific message</td></tr>
-          <tr><td>Board, drag &amp; drop, due dates</td><td>Fully working</td><td>—</td></tr>
+          <tr><td>List, drag &amp; drop, due dates</td><td>Fully working</td><td>—</td></tr>
         </tbody>
       </table>
       <button type="button" class="btn-primary" data-action="about-close">Got it</button>
@@ -58,7 +58,7 @@
 
   <div class="toast-wrap" id="toasts" aria-live="polite"></div>
 
-  <script src="data.js?v=20261020d"></script>
-  <script src="app.js?v=20261020d"></script>
+  <script src="data.js?v=20261020e"></script>
+  <script src="app.js?v=20261020e"></script>
 </body>
 </html>

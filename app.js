@@ -63,6 +63,7 @@
     bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
     filter: '<path d="M4 6h16M7 12h10M10 18h4"/>',
     down: '<path d="M6 9l6 6 6-6"/>',
+    checklist: '<path d="M4 6l1.5 1.5L8 5M4 12l1.5 1.5L8 11M4 18l1.5 1.5L8 17M11 6h9M11 12h9M11 18h9"/>',
     shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
     gcal: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
     clip: '<path d="M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
@@ -78,7 +79,8 @@
   const ic = (n, cls) => '<svg class="icon ' + (cls || '') + '" viewBox="0 0 24 24" aria-hidden="true">' + (P[n] || '') + '</svg>';
   /* colour is reserved for actions: sources, people and projects are neutral */
   const srcLabel = s => (D.SOURCES[s] || D.SOURCES.keeper).label;
-  const srcIc = s => '<span class="src-ic" style="--c:' + (D.SOURCES[s] || D.SOURCES.keeper).color + '" title="' + esc(srcLabel(s)) + '">' + ic(s) + '</span>';
+  const LOGO = {"gmail": "<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path fill=\"#4285F4\" d=\"M6 38h7V22L4 15v20a3 3 0 0 0 2 3z\"/><path fill=\"#34A853\" d=\"M35 38h7a3 3 0 0 0 2-3V15l-9 7z\"/><path fill=\"#FBBC04\" d=\"M35 11v11l9-7v-3c0-3.7-4.2-5.8-7.2-3.6z\"/><path fill=\"#EA4335\" d=\"M13 22V11l11 8.3L35 11v11l-11 8.3z\"/><path fill=\"#C5221F\" d=\"M4 12v3l9 7V11l-1.8-1.6C8.2 7.2 4 9.3 4 12z\"/></svg>", "outlook": "<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"18\" y=\"8\" width=\"26\" height=\"32\" rx=\"3\" fill=\"#28A8EA\"/><path fill=\"#0078D4\" d=\"M18 24h26v13a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3z\"/><rect x=\"4\" y=\"13\" width=\"22\" height=\"22\" rx=\"3\" fill=\"#0A64C2\"/><ellipse cx=\"15\" cy=\"24\" rx=\"5.2\" ry=\"6.3\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.6\"/></svg>", "slack": "<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path fill=\"#E01E5A\" d=\"M14 29a4 4 0 1 1-4-4h4zm2 0a4 4 0 0 1 8 0v10a4 4 0 0 1-8 0z\"/><path fill=\"#36C5F0\" d=\"M20 14a4 4 0 1 1 4-4v4zm0 2a4 4 0 0 1 0 8H10a4 4 0 0 1 0-8z\"/><path fill=\"#2EB67D\" d=\"M34 20a4 4 0 1 1 4 4h-4zm-2 0a4 4 0 0 1-8 0V10a4 4 0 0 1 8 0z\"/><path fill=\"#ECB22E\" d=\"M28 34a4 4 0 1 1-4 4v-4zm0-2a4 4 0 0 1 0-8h10a4 4 0 0 1 0 8z\"/></svg>", "sms": "<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"2\" y=\"2\" width=\"44\" height=\"44\" rx=\"11\" fill=\"#34C759\"/><path fill=\"#fff\" d=\"M24 12c-7.7 0-14 5-14 11.2 0 3.6 2.1 6.8 5.4 8.8L14 37l6.2-3.3c1.2.3 2.5.5 3.8.5 7.7 0 14-5 14-11.2S31.7 12 24 12z\"/></svg>", "zoom": "<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"2\" y=\"2\" width=\"44\" height=\"44\" rx=\"11\" fill=\"#0B5CFF\"/><rect x=\"10\" y=\"16\" width=\"19\" height=\"16\" rx=\"4\" fill=\"#fff\"/><path fill=\"#fff\" d=\"M31 21.5l7-4.5v14l-7-4.5z\"/></svg>", "meet": "<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path fill=\"#00832D\" d=\"M27 24l4.4 5 5.6 3.7 1-8.6-1-8.4-5.7 3.2z\"/><path fill=\"#0066DA\" d=\"M4 31.6V38a3 3 0 0 0 3 3h6.4l1.3-4.8-1.3-4.6-4.4-1.3z\"/><path fill=\"#E94235\" d=\"M13.4 7L4 16.4l4.8 1.3 4.6-1.3 1.3-4.4z\"/><path fill=\"#2684FC\" d=\"M13.4 16.4H4v15.2h9.4z\"/><path fill=\"#00AC47\" d=\"M42 11.3l-5 4.4v16.9l5 4.1c.8.6 2 0 2-1V12.3c0-1-1.2-1.6-2-1zM27 24v7.6H13.4V41h20.1a3 3 0 0 0 3-3v-5.6z\"/><path fill=\"#FFBA00\" d=\"M33.5 7H13.4v9.4H27V24l9.6-8V10a3 3 0 0 0-3-3z\"/></svg>", "gcal": "<svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><rect x=\"6\" y=\"6\" width=\"36\" height=\"36\" rx=\"5\" fill=\"#fff\" stroke=\"#DADCE0\" stroke-width=\"2\"/><path d=\"M6 11a5 5 0 0 1 5-5h26a5 5 0 0 1 5 5v5H6z\" fill=\"#1A73E8\"/><text x=\"24\" y=\"36\" text-anchor=\"middle\" font-family=\"Arial,sans-serif\" font-weight=\"700\" font-size=\"15\" fill=\"#1A73E8\">31</text></svg>", "keeper": "<img src=\"keeper-logo.svg\" alt=\"\">"};
+  const srcIc = s => '<span class="src-ic lg" title="' + esc(srcLabel(s)) + '">' + (LOGO[s] || LOGO.keeper) + '</span>';
   const SICON = {
     upnext: '<circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/>',
     inprogress: '<circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/>',
@@ -352,7 +354,7 @@
     if (S.onboarded && S.step === 3) { /* noop */ }
   }
 
-  /* first-run review: approve or reject everything Keeper found before it reaches the board */
+  /* first-run review: approve or reject everything Keeper found before it reaches your list */
   const foundTasks = () => S.tasks.filter(t => !t.dismissed && t.status !== 'done' && t.source !== 'keeper' && S.channels.includes(t.source)).sort((a, b) => b.captured - a.captured);
   function onbReviewHTML(steps) {
     const list = foundTasks(), pick = S.onbPick || {};
@@ -370,17 +372,17 @@
     }).join('');
     return `<div class="onb"><div class="onb-inner">${steps(3)}
       <h2>Keeper found ${list.length} tasks</h2>
-      <p class="lead">Keep the ones you owe someone. Dismissed tasks won’t be added to your board.</p>
+      <p class="lead">Keep the ones you owe someone. Dismissed tasks won’t be added to your list.</p>
       <div class="ob-bar"><span>${decided} of ${list.length} reviewed</span><button type="button" class="linkish" data-action="ob-all">Keep all</button></div>
       <div class="ob-list">${rows}</div>
-      <div class="onb-foot ob-foot"><button class="btn-primary" data-action="ob-finish" ${kept ? '' : 'disabled'}>Add ${kept} task${kept === 1 ? '' : 's'} to my board</button>
+      <div class="onb-foot ob-foot"><button class="btn-primary" data-action="ob-finish" ${kept ? '' : 'disabled'}>Add ${kept} task${kept === 1 ? '' : 's'} to my list</button>
         <span class="small">${decided < list.length ? 'Anything you skip now stays in To review.' : 'You can change these later.'}</span></div>
     </div></div>`;
   }
   function privacyCard() {
     return `<div class="priv"><div class="priv-h">${ic('shield')}<b>Your business stays yours</b></div>
       <ul><li>${ic('check')}Your messages and client data are never used to train AI models, ours or anyone else’s.</li>
-      <li>${ic('check')}Encrypted in transit and at rest. Only you can see your board.</li>
+      <li>${ic('check')}Encrypted in transit and at rest. Only you can see your list.</li>
       <li>${ic('check')}Keeper reads to find tasks. It never sends anything without your permission.</li>
       <li>${ic('check')}Disconnect a channel or delete everything, anytime, in one tap.</li></ul></div>`;
   }
@@ -389,7 +391,7 @@
     if (S.step === 0) return `<div class="onb"><div class="onb-inner">
       <div class="onb-hero"><span class="logo-mark" aria-hidden="true"></span>
       <h1>Every commitment, <em>kept.</em></h1>
-      <p class="lead">Keeper listens across your inboxes, chats, texts and calls, catches every promise you make, and keeps it on one simple board.</p></div>
+      <p class="lead">Keeper listens across your inboxes, chats, texts and calls, catches every promise you make, and keeps it on one simple list.</p></div>
       <div class="onb-foot"><button class="btn-primary" data-action="onb-next">Get started</button><span class="small">Takes about a minute</span></div>
     </div></div>`;
     if (S.step === 1) {
@@ -475,7 +477,7 @@
     const list = toReview();
     if (!list.length) return '';
     if (mode() === 'mobile') return `<button type="button" class="rv-banner" data-action="review"><span class="rv-count">${list.length}</span><span class="o-txt"><b>${list.length === 1 ? 'New task' : 'New tasks'} to review</b><span>Keeper caught ${list.length === 1 ? 'this' : 'these'}. Keep or dismiss.</span></span>${ic('chev')}</button>`;
-    return `<section class="rv-strip"><div class="rv-h"><h2>To review <span class="n">${list.length}</span></h2><span>Keeper caught these. Keep them on your board or dismiss.</span>${list.length > 3 ? `<button type="button" class="linkish" data-action="review">See all</button>` : ''}</div>
+    return `<section class="rv-strip"><div class="rv-h"><h2>To review <span class="n">${list.length}</span></h2><span>Keeper caught these. Keep them on your list or dismiss.</span>${list.length > 3 ? `<button type="button" class="linkish" data-action="review">See all</button>` : ''}</div>
       <div class="rv-row">${list.slice(0, 3).map(reviewCard).join('')}</div></section>`;
   }
   function cardHTML(t) {
@@ -599,7 +601,7 @@
         <button type="button" class="icon-btn ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources" aria-label="Settings">${ic('gear')}</button><img class="m-me" src="maya.svg" alt="Maya"></div>
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
-        <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
+        <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}List</button>
         <button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>
         <button class="${S.screen === 'feed' || S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="feed" ${S.screen === 'sources' ? 'data-sub="1"' : ''}><span class="navi">${ic('feed')}${badge('navBadge')}</span>Task Feed</button>
       </nav>
@@ -617,7 +619,7 @@
     return `<div class="d-layout">
       <aside class="d-side">
         <div class="d-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
-        <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('board')}Board</button>
+        <button class="d-nav ${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}List</button>
         <button class="d-nav ${S.screen === 'feed' ? 'on' : ''}" data-action="go" data-screen="feed">${ic('feed')}Task Feed<span class="cnt" id="navBadge" ${S.unseen ? '' : 'hidden'}>${S.unseen}</span></button>
         <button class="d-nav ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources">${ic('gear')}Settings</button>
         <div class="d-me"><img class="m-me" src="maya.svg" alt=""><span><b>Maya</b></span></div>
@@ -1418,7 +1420,7 @@
         const pick = S.onbPick || {}; let kept = 0;
         foundTasks().forEach(t => { const p = pick[t.id]; if (p === 'keep') { t.triage = false; t.low = false; kept++; } else if (p === 'skip') { t.dismissed = true; t.triage = false; } else t.triage = true; });
         S.onboarded = true; S.screen = 'board'; S.onbPick = null; save(); render();
-        toast(`${kept} task${kept === 1 ? '' : 's'} added to your board`, { title: 'You’re all set' });
+        toast(`${kept} task${kept === 1 ? '' : 's'} added to your list`, { title: 'You’re all set' });
         scheduleLive();
         break;
       }
