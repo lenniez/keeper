@@ -766,3 +766,4 @@ button.sort-note{color:var(--brand-ink);font-weight:600;text-decoration:underlin
 .frow.triage{background:#F7F3FF;box-shadow:inset 3px 0 0 var(--brand)}
 .frow.triage:hover{background:#F1EBFE}
 .rv-strip .s-triage{--sd:#fff}
+.sum-btn b{margin-right:4px}
