@@ -602,7 +602,7 @@
       <div class="m-body" id="mBody">${body}</div>
       <nav class="m-nav">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}To Do List</button>
-        <button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>
+        ${vision() ? `<button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>` : '<span class="fab-gap" aria-hidden="true"></span>'}
         <button class="${S.screen === 'feed' || S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="feed" ${S.screen === 'sources' ? 'data-sub="1"' : ''}><span class="navi">${ic('feed')}${badge('navBadge')}</span>Live Feed</button>
       </nav>
     </div>`;
@@ -613,7 +613,7 @@
     else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Settings</h1></div>${sourcesHTML()}</div>`;
     else main = `<div class="d-head">${greeting()}<div class="d-acts"><div class="sum" id="summary">${summary()}</div>${searchBtn()}
         <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Live Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
-        <button class="btn-ask" data-action="ask">${ic('plus')} Add task</button></div></div>
+        ${vision() ? `<button class="btn-ask" data-action="ask">${ic('plus')} Add task</button>` : ''}</div></div>
       ${filterBar()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
       <div class="board ${S.doneOpen ? '' : 'done-collapsed'}" id="board">${boardHTML()}</div>`;
     return `<div class="d-layout">
@@ -868,7 +868,7 @@
     if (!vision() || !S.onboarded) return;
     let changed = false;
     S.tasks.forEach(t => {
-      const k = agentKind(t); if (!k || t.status === 'done') return;
+      const k = agentKind(t); if (!k || t.status === 'done' || t.triage || t.dismissed) return;
       const st = t.agent || {};
       if (k === 'schedule' && autoBook() && st.booked == null && !st.sent && !st.manual) { t.agent = Object.assign({}, st, { booked: 0, slot: 0, auto: true }); t.status = 'done'; changed = true; }
       if (k === 'draft' && autoReply() && !st.sent) { t.agent = Object.assign({}, st, { sent: true, auto: true }); if (t.status === 'upnext') t.status = 'inprogress'; changed = true; }
@@ -1099,6 +1099,7 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const ADDCOLS = ['upnext', 'inprogress'];
   function startAsk(voice) {
+    if (!vision()) return;
     UI.ask = { msgs: [], draft: null, awaiting: null, listening: false, voice: !!voice || mode() === 'mobile', handsFree: !!voice, interim: '' };
     openSheet({ type: 'ask' });
     setTimeout(() => { if (voice && SR) startListening(); else { const i = $('#askInput'); if (i && mode() === 'desktop') i.focus(); } }, 380);
@@ -1326,7 +1327,7 @@
       const t = mkTask(Object.assign({}, tpl, { status: 'upnext', ago: 0, triage: true }));
       t.fresh = true;
       S.tasks.push(t); S.unseen = (S.unseen || 0) + 1; save(); refresh();
-      toast(esc(t.title), { title: 'New task kept', id: t.id, sub: srcIc(t.source) + 'From ' + esc(personName(t.requester) || 'you') + ' · ' + esc(D.SOURCES[t.source].label) });
+      toast(esc(t.title), { title: 'New task to review', id: t.id, sub: srcIc(t.source) + 'From ' + esc(personName(t.requester) || 'you') + ' · ' + esc(D.SOURCES[t.source].label) });
       setTimeout(() => { t.fresh = false; refresh(); }, 6000);
       return;
     }
