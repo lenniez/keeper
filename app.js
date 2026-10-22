@@ -579,8 +579,8 @@
           <span class="chan-txt"><b>${esc(s.label)}</b><span>${esc(s.desc)}</span>${k === 'sms' && on ? '<span class="num">' + bizNum() + '</span>' : ''}</span>
           <span class="tog" aria-hidden="true"></span></button>`;
       }).join('')}<p class="note">Prototype: connections are simulated. The Live Feed only shows tasks from channels that are on.</p></section>
-      <section class="set-sec"><h2 class="sec-h">Assistant voice</h2>
-      <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</b><span>The voice Keeper uses when you add tasks by voice</span></span>${ic('chev')}</button></section>
+      ${vision() ? `<section class="set-sec"><h2 class="sec-h">Assistant voice</h2>
+      <button type="button" class="chan" data-action="voice"><span class="src-ic">${ic('wave')}</span><span class="chan-txt"><b>${esc(currentVoice() ? voiceName(currentVoice()) : 'Device default')}</b><span>The voice Keeper uses when you add tasks by voice</span></span>${ic('chev')}</button></section>` : ''}
       ${agentSettings()}
     </div>`;
   }
