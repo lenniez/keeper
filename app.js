@@ -112,7 +112,6 @@
   }
   /* completion detection: what Keeper has seen in your channels that shows a task is (partly) done */
   const DETECT_SEED = {
-    'Share the Halcyon staging site': { kind: 'done', via: 'slack', proof: 'You shared the staging link with Marcus in Slack', ago: 38 },
     'Send final brand guidelines PDF': { kind: 'partial', via: 'gmail', proof: 'You emailed Dana the guidelines PDF', remaining: 'Dana’s Slack follow-up also asked for the print-ready version', ago: 22 }
   };
   const DETECT_LIVE = { title: 'Revise the Halcyon homepage hero', kind: 'done', via: 'gmail', proof: 'You sent Marcus the revised homepage hero in Gmail' };
@@ -123,14 +122,14 @@
   const narrow = () => window.innerWidth < 720;
   function fresh() {
     return { onboarded: false, step: 0, channels: ['gmail', 'slack', 'sms', 'zoom'], screen: 'board', mode: 'mobile', mstatus: 'inprogress',
-      tasks: seedDetect(D.SEED.map(t => mkTask(t))), detectSeeded: true, incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
+      tasks: seedDetect(D.SEED.map(t => mkTask(t))), detectSeeded: 2, incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
   }
   function load() {
     try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = 'inprogress'; s.live = true; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
     return null;
   }
   let S = load() || fresh();
-  if (!S.detectSeeded) { seedDetect(S.tasks); S.detectSeeded = true; }
+  if (S.detectSeeded !== 2) { S.tasks.forEach(t => { if (t.title === 'Share the Halcyon staging site' && t.detect && !S.detectFired) { delete t.detect; if (t.doneBy === 'keeper') { t.status = 'inprogress'; t.doneBy = null; } } }); seedDetect(S.tasks); S.detectSeeded = 2; }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
   const UI = { expand: {}, srcTab: {}, editField: null, feedSel: null, sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
   const filterOn = () => !!(S.filter.text.trim() || S.filter.tokens.length);

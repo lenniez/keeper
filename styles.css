@@ -1094,3 +1094,16 @@ body{background:#EEF0EE}
 .det-rem b{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mari-ink);margin-bottom:2px}
 .det-sub{margin:0;font-size:13px;color:var(--faint)}
 .device.is-mobile .det-note{font-size:14px}
+/* detected-done type follows the app scale: mobile 17 body / 15 secondary */
+.det-note{font-size:14px}
+.det-h{font-size:16px}.det-ev,.det-rem{font-size:15px}.det-sub{font-size:14px}
+.device.is-mobile .det-badge{font-size:15px;padding:2px 10px 2px 7px}
+.device.is-mobile .det-badge .icon{width:15px;height:15px}
+.device.is-mobile .det-badge.sm{font-size:15px}
+.device.is-mobile .det-note{font-size:15px;line-height:1.4}
+.device.is-mobile .det-h{font-size:17px}
+.device.is-mobile .det-h .icon{width:18px;height:18px}
+.device.is-mobile .det-ev{font-size:15px}
+.device.is-mobile .det-rem{font-size:17px;line-height:1.4}
+.device.is-mobile .det-rem b{font-size:14px}
+.device.is-mobile .det-sub{font-size:15px}
