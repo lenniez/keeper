@@ -878,7 +878,7 @@
   function agentBadge(t) {
     const s = agentState(t); if (!s) return '';
     const B = { draft: ['', 'spark', 'Draft ready'], sent: ['sent', 'check', 'Reply sent'], autosent: ['auto', 'bolt', 'Replied automatically'],
-      times: ['', 'cal', 'Times ready'], timessent: ['sent', 'check', 'Times sent'], booked: ['sent', 'cal', 'Meeting booked'], autobooked: ['auto', 'cal', 'Booked automatically'] }[s];
+      times: ['', 'cal', 'Times ready'], timessent: ['sent', 'check', 'Times sent'], booked: ['sent', 'cal', 'Meeting booked'], autobooked: ['auto', 'cal', 'Booked'] }[s];
     return `<span class="ag-badge ${B[0]}">${ic(B[1])}${B[2]}</span>`;
   }
   /* turn the task into the object being delivered: "Send Jen the two logo options" -> "the two logo options" */
