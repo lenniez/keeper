@@ -390,7 +390,7 @@
     const steps = n => '<div class="steps">' + [0, 1, 2, 3].map(i => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</div>';
     if (S.step === 0) return `<div class="onb"><div class="onb-inner">
       <div class="onb-hero"><span class="logo-mark" aria-hidden="true"></span>
-      <h1>Every commitment, <em>kept.</em></h1>
+      <h1 class="welcome-h">The only to-do list<br>that <em>updates itself.</em></h1>
       <p class="lead">Keeper listens across your inboxes, chats, texts and calls, catches every promise you make, and keeps it on one simple list.</p></div>
       <div class="onb-foot"><button class="btn-primary" data-action="onb-next">Get started</button><span class="small">Takes about a minute</span></div>
     </div></div>`;

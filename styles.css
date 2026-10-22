@@ -1063,3 +1063,4 @@ body{background:#EEF0EE}
 .m-tabs{overflow:visible}
 .mtab{flex:1 1 auto;justify-content:center;padding:7px 8px;gap:5px;min-width:0;white-space:nowrap}
 .device.is-desktop .ob-foot{bottom:-48px;padding-bottom:48px;margin-bottom:-48px}
+.device.is-mobile .onb h1.welcome-h,.onb h1.welcome-h{font-size:37px;letter-spacing:-.03em}
