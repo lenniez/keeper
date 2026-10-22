@@ -110,16 +110,27 @@
       also: (t.also || []).map(a => ({ source: a.source, snippet: a.snippet, captured: Date.now() - (a.ago || 0) * 60000 }))
     }, extra || {});
   }
+  /* completion detection: what Keeper has seen in your channels that shows a task is (partly) done */
+  const DETECT_SEED = {
+    'Share the Halcyon staging site': { kind: 'done', via: 'slack', proof: 'You shared the staging link with Marcus in Slack', ago: 38 },
+    'Send final brand guidelines PDF': { kind: 'partial', via: 'gmail', proof: 'You emailed Dana the guidelines PDF', remaining: 'Dana’s Slack follow-up also asked for the print-ready version', ago: 22 }
+  };
+  const DETECT_LIVE = { title: 'Revise the Halcyon homepage hero', kind: 'done', via: 'gmail', proof: 'You sent Marcus the revised homepage hero in Gmail' };
+  function seedDetect(list) {
+    list.forEach(t => { const d = DETECT_SEED[t.title]; if (d && !t.detect) t.detect = { kind: d.kind, via: d.via, proof: d.proof, remaining: d.remaining || '', at: Date.now() - d.ago * 60000 }; });
+    return list;
+  }
   const narrow = () => window.innerWidth < 720;
   function fresh() {
     return { onboarded: false, step: 0, channels: ['gmail', 'slack', 'sms', 'zoom'], screen: 'board', mode: 'mobile', mstatus: 'inprogress',
-      tasks: D.SEED.map(t => mkTask(t)), incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
+      tasks: seedDetect(D.SEED.map(t => mkTask(t))), detectSeeded: true, incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
   }
   function load() {
     try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = 'inprogress'; s.live = true; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
     return null;
   }
   let S = load() || fresh();
+  if (!S.detectSeeded) { seedDetect(S.tasks); S.detectSeeded = true; }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
   const UI = { expand: {}, srcTab: {}, editField: null, feedSel: null, sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
   const filterOn = () => !!(S.filter.text.trim() || S.filter.tokens.length);
@@ -480,13 +491,19 @@
     return `<section class="rv-strip"><div class="rv-h"><h2>To review <span class="n">${list.length}</span></h2><span>Keeper caught these. Keep them on your list or dismiss.</span>${list.length > 3 ? `<button type="button" class="linkish" data-action="review">See all</button>` : ''}</div>
       <div class="rv-row">${list.slice(0, 3).map(reviewCard).join('')}</div></section>`;
   }
+  function detectBadge(t) {
+    if (t.status === 'done' && t.doneBy === 'keeper') return `<span class="det-badge auto">${ic('check')}Completed by Keeper</span>`;
+    if (!detected(t) || t.status === 'done') return '';
+    if (t.detect.kind === 'partial') return `<span class="det-badge part">${ic('check')}Partly done</span><span class="det-note"><b>Still to do:</b> ${esc(t.detect.remaining)}</span>`;
+    return `<span class="det-badge">${ic('check')}Detected done</span><span class="det-note">${esc(t.detect.proof)}</span>`;
+  }
   function cardHTML(t) {
     const di = dueInfo(t.due, t.status);
     const who = t.requester && t.requester !== 'maya' ? personName(t.requester) : 'You';
     const where = [projName(t.project), who].filter(Boolean).join(' · ');
     return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
       <div class="card-title">${esc(t.title)}</div>
-      ${agentBadge(t)}
+      ${detectBadge(t)}${agentBadge(t)}
       <div class="card-meta"><span class="where">${srcIcons(t)}<span>${esc(where)}</span></span>
         <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
     </article>`;
@@ -818,13 +835,22 @@
   }
   if (synth && 'onvoiceschanged' in synth) synth.onvoiceschanged = () => { if (UI.sheet && UI.sheet.type === 'voice') renderLayer(true); };
 
+  function detectBlock(t) {
+    if (!t.detect || t.detect.rejected) return '';
+    const when = agoText(t.detect.at);
+    const head = t.status === 'done' && t.doneBy === 'keeper' ? 'Keeper completed this task' : t.detect.kind === 'partial' ? 'Keeper detected this is partly done' : t.status === 'done' ? 'Keeper detected this was done' : 'Keeper detected this is done';
+    return `<section class="det-block ${t.detect.kind}"><div class="det-h">${ic('check')}<b>${head}</b></div>
+      <div class="det-ev">${srcIc(t.detect.via)}<span>${esc(t.detect.proof)} · ${esc(when)}</span></div>
+      ${t.detect.kind === 'partial' ? `<div class="det-rem"><b>Still to do</b>${esc(t.detect.remaining)}</div>` : ''}
+      ${t.status !== 'done' && t.detect.kind === 'done' ? `<p class="det-sub">${vision() && AG().complete === 'auto' ? 'Auto-complete is on.' : 'Confirm it to move it to Done.'}</p>` : ''}</section>`;
+  }
   function taskDetail(t) {
     const req = t.requester && t.requester !== 'maya' ? `<span class="person">${av(t.requester)}${esc(personName(t.requester))}</span>` : `<span class="person">${av('maya')}You</span>`;
     const quick = [['Today', 0], ['Tomorrow', 1], ['Friday', daysToDow(5, true)], ['Next Mon', daysToDow(1, false)]];
     const di = dueInfo(t.due, t.status);
     const dueText = t.due ? di.label + (Math.abs(daysOut(t.due)) < 7 && !/\d/.test(di.label) ? ' · ' + shortDate(fromISO(t.due)) : '') : 'No due date';
     const ed = UI.editField;
-    const statusRow = t.triage ? `<dt>Status</dt><dd>${spill('triage')}</dd>` : `<dt>Status</dt><dd><button type="button" class="sel ${ed === 'status' ? 'open' : ''}" data-action="edit" data-f="status" aria-expanded="${ed === 'status'}">${spill(t.status)}<span class="caret">${ic('down')}</span></button></dd>
+    const statusRow = t.triage ? `<dt>Status</dt><dd>${spill('triage')}</dd>` : `<dt>Status</dt><dd class="st-dd"><button type="button" class="sel ${ed === 'status' ? 'open' : ''}" data-action="edit" data-f="status" aria-expanded="${ed === 'status'}">${spill(t.status)}<span class="caret">${ic('down')}</span></button>${looksDone(t) ? '<span class="det-badge sm">Detected done</span>' : ''}</dd>
       ${ed === 'status' ? `<dd class="pop"><div class="opts" role="listbox">${D.COLUMNS.map(c => `<button type="button" role="option" aria-selected="${t.status === c.id}" class="opt ${t.status === c.id ? 'on' : ''}" data-action="set-status" data-v="${c.id}">${spill(c.id)}${t.status === c.id ? ic('check') : ''}</button>`).join('')}</div></dd>` : ''}`;
     const dueRow = `<dt>Due</dt><dd><button type="button" class="sel ${ed === 'due' ? 'open' : ''}" data-action="edit" data-f="due" aria-expanded="${ed === 'due'}"><span class="due ${di.cls}">${esc(dueText)}</span><span class="caret">${ic('down')}</span></button></dd>
       ${ed === 'due' ? `<dd class="pop"><div class="duebox">${quick.map(([l, n]) => `<button type="button" class="chip ${t.due === iso(addDays(n)) ? 'on' : ''}" data-action="set-due" data-n="${n}">${l}</button>`).join('')}
@@ -832,19 +858,23 @@
     return {
       body: `<h2 class="sh-title">${esc(t.title)}</h2>
           <dl class="fields">${statusRow}${dueRow}<dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
+          ${detectBlock(t)}
           ${origBlock(t)}
           ${agentBlock(t)}`,
       foot: t.triage ? `<button class="btn-ghost" data-action="rv-dismiss">Dismiss</button><button class="btn-primary" data-action="rv-add">${ic('check')} Keep</button>`
-        : t.status === 'done' ? `<button class="btn-ghost" data-action="set-status" data-v="upnext">Reopen</button>` : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`
+        : t.status === 'done' ? `<button class="btn-ghost" data-action="det-reopen">Reopen</button>`
+        : looksDone(t) ? `<button class="btn-ghost" data-action="det-reject">Not done yet</button><button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Confirm done</button>`
+        : `<button class="btn-primary" data-action="set-status" data-v="done">${ic('check')} Mark done</button>`
     };
   }
   /* ================= Vision: Keeper agent prepares the work ================= */
   const vision = () => S.scope === 'vision';
-  const AG = () => Object.assign({ draft: 'review', schedule: 'auto' }, S.agent || {});
+  const AG = () => Object.assign({ draft: 'review', schedule: 'auto', complete: 'ask' }, S.agent || {});
   const SENDVIA = { gmail: 'Reply in the Gmail thread', outlook: 'Reply in the Outlook thread', slack: 'Reply in the Slack thread', sms: 'Text from your business line', zoom: 'Follow-up email', meet: 'Follow-up email', keeper: 'Email' };
   /* which tasks the agent can do the work for */
   function agentKind(t) {
     if (!vision() || t.dismissed || t.triage || t.agentOff) return null;
+    if (t.detect && t.detect.kind === 'done' && !t.detect.rejected) return null;
     if (t.status === 'done' && !(t.agent && (t.agent.booked != null || t.agent.sent))) return null;
     const client = t.requester && D.PEOPLE[t.requester] && D.PEOPLE[t.requester].role === 'client';
     if (!client) return null;
@@ -864,7 +894,31 @@
     return null;
   }
   /* with automatic permissions on, Keeper actually does the work: books (task -> Done) or replies (task -> In Progress) */
+  /* detected work: Up Next moves to In Progress; in Phase 2 with auto-complete on, proven tasks move to Done */
+  const detected = t => t.detect && !t.detect.rejected && !t.dismissed && !t.triage;
+  const looksDone = t => detected(t) && t.detect.kind === 'done' && t.status !== 'done';
+  function applyDetect() {
+    let changed = false;
+    S.tasks.forEach(t => {
+      if (!detected(t)) return;
+      if (t.status === 'upnext') { t.status = 'inprogress'; changed = true; }
+      if (vision() && AG().complete === 'auto' && t.detect.kind === 'done' && t.status !== 'done' && !t.detect.undone) { t.status = 'done'; t.doneBy = 'keeper'; changed = true; }
+    });
+    if (changed) save();
+  }
+  function detectEvent() {
+    if (!S.onboarded || S.detectFired) return;
+    const t = S.tasks.find(x => x.title === DETECT_LIVE.title && !x.dismissed && x.status !== 'done');
+    S.detectFired = true;
+    if (!t) { save(); return; }
+    t.detect = { kind: DETECT_LIVE.kind, via: DETECT_LIVE.via, proof: DETECT_LIVE.proof, remaining: '', at: Date.now() };
+    t.fresh = true; applyDetect(); save(); refresh(); if (UI.sheet && UI.sheet.type === 'task') renderLayer(true);
+    const auto = t.status === 'done';
+    toast(esc(t.title), { title: auto ? 'Completed by Keeper' : 'Looks done', id: t.id, sub: srcIc(t.detect.via) + esc(t.detect.proof) });
+    setTimeout(() => { t.fresh = false; refresh(); }, 6000);
+  }
   function applyAgent() {
+    if (S.onboarded) applyDetect();
     if (!vision() || !S.onboarded) return;
     let changed = false;
     S.tasks.forEach(t => {
@@ -1009,7 +1063,12 @@
         ${opt('schedule', 'suggest', 'Find times for me to book', 'Keeper picks free slots; you confirm with one tap')}
         ${opt('schedule', 'auto', 'Book automatically', 'Keeper books the first free slot and sends the invite', !calOn())}
       </section>
-      <p class="note">Automatic actions only go to people you’ve worked with before, and everything Keeper sends or books is logged on the task.</p>`;
+      <section class="set-sec"><h2 class="sec-h">Keeper Agent: Auto-complete tasks</h2>
+        <p class="sec-sub">When Keeper sees in your channels that a task is done, like a reply you sent with the file attached.</p>
+        ${opt('complete', 'ask', 'Ask me first', 'Keeper marks it Detected done; you confirm')}
+        ${opt('complete', 'auto', 'Automatically', 'Keeper moves it to Done. You can reopen it anytime')}
+      </section>
+      <p class="note">Automatic actions only go to people you’ve worked with before, and everything Keeper sends, books or completes is logged on the task.</p>`;
   }
 
   /* ---------- sheets ---------- */
@@ -1429,6 +1488,7 @@
         toast(`${kept} task${kept === 1 ? '' : 's'} added to your list`, { title: 'You’re all set' });
         clearTimeout(liveTimer);
         liveTimer = setTimeout(() => { if (!S.onboarded) return; firstArrival(); scheduleLive(); }, 20000);
+        setTimeout(detectEvent, 45000);
         break;
       }
       case 'chan': {
@@ -1450,7 +1510,9 @@
         openSheet({ type: 'task', id: a.dataset.id }); break;
       case 'done-toggle': S.doneOpen = !S.doneOpen; save(); refresh(); break;
       case 'close': if (UI.sheet && UI.sheet.type === 'voice' && UI.prevAsk && UI.ask) { UI.prevAsk = false; UI.sheet = { type: 'ask' }; renderLayer(true); break; } closeSheet(); break;
-      case 'set-status': { const t = task(tidOf(a)); t.status = a.dataset.v; UI.editField = null; save(); refresh(); renderLayer(true); break; }
+      case 'set-status': { const t = task(tidOf(a)); t.status = a.dataset.v; if (t.status !== 'done') { t.doneBy = null; if (t.detect) t.detect.undone = true; } UI.editField = null; save(); refresh(); renderLayer(true); break; }
+      case 'det-reject': { const t = task(tidOf(a)); if (t.detect) t.detect.rejected = true; save(); refresh(); renderLayer(true); break; }
+      case 'det-reopen': { const t = task(tidOf(a)); t.status = 'inprogress'; t.doneBy = null; if (t.detect) t.detect.undone = true; save(); refresh(); renderLayer(true); break; }
       case 'set-due': { const t = task(tidOf(a)); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); UI.editField = null; save(); refresh(); renderLayer(true); break; }
       case 'edit': UI.editField = UI.editField === a.dataset.f ? null : a.dataset.f; refresh(); if (UI.sheet) renderLayer(true); break;
       case 'rv-add': { const t = task(tidOf(a)); t.triage = false; t.low = false; t.fresh = true; save(); afterReview(); setTimeout(() => { t.fresh = false; refresh(); }, 2500); break; }
@@ -1699,6 +1761,6 @@
     device.appendChild(sp);
     setTimeout(() => { sp.classList.add('out'); setTimeout(() => sp.remove(), 500); }, 1600);
   }
-  if (S.onboarded) scheduleLive();
+  if (S.onboarded) { scheduleLive(); if (!S.detectFired) setTimeout(detectEvent, 45000); }
   setInterval(() => { if (S.onboarded && !(UI.drag && UI.drag.active)) { const sm = $('#summary'); if (sm) sm.innerHTML = summary(); } }, 60000);
 })();
