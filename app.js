@@ -1334,6 +1334,11 @@
     save(); refresh();
   }
   let liveTimer = null;
+  /* demo kickoff: guarantee one new task in To review shortly after onboarding */
+  function firstArrival() {
+    const n = toReview().length; let guard = 0;
+    while (toReview().length === n && S.incomingIdx < D.INCOMING.length && guard++ < 12) arrive(false);
+  }
   function scheduleLive() {
     clearTimeout(liveTimer);
     liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 60000);
@@ -1422,7 +1427,8 @@
         foundTasks().forEach(t => { const p = pick[t.id]; if (p === 'keep') { t.triage = false; t.low = false; kept++; } else if (p === 'skip') { t.dismissed = true; t.triage = false; } else t.triage = true; });
         S.onboarded = true; S.screen = 'board'; S.onbPick = null; save(); render();
         toast(`${kept} task${kept === 1 ? '' : 's'} added to your list`, { title: 'You’re all set' });
-        scheduleLive();
+        clearTimeout(liveTimer);
+        liveTimer = setTimeout(() => { if (!S.onboarded) return; firstArrival(); scheduleLive(); }, 20000);
         break;
       }
       case 'chan': {
