@@ -1336,7 +1336,7 @@
   let liveTimer = null;
   function scheduleLive() {
     clearTimeout(liveTimer);
-    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 120000);
+    liveTimer = setTimeout(() => { if (S.onboarded && S.live && !document.hidden && !UI.sheet && !(UI.drag && UI.drag.active)) arrive(false); scheduleLive(); }, 60000);
   }
 
   /* ---------- toasts ---------- */
