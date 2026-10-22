@@ -1065,3 +1065,10 @@ body{background:#EEF0EE}
 .device.is-desktop .ob-foot{bottom:-48px;padding-bottom:48px;margin-bottom:-48px}
 .device.is-mobile .onb h1.welcome-h,.onb h1.welcome-h{font-size:37px;letter-spacing:-.03em}
 .m-nav.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* splash: deck-style green gradient */
+.splash{background:
+  radial-gradient(70% 45% at 50% 112%,rgba(246,196,106,.75) 0%,rgba(242,181,68,.3) 35%,transparent 70%),
+  radial-gradient(60% 50% at 15% -5%,#0E6A5D 0%,transparent 60%),
+  linear-gradient(180deg,#0F5A50 0%,#127567 40%,#1C8F6B 72%,#3FA98A 100%)!important}
+.splash .wordmark{color:#fff}
+.splash .logo-mark{box-shadow:0 24px 48px -18px rgba(4,34,30,.7),0 0 0 1px rgba(255,255,255,.25)}
