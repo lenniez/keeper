@@ -600,9 +600,9 @@
       <div class="m-top"><div class="shell-brand"><span class="logo-mark" aria-hidden="true"></span><span class="wordmark">keeper</span></div>
         <button type="button" class="icon-btn ${S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="sources" aria-label="Settings">${ic('gear')}</button><img class="m-me" src="maya.svg" alt="Maya"></div>
       <div class="m-body" id="mBody">${body}</div>
-      <nav class="m-nav">
+      <nav class="m-nav ${vision() ? '' : 'two'}">
         <button class="${S.screen === 'board' ? 'on' : ''}" data-action="go" data-screen="board">${ic('checklist')}To Do List</button>
-        ${vision() ? `<button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>` : '<span class="fab-gap" aria-hidden="true"></span>'}
+        ${vision() ? `<button class="fab" data-action="ask-voice" aria-label="Add a task by voice">${ic('plus')}</button>` : ''}
         <button class="${S.screen === 'feed' || S.screen === 'sources' ? 'on' : ''}" data-action="go" data-screen="feed" ${S.screen === 'sources' ? 'data-sub="1"' : ''}><span class="navi">${ic('feed')}${badge('navBadge')}</span>Live Feed</button>
       </nav>
     </div>`;
