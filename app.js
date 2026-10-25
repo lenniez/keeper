@@ -115,21 +115,29 @@
     'Send final brand guidelines PDF': { kind: 'partial', via: 'gmail', proof: 'You emailed Dana the guidelines PDF', remaining: 'Dana’s Slack follow-up also asked for the print-ready version', ago: 22 }
   };
   const DETECT_LIVE = { title: 'Revise the Halcyon homepage hero', kind: 'done', via: 'gmail', proof: 'You sent Marcus the revised homepage hero in Gmail' };
+  /* detected changes: one wording change and one due-date change in the demo */
+  const CHANGE_SEED = {
+    'Send Raj the revised deck timeline': { kind: 'title', via: 'slack', proof: 'Raj in Slack: “Can you include the budget too?”', to: 'Send Raj the revised deck timeline and budget', ago: 14 },
+    'Send weekly status report to Halcyon': { kind: 'due', via: 'outlook', proof: 'Marcus in Outlook: “Can this land two days later?”', days: 2, ago: 31 }
+  };
   function seedDetect(list) {
     list.forEach(t => { const d = DETECT_SEED[t.title]; if (d && !t.detect) t.detect = { kind: d.kind, via: d.via, proof: d.proof, remaining: d.remaining || '', at: Date.now() - d.ago * 60000 }; });
+    list.forEach(t => { const c = CHANGE_SEED[t.title]; if (!c || t.change) return;
+      t.change = { kind: c.kind, via: c.via, proof: c.proof, at: Date.now() - c.ago * 60000, from: c.kind === 'title' ? t.title : t.due, to: c.kind === 'title' ? c.to : (t.due ? iso(addDays(daysOut(t.due) + c.days)) : null), state: 'pending' }; });
     return list;
   }
   const narrow = () => window.innerWidth < 720;
   function fresh() {
     return { onboarded: false, step: 0, channels: ['gmail', 'slack', 'sms', 'zoom'], screen: 'board', mode: 'mobile', mstatus: 'inprogress',
-      tasks: seedDetect(D.SEED.map(t => mkTask(t))), detectSeeded: 2, incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
+      tasks: seedDetect(D.SEED.map(t => mkTask(t))), detectSeeded: 3, incomingIdx: 0, live: true, unseen: 0, filter: { text: '', tokens: [] } };
   }
   function load() {
     try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.tasks) { s.tasks.forEach(t => t.fresh = false); s.filter = s.filter || { text: '', tokens: [] }; s.mstatus = 'inprogress'; s.live = true; s.unseen = s.unseen || 0; if (s.screen === 'feed') s.screen = 'board'; return s; } } catch (e) {}
     return null;
   }
   let S = load() || fresh();
-  if (S.detectSeeded !== 2) { S.tasks.forEach(t => { if (t.title === 'Share the Halcyon staging site' && t.detect && !S.detectFired) { delete t.detect; if (t.doneBy === 'keeper') { t.status = 'inprogress'; t.doneBy = null; } } }); seedDetect(S.tasks); S.detectSeeded = 2; }
+  if (S.detectSeeded === 2) { seedDetect(S.tasks); S.detectSeeded = 3; }
+  if (S.detectSeeded !== 2 && S.detectSeeded !== 3) { S.tasks.forEach(t => { if (t.title === 'Share the Halcyon staging site' && t.detect && !S.detectFired) { delete t.detect; if (t.doneBy === 'keeper') { t.status = 'inprogress'; t.doneBy = null; } } }); seedDetect(S.tasks); S.detectSeeded = 3; }
   function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
   const UI = { expand: {}, srcTab: {}, editField: null, feedSel: null, sheet: null, menu: null, ask: null, drag: null, suppressClick: false, search: false, scale: 1 };
   const filterOn = () => !!(S.filter.text.trim() || S.filter.tokens.length);
@@ -490,6 +498,13 @@
     return `<section class="rv-strip"><div class="rv-h"><h2>To review <span class="n">${list.length}</span></h2><span>Keeper caught these. Keep them on your list or dismiss.</span>${list.length > 3 ? `<button type="button" class="linkish" data-action="review">See all</button>` : ''}</div>
       <div class="rv-row">${list.slice(0, 3).map(reviewCard).join('')}</div></section>`;
   }
+  function changeBadge(t) {
+    const c = t.change; if (!c || t.status === 'done') return '';
+    if (c.state === 'auto') return `<span class="det-badge auto">${ic(c.kind === 'due' ? 'cal' : 'spark')}${c.kind === 'due' ? 'Due date updated by Keeper' : 'Updated by Keeper'}</span>`;
+    if (c.state !== 'pending') return '';
+    if (c.kind === 'due') return `<span class="det-badge">${ic('cal')}Due date moved</span><span class="det-note"><s>${esc(fmtDue(c.from))}</s> → <b>${esc(fmtDue(c.to))}</b> · ${esc(srcLabel(c.via))}</span>`;
+    return `<span class="det-badge">${ic('spark')}Updated</span><span class="det-note"><b>Now:</b> ${esc(c.to)}</span>`;
+  }
   function detectBadge(t) {
     if (t.status === 'done' && t.doneBy === 'keeper') return `<span class="det-badge auto">${ic('check')}Completed by Keeper</span>`;
     if (!detected(t) || t.status === 'done') return '';
@@ -502,7 +517,7 @@
     const where = [projName(t.project), who].filter(Boolean).join(' · ');
     return `<article class="card ${t.status === 'done' ? 'done' : ''} ${t.fresh ? 'fresh' : ''}" data-id="${t.id}" tabindex="0" aria-label="${esc(t.title)}">
       <div class="card-title">${esc(t.title)}</div>
-      ${detectBadge(t)}${agentBadge(t)}
+      ${changeBadge(t)}${detectBadge(t)}${agentBadge(t)}
       <div class="card-meta"><span class="where">${srcIcons(t)}<span>${esc(where)}</span></span>
         <span class="due ${di.cls}">${t.status === 'done' ? '✓ ' : ''}${esc(di.label)}</span></div>
     </article>`;
@@ -834,6 +849,17 @@
   }
   if (synth && 'onvoiceschanged' in synth) synth.onvoiceschanged = () => { if (UI.sheet && UI.sheet.type === 'voice') renderLayer(true); };
 
+  function changeBlock(t) {
+    const c = t.change; if (!c || c.state === 'kept') return '';
+    const pend = c.state === 'pending', due = c.kind === 'due';
+    const head = pend ? (due ? 'Keeper detected a new due date' : 'Keeper detected a change to this task') : (due ? 'Due date updated' : 'Task updated') + (c.state === 'auto' ? ' by Keeper' : '');
+    const diff = due ? `<div class="chg-diff"><span class="was">${esc(fmtDue(c.from))}</span><span class="arr">→</span><span class="now">${esc(fmtDue(c.to))}</span></div>`
+      : `<div class="chg-diff stk"><span class="lab">Was</span><span class="was">${esc(c.from)}</span><span class="lab">Now</span><span class="now">${esc(c.to)}</span></div>`;
+    const acts = pend ? `<div class="chg-acts"><button type="button" class="btn-ghost" data-action="chg-keep">${due ? 'Keep ' + esc(fmtDue(c.from)) : 'Keep original'}</button><button type="button" class="btn-primary" data-action="chg-apply">${ic('check')} ${due ? 'Accept new date' : 'Apply update'}</button></div>`
+      : `<div class="chg-acts"><button type="button" class="linkish" data-action="chg-undo">Undo</button></div>`;
+    return `<section class="det-block chg"><div class="det-h">${ic(due ? 'cal' : 'spark')}<b>${head}</b></div>${diff}
+      <div class="det-ev">${srcIc(c.via)}<span>${esc(c.proof)} · ${esc(agoText(c.at))}</span></div>${acts}</section>`;
+  }
   function detectBlock(t) {
     if (!t.detect || t.detect.rejected) return '';
     const when = agoText(t.detect.at);
@@ -857,7 +883,7 @@
     return {
       body: `<h2 class="sh-title">${esc(t.title)}</h2>
           <dl class="fields">${statusRow}${dueRow}<dt>Requested by</dt><dd>${req}</dd><dt>Project</dt><dd>${projTag(t.project) || '—'}</dd></dl>
-          ${detectBlock(t)}
+          ${changeBlock(t)}${detectBlock(t)}
           ${origBlock(t)}
           ${agentBlock(t)}`,
       foot: t.triage ? `<button class="btn-ghost" data-action="rv-dismiss">Dismiss</button><button class="btn-primary" data-action="rv-add">${ic('check')} Keep</button>`
@@ -896,8 +922,21 @@
   /* detected work: Up Next moves to In Progress; in Phase 2 with auto-complete on, proven tasks move to Done */
   const detected = t => t.detect && !t.detect.rejected && !t.dismissed && !t.triage;
   const looksDone = t => detected(t) && t.detect.kind === 'done' && t.status !== 'done';
+  const pendingChange = t => t.change && t.change.state === 'pending' && !t.dismissed && !t.triage;
+  function applyChange(t, auto) {
+    const c = t.change; if (!c) return;
+    if (c.kind === 'title') t.title = c.to; else t.due = c.to;
+    c.state = auto ? 'auto' : 'applied';
+  }
+  function undoChange(t) {
+    const c = t.change; if (!c) return;
+    if (c.kind === 'title') t.title = c.from; else t.due = c.from;
+    c.state = 'kept';
+  }
+  function fmtDue(v) { return v ? dueInfo(v, 'upnext').label : 'No date'; }
   function applyDetect() {
     let changed = false;
+    S.tasks.forEach(t => { if (vision() && AG().complete === 'auto' && pendingChange(t)) { applyChange(t, true); changed = true; } });
     S.tasks.forEach(t => {
       if (!detected(t)) return;
       if (t.status === 'upnext') { t.status = 'inprogress'; changed = true; }
@@ -1063,9 +1102,9 @@
         ${opt('schedule', 'auto', 'Book automatically', 'Keeper books the first free slot and sends the invite', !calOn())}
       </section>
       <section class="set-sec"><h2 class="sec-h">Keeper Agent: Auto-complete tasks</h2>
-        <p class="sec-sub">When Keeper sees in your channels that a task is done, like a reply you sent with the file attached.</p>
-        ${opt('complete', 'ask', 'Ask me first', 'Keeper marks it Detected done; you confirm')}
-        ${opt('complete', 'auto', 'Automatically', 'Keeper moves it to Done. You can reopen it anytime')}
+        <p class="sec-sub">When Keeper sees in your channels that a task is done or has changed, like a reply you sent with the file attached or a client moving a due date.</p>
+        ${opt('complete', 'ask', 'Ask me first', 'Keeper flags completions and changes; you confirm')}
+        ${opt('complete', 'auto', 'Automatically', 'Keeper applies them for you. You can undo anytime')}
       </section>
       <p class="note">Automatic actions only go to people you’ve worked with before, and everything Keeper sends, books or completes is logged on the task.</p>`;
   }
@@ -1510,6 +1549,9 @@
       case 'done-toggle': S.doneOpen = !S.doneOpen; save(); refresh(); break;
       case 'close': if (UI.sheet && UI.sheet.type === 'voice' && UI.prevAsk && UI.ask) { UI.prevAsk = false; UI.sheet = { type: 'ask' }; renderLayer(true); break; } closeSheet(); break;
       case 'set-status': { const t = task(tidOf(a)); t.status = a.dataset.v; if (t.status !== 'done') { t.doneBy = null; if (t.detect) t.detect.undone = true; } UI.editField = null; save(); refresh(); renderLayer(true); break; }
+      case 'chg-apply': { const t = task(tidOf(a)); applyChange(t, false); t.fresh = true; save(); refresh(); renderLayer(true); setTimeout(() => { t.fresh = false; refresh(); }, 2500); break; }
+      case 'chg-keep': { const t = task(tidOf(a)); if (t.change) t.change.state = 'kept'; save(); refresh(); renderLayer(true); break; }
+      case 'chg-undo': { const t = task(tidOf(a)); undoChange(t); save(); refresh(); renderLayer(true); break; }
       case 'det-reject': { const t = task(tidOf(a)); if (t.detect) t.detect.rejected = true; save(); refresh(); renderLayer(true); break; }
       case 'det-reopen': { const t = task(tidOf(a)); t.status = 'inprogress'; t.doneBy = null; if (t.detect) t.detect.undone = true; save(); refresh(); renderLayer(true); break; }
       case 'set-due': { const t = task(tidOf(a)); t.due = a.dataset.n === 'none' ? null : iso(addDays(+a.dataset.n)); UI.editField = null; save(); refresh(); renderLayer(true); break; }
