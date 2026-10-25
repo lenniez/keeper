@@ -619,6 +619,9 @@
   .nw{white-space:nowrap}
   .day{align-items:start}
   @media (min-width:901px){.day-photo{aspect-ratio:auto;height:min(78vh,720px)}.day-photo img{width:100%;height:100%;object-fit:cover;object-position:45% 88%;transform:scale(1.12);transform-origin:45% 80%}}
+  .feat .crop.fit{flex:none;height:auto;min-height:0;width:min(80%,340px);margin:28px auto 0!important;background:#fff}
+  .feat .crop.fit.voice{flex:1;margin-bottom:0!important}
+  .feat .crop.fit img{position:static;display:block;width:100%;height:auto;transform:none}
 </style>
 </head>
 <body>
@@ -770,11 +773,11 @@
       </article>
       <article class="feat f2 rev">
         <div class="feat-txt"><h3 class="feat-name">Mobile first</h3><p class="feat-sub">Your day on one screen</p><p>Sorted by due date. Swipe right to finish a task.</p></div>
-        <div class="crop"><img src="img/m-board.png?v=1021b" alt="The Keeper list on a phone, with drafts ready to approve" loading="lazy" style="width:72%;left:14%;transform:translate(0%,-29%)"></div>
+        <div class="crop fit"><img src="img/m-list-feature.png?v=1025a" alt="The Keeper to-do list on a phone: status tabs, filters and tasks sorted by due date" loading="lazy"></div>
       </article>
       <article class="feat f3 rev">
         <div class="feat-txt"><h3 class="feat-name">Voice mode</h3><p class="feat-sub">Say it, don’t type it</p><p>Tap once and talk. Keeper turns a ramble into a clean task and reads it back.</p></div>
-        <div class="crop"><img src="img/m-voice.png?v=1021b" alt="Keeper voice capture screen with a large microphone button" loading="lazy" style="width:78%;left:11%;transform:translate(0%,-23.5%)"></div>
+        <div class="crop fit voice"><img src="img/m-voice-feature.png?v=1025a" alt="Keeper voice capture screen with a large microphone button" loading="lazy"></div>
       </article>
     </div>
     <div class="sec-cta center"><a class="btn primary" href="index.html">Try Keeper free</a></div>
