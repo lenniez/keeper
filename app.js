@@ -1118,7 +1118,7 @@
       const d = taskDetail(t);
       layer.innerHTML = `<div class="scrim" data-action="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Task details" data-tid="${t.id}">
         <div class="grab"></div>
-        <div class="sh-h"><button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
+        <div class="sh-h">${UI.sheet.from ? `<button class="back" data-action="sheet-back" aria-label="Back to ${UI.sheet.from === 'agents' ? 'Ready for you' : 'To review'}">${ic('back')}</button><span class="lab">${UI.sheet.from === 'agents' ? 'Ready for you' : 'To review'}</span>` : ''}<button class="x" data-action="close" aria-label="Close">${ic('x')}</button></div>
         <div class="sh-body">${d.body}</div>
         <div class="sh-foot">${d.foot}</div>
       </div>`;
@@ -1184,6 +1184,12 @@
   }
   function openSheet(s) { UI.editField = null; return openSheet0(s); }
   function openSheet0(s) { UI.sheet = s; const l = $('#layer'); if (l) l.classList.remove('open'); renderLayer(); }
+  /* a task opened from a review list returns to that list (if anything is left in it) */
+  function backToList() {
+    const from = UI.sheet && UI.sheet.from;
+    const left = from === 'agents' ? agentTasks().filter(t => { const st = agentState(t); return st === 'draft' || st === 'times'; }).length : from === 'review' ? toReview().length : 0;
+    if (from && left) openSheet({ type: from }); else closeSheet();
+  }
   function closeSheet() {
     stopListening();
     const l = $('#layer'); if (!l) return;
@@ -1545,9 +1551,12 @@
       case 'f-close': UI.search = false; save(); render(); break;
       case 'open':
         if (mode() === 'desktop' && a.closest('#feedPage')) { UI.feedSel = a.dataset.id; refresh(); break; }
-        openSheet({ type: 'task', id: a.dataset.id }); break;
+        { const from = UI.sheet && (UI.sheet.type === 'agents' || UI.sheet.type === 'review') ? UI.sheet.type : UI.sheet && UI.sheet.type === 'task' && UI.sheet.id === a.dataset.id ? UI.sheet.from : (UI.sheet && UI.sheet.type === 'src' ? UI.sheet.from : null);
+          openSheet({ type: 'task', id: a.dataset.id, from }); } break;
       case 'done-toggle': S.doneOpen = !S.doneOpen; save(); refresh(); break;
-      case 'close': if (UI.sheet && UI.sheet.type === 'voice' && UI.prevAsk && UI.ask) { UI.prevAsk = false; UI.sheet = { type: 'ask' }; renderLayer(true); break; } closeSheet(); break;
+      case 'sheet-back': backToList(); break;
+      case 'close': if (UI.sheet && UI.sheet.type === 'task' && UI.sheet.from) { backToList(); break; }
+        if (UI.sheet && UI.sheet.type === 'voice' && UI.prevAsk && UI.ask) { UI.prevAsk = false; UI.sheet = { type: 'ask' }; renderLayer(true); break; } closeSheet(); break;
       case 'set-status': { const t = task(tidOf(a)); t.status = a.dataset.v; if (t.status !== 'done') { t.doneBy = null; if (t.detect) t.detect.undone = true; } UI.editField = null; save(); refresh(); renderLayer(true); break; }
       case 'chg-apply': { const t = task(tidOf(a)); applyChange(t, false); t.fresh = true; save(); refresh(); renderLayer(true); setTimeout(() => { t.fresh = false; refresh(); }, 2500); break; }
       case 'chg-keep': { const t = task(tidOf(a)); if (t.change) t.change.state = 'kept'; save(); refresh(); renderLayer(true); break; }
@@ -1560,7 +1569,7 @@
       case 'rv-dismiss': { const t = task(tidOf(a)); t.dismissed = true; t.triage = false; save(); afterReview(); break; }
       case 'review': openSheet({ type: 'review' }); break;
       case 'agent-list': openSheet({ type: 'agents' }); break;
-      case 'open-agent': openSheet({ type: 'task', id: a.dataset.id }); setTimeout(() => { const el = $('.sheet #agent'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 360); break;
+      case 'open-agent': openSheet({ type: 'task', id: a.dataset.id, from: 'agents' }); setTimeout(() => { const el = $('.sheet #agent'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 360); break;
       case 'ag-set': S.agent = Object.assign(AG(), { [a.dataset.k]: a.dataset.v }); save(); applyAgent(); { const m = $('.src-page'); if (m) m.outerHTML = sourcesHTML(); } break;
       case 'go-agent': S.screen = 'sources'; UI.sheet = null; save(); render(); break;
       case 'ag-slot': { const t = task(tidOf(a)); t.agent = Object.assign({}, t.agent, { slot: +a.dataset.i, text: null }); save(); refresh(); renderLayer(true); break; }
@@ -1578,7 +1587,7 @@
       case 'f-due': toggleToken({ type: 'due', value: a.dataset.v, label: a.dataset.v === 'today' ? 'Due today' : 'Overdue' }); break;
       case 'f-clear': S.filter = { text: '', tokens: [] }; save(); render(); break;
       case 'f-clear-text': S.filter.text = ''; save(); { const i = $('#fInput'); if (i) { i.value = ''; i.focus(); } a.hidden = true; } refresh(); break;
-      case 'src': openSheet({ type: 'src', id: a.dataset.id }); break;
+      case 'src': openSheet({ type: 'src', id: a.dataset.id, from: UI.sheet && UI.sheet.from }); break;
       case 'expand': { const id = tidOf(a); UI.expand[id] = !UI.expand[id]; if (UI.sheet) renderLayer(true); refresh(); break; }
       case 'connect-allow': finishConnect(); break;
       case 'connect-cancel': closeSheet(); break;
