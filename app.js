@@ -388,7 +388,7 @@
           <button type="button" class="ob-btn yes ${p === 'keep' ? 'on' : ''}" data-action="ob-pick" data-v="keep" aria-pressed="${p === 'keep'}">${ic('check')}Keep</button>
         </div></article>`;
     }).join('');
-    return `<div class="onb"><div class="onb-inner">${steps(3)}
+    return `<div class="onb rvstep"><div class="onb-inner">${steps(3)}
       <h2>Keeper found ${list.length} tasks</h2>
       <p class="lead">Keep the ones you owe someone. Dismissed tasks won’t be added to your list.</p>
       <div class="ob-bar"><span>${decided} of ${list.length} reviewed</span><button type="button" class="linkish" data-action="ob-all">Keep all</button></div>
