@@ -1120,3 +1120,8 @@ body{background:#EEF0EE}
 .chg-acts .btn-ghost,.chg-acts .btn-primary{padding:8px 14px;font-size:15px;min-height:0}
 .device.is-mobile .chg-diff{font-size:17px}
 .det-h{align-items:flex-start}.det-h .icon{margin-top:2px;flex:none}
+/* desktop: Filter + due chips sit right above the list */
+.d-tools{display:flex;align-items:center;gap:8px;margin:4px 0 10px}
+.d-tools .sum{margin:0;flex-wrap:nowrap}
+.d-tools .sum-btn{height:34px;display:inline-flex;align-items:center;white-space:nowrap}
+.d-tools .icon-btn.labeled{height:34px}

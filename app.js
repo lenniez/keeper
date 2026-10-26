@@ -642,10 +642,12 @@
     let main;
     if (S.screen === 'feed') main = `<div class="screen">${feedHead()}<div id="feedPage">${feedPageHTML()}</div></div>`;
     else if (S.screen === 'sources') main = `<div class="screen"><div class="page-h"><h1>Settings</h1></div>${sourcesHTML()}</div>`;
-    else main = `<div class="d-head">${greeting()}<div class="d-acts"><div class="sum" id="summary">${summary()}</div>${searchBtn()}
+    else main = `<div class="d-head">${greeting()}<div class="d-acts">
         <button type="button" class="btn-inc" data-action="inc">${ic('feed')}Live Feed${S.unseen ? ` <b id="incCount">${S.unseen} new</b>` : '<b id="incCount"></b>'}</button>
         ${vision() ? `<button class="btn-ask" data-action="ask">${ic('plus')} Add task</button>` : ''}</div></div>
-      ${filterBar()}<div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
+      <div id="rvSlot">${reviewStrip()}</div><div id="agSlot">${agentStrip()}</div>
+      <div class="d-tools">${searchBtn()}<div class="sum" id="summary">${summary()}</div></div>
+      ${filterBar()}
       <div class="board ${S.doneOpen ? '' : 'done-collapsed'}" id="board">${boardHTML()}</div>`;
     return `<div class="d-layout">
       <aside class="d-side">
