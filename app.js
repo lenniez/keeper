@@ -1192,6 +1192,12 @@
     const left = from === 'agents' ? agentTasks().filter(t => { const st = agentState(t); return st === 'draft' || st === 'times'; }).length : from === 'review' ? toReview().length : 0;
     if (from && left) openSheet({ type: from }); else closeSheet();
   }
+  /* re-render onboarding without losing the scroll position of the page or the review list */
+  function keepOnbScroll(fn) {
+    const o = $('.onb'), l = $('.ob-list'); const so = o ? o.scrollTop : 0, sl = l ? l.scrollTop : 0;
+    fn();
+    const o2 = $('.onb'), l2 = $('.ob-list'); if (o2) o2.scrollTop = so; if (l2) l2.scrollTop = sl;
+  }
   function closeSheet() {
     stopListening();
     const l = $('#layer'); if (!l) return;
@@ -1525,8 +1531,8 @@
           S.step = 3; S.onbPick = {}; save(); render();
         }, 2600);
         break;
-      case 'ob-pick': { const id = tidOf(a); S.onbPick = S.onbPick || {}; S.onbPick[id] = S.onbPick[id] === a.dataset.v ? undefined : a.dataset.v; save(); const sc = $('.onb') && $('.onb').scrollTop; render(); if ($('.onb')) $('.onb').scrollTop = sc; break; }
-      case 'ob-all': { S.onbPick = S.onbPick || {}; foundTasks().forEach(t => { if (!S.onbPick[t.id]) S.onbPick[t.id] = 'keep'; }); save(); const sc = $('.onb') && $('.onb').scrollTop; render(); if ($('.onb')) $('.onb').scrollTop = sc; break; }
+      case 'ob-pick': { const id = tidOf(a); S.onbPick = S.onbPick || {}; S.onbPick[id] = S.onbPick[id] === a.dataset.v ? undefined : a.dataset.v; save(); keepOnbScroll(render); break; }
+      case 'ob-all': { S.onbPick = S.onbPick || {}; foundTasks().forEach(t => { if (!S.onbPick[t.id]) S.onbPick[t.id] = 'keep'; }); save(); keepOnbScroll(render); break; }
       case 'ob-finish': {
         const pick = S.onbPick || {}; let kept = 0;
         foundTasks().forEach(t => { const p = pick[t.id]; if (p === 'keep') { t.triage = false; t.low = false; kept++; } else if (p === 'skip') { t.dismissed = true; t.triage = false; } else t.triage = true; });
