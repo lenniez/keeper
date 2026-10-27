@@ -890,7 +890,7 @@
     return `<section class="det-block ${t.detect.kind}"><div class="det-h">${ic('check')}<b>${head}</b></div>
       <div class="det-ev">${srcIc(t.detect.via)}<span>${esc(t.detect.proof)} · ${esc(when)}</span></div>
       ${t.detect.kind === 'partial' ? `<div class="det-rem"><b>Still to do</b>${esc(t.detect.remaining)}</div>` : ''}
-      ${t.status !== 'done' && t.detect.kind === 'done' ? `<p class="det-sub">${vision() && AG().complete === 'auto' ? 'Auto-complete is on.' : 'Confirm it to move it to Done.'}</p>` : ''}</section>`;
+      ${t.status !== 'done' && t.detect.kind === 'done' ? `<p class="det-sub">${AG().complete === 'auto' ? 'Auto-complete is on.' : 'Confirm it to move it to Done.'}</p>` : ''}</section>`;
   }
   function taskDetail(t) {
     const req = t.requester && t.requester !== 'maya' ? `<span class="person">${av(t.requester)}${esc(personName(t.requester))}</span>` : `<span class="person">${av('maya')}You</span>`;
@@ -959,11 +959,11 @@
   function fmtDue(v) { return v ? dueInfo(v, 'upnext').label : 'No date'; }
   function applyDetect() {
     let changed = false;
-    S.tasks.forEach(t => { if (vision() && AG().complete === 'auto' && pendingChange(t)) { applyChange(t, true); changed = true; } });
+    S.tasks.forEach(t => { if (AG().complete === 'auto' && pendingChange(t)) { applyChange(t, true); changed = true; } });
     S.tasks.forEach(t => {
       if (!detected(t)) return;
       if (t.status === 'upnext') { t.status = 'inprogress'; changed = true; }
-      if (vision() && AG().complete === 'auto' && t.detect.kind === 'done' && t.status !== 'done' && !t.detect.undone) { t.status = 'done'; t.doneBy = 'keeper'; changed = true; }
+      if (AG().complete === 'auto' && t.detect.kind === 'done' && t.status !== 'done' && !t.detect.undone) { t.status = 'done'; t.doneBy = 'keeper'; changed = true; }
     });
     if (changed) save();
   }
@@ -1107,9 +1107,14 @@
     return `<button type="button" class="ag-strip" data-action="agent-list"><span class="ag-ic">${ic('spark')}</span><span class="o-txt"><b>Approve Keeper’s work</b><span>${bits.join(' · ')}.${todo ? ' Review and send.' : ''}</span></span>${ic('chev')}</button>`;
   }
   function agentSettings() {
-    if (!vision()) return '';
     const g = AG();
     const opt = (key, v, label, sub, dis) => `<button type="button" class="ag-opt ${g[key] === v ? 'on' : ''}" data-action="ag-set" data-k="${key}" data-v="${v}" aria-pressed="${g[key] === v}" ${dis ? 'disabled' : ''}><span class="radio"></span><span class="vt"><b>${label}</b><span>${sub}</span></span></button>`;
+    const auto = `<section class="set-sec"><h2 class="sec-h">Keeper Agent: Auto-complete tasks</h2>
+        <p class="sec-sub">When Keeper sees in your channels that a task is done or has changed, like a reply you sent with the file attached or a client moving a due date.</p>
+        ${opt('complete', 'ask', 'Ask me first', 'Keeper flags completions and changes; you confirm')}
+        ${opt('complete', 'auto', 'Automatically', 'Keeper applies them for you. You can undo anytime')}
+      </section>`;
+    if (!vision()) return auto;
     return `<section class="set-sec"><h2 class="sec-h">Keeper Agent: General replies</h2>
         <p class="sec-sub">How Keeper handles replies to emails, Slack and texts.</p>
         ${opt('draft', 'off', 'Off', 'Keeper only tracks tasks')}
