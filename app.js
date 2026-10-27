@@ -974,7 +974,6 @@
     if (!t) { save(); return; }
     t.detect = { kind: DETECT_LIVE.kind, via: DETECT_LIVE.via, proof: DETECT_LIVE.proof, remaining: '', at: Date.now() };
     t.fresh = true; applyDetect(); save(); refresh(); if (UI.sheet && UI.sheet.type === 'task') renderLayer(true);
-    const auto = t.status === 'done';
     setTimeout(() => { t.fresh = false; refresh(); }, 6000);
   }
   function applyAgent() {
