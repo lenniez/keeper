@@ -975,7 +975,6 @@
     t.detect = { kind: DETECT_LIVE.kind, via: DETECT_LIVE.via, proof: DETECT_LIVE.proof, remaining: '', at: Date.now() };
     t.fresh = true; applyDetect(); save(); refresh(); if (UI.sheet && UI.sheet.type === 'task') renderLayer(true);
     const auto = t.status === 'done';
-    toast(esc(t.title), { title: auto ? 'Completed by Keeper' : 'Looks done', id: t.id, sub: srcIc(t.detect.via) + esc(t.detect.proof) });
     setTimeout(() => { t.fresh = false; refresh(); }, 6000);
   }
   function applyAgent() {
@@ -1457,7 +1456,6 @@
         if (!orig) continue;
         orig.also = (orig.also || []).concat({ source: tpl.source, snippet: tpl.snippet, captured: Date.now() });
         orig.fresh = true; save(); refresh();
-        toast(esc(orig.title), { title: 'Duplicate merged', id: orig.id, sub: srcIc(tpl.source) + 'Same request from ' + esc(personName(tpl.requester)) + ' · ' + esc(D.SOURCES[tpl.source].label) });
         setTimeout(() => { orig.fresh = false; refresh(); }, 6000);
         return;
       }
@@ -1563,7 +1561,7 @@
         const pick = S.onbPick || {}; let kept = 0;
         foundTasks().forEach(t => { const p = pick[t.id]; if (p === 'keep') { t.triage = false; t.low = false; kept++; } else if (p === 'skip') { t.dismissed = true; t.triage = false; } else t.triage = true; });
         S.onboarded = true; S.screen = 'board'; S.onbPick = null; save(); render();
-        toast(`${kept} task${kept === 1 ? '' : 's'} added to your list`, { title: 'You’re all set' });
+        toast(`${kept} task${kept === 1 ? '' : 's'} added to your list`);
         clearTimeout(liveTimer);
         liveTimer = setTimeout(() => { if (!S.onboarded) return; firstArrival(); scheduleLive(); }, 20000);
         setTimeout(detectEvent, 45000);
