@@ -826,16 +826,37 @@
   const voiceQuality = v => /natural|neural/i.test(v.name) ? 'Natural' : /premium/i.test(v.name) ? 'Premium' : /enhanced/i.test(v.name) ? 'Enhanced' : /google/i.test(v.name) ? 'Online' : 'Standard';
   const voiceName = v => v.name.replace(/^Microsoft\s+/i, '').replace(/\s*Online\s*/i, ' ').replace(/\s*\((natural|premium|enhanced)\)/i, '').replace(/\s+-\s+English.*$/i, '').trim();
   const SAMPLE = 'Hi Maya! I just caught a new task from Jen at Northwind. She needs the final logo files by Friday. Want me to add it to Up Next?';
+  /* resilient speech: Chrome can go silent when speak() follows cancel() or a mic session,
+     and online voices can stall. Delay after cancel, nudge resume(), and fall back to a
+     local voice if nothing starts within ~1.5s. */
+  let speakSeq = 0;
+  function localVoice() { return voiceList().find(x => x.localService) || null; }
   function speakWith(text, v, onend) {
-    if (!synth) return;
-    try {
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      if (v) { u.voice = v; u.lang = v.lang; }
-      u.rate = 1; u.pitch = 1;
-      if (onend) u.onend = onend;
-      synth.speak(u);
-    } catch (e) {}
+    if (!synth) { if (onend) onend(); return; }
+    const seq = ++speakSeq; let started = false, finished = false;
+    const done = () => { if (finished || seq !== speakSeq) return; finished = true; if (onend) onend(); };
+    const go = voice => {
+      try {
+        const u = new SpeechSynthesisUtterance(text);
+        if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-US';
+        u.rate = 1; u.pitch = 1; u.volume = 1;
+        u.onstart = () => { started = true; };
+        u.onend = done; u.onerror = () => { if (!started) return; done(); };
+        synth.resume();
+        synth.speak(u);
+      } catch (e) { done(); }
+    };
+    try { synth.cancel(); } catch (e) {}
+    setTimeout(() => {
+      if (seq !== speakSeq) return;
+      go(v);
+      setTimeout(() => {
+        if (seq !== speakSeq || started || finished) return;
+        try { synth.cancel(); } catch (e) {}
+        const lv = localVoice();
+        setTimeout(() => { if (seq === speakSeq && !finished) go(lv && (!v || lv.name !== v.name) ? lv : null); }, 60);
+      }, 1500);
+    }, 80);
   }
   function voiceSheetHTML() {
     const list = voiceList(), cur = currentVoice();
@@ -1255,7 +1276,7 @@
     A.speaking = true;
     if (rec && A.listening) { try { rec.abort(); } catch (e) {} }
     speakWith(text, currentVoice(), resume);
-    setTimeout(() => { if (A.speaking && !synth.speaking) resume(); }, 8000);
+    setTimeout(() => { if (A.speaking && !synth.speaking && !synth.pending) resume(); }, 9000);
   }
   const fn = k => personName(k).split(' ')[0];
   function spokenDue(days) { if (days == null) return 'no due date'; const l = dueInfo(iso(addDays(days)), 'upnext').label; return 'due ' + (l === 'Today' || l === 'Tomorrow' ? l.toLowerCase() : Math.abs(days) < 7 ? l.replace(/^(\w{3})$/, m => ({ Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' })[m] || m) : addDays(days).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })); }
