@@ -1107,13 +1107,13 @@
   function agentSettings() {
     const g = AG();
     const opt = (key, v, label, sub, dis) => `<button type="button" class="ag-opt ${g[key] === v ? 'on' : ''}" data-action="ag-set" data-k="${key}" data-v="${v}" aria-pressed="${g[key] === v}" ${dis ? 'disabled' : ''}><span class="radio"></span><span class="vt"><b>${label}</b><span>${sub}</span></span></button>`;
-    const auto = `<section class="set-sec"><h2 class="sec-h">Keeper Agent: Auto-complete tasks</h2>
+    const auto = `<section class="set-sec"><h2 class="sec-h">Auto-complete tasks</h2>
         <p class="sec-sub">When Keeper sees in your channels that a task is done or has changed, like a reply you sent with the file attached or a client moving a due date.</p>
         ${opt('complete', 'ask', 'Ask me first', 'Keeper flags completions and changes; you confirm')}
         ${opt('complete', 'auto', 'Automatically', 'Keeper applies them for you. You can undo anytime')}
       </section>`;
     if (!vision()) return auto;
-    return `<section class="set-sec"><h2 class="sec-h">Keeper Agent: General replies</h2>
+    return auto + `<section class="set-sec"><h2 class="sec-h">Keeper Agent: General replies</h2>
         <p class="sec-sub">How Keeper handles replies to emails, Slack and texts.</p>
         ${opt('draft', 'off', 'Off', 'Keeper only tracks tasks')}
         ${opt('draft', 'review', 'Draft for my review', 'Keeper writes the reply; you edit and send it')}
@@ -1126,11 +1126,6 @@
         ${opt('schedule', 'off', 'Off', 'No scheduling help')}
         ${opt('schedule', 'suggest', 'Find times for me to book', 'Keeper picks free slots; you confirm with one tap')}
         ${opt('schedule', 'auto', 'Book automatically', 'Keeper books the first free slot and sends the invite', !calOn())}
-      </section>
-      <section class="set-sec"><h2 class="sec-h">Keeper Agent: Auto-complete tasks</h2>
-        <p class="sec-sub">When Keeper sees in your channels that a task is done or has changed, like a reply you sent with the file attached or a client moving a due date.</p>
-        ${opt('complete', 'ask', 'Ask me first', 'Keeper flags completions and changes; you confirm')}
-        ${opt('complete', 'auto', 'Automatically', 'Keeper applies them for you. You can undo anytime')}
       </section>
       <p class="note">Automatic actions only go to people you’ve worked with before, and everything Keeper sends, books or completes is logged on the task.</p>`;
   }
