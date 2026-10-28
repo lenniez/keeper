@@ -1121,7 +1121,7 @@
       </section>
       <section class="set-sec"><h2 class="sec-h">Keeper Agent: Scheduling</h2>
         <p class="sec-sub">Keeper finds free time on your calendar, books the meeting and sends the invite.</p>
-        <div class="chan cal-row ${calOn() ? 'on' : ''}"><span class="src-ic" style="--c:#1A73E8">${ic('cal')}</span><span class="chan-txt"><b>Google Calendar</b><span>${calOn() ? 'Connected · maya@mayastudio.co' : 'Not connected'}</span></span>
+        <div class="chan cal-row ${calOn() ? 'on' : ''}"><span class="src-ic" style="--c:#1A73E8">${ic('cal')}</span><span class="chan-txt"><b>Google Calendar</b><span class="cal-sub">${calOn() ? 'maya@mayastudio.co' : 'Not connected'}</span></span>
           <button type="button" class="${calOn() ? 'btn-ghost' : 'btn-primary'} cal-btn" data-action="${calOn() ? 'cal-disconnect' : 'cal-connect'}">${calOn() ? 'Disconnect' : 'Connect'}</button></div>
         ${opt('schedule', 'off', 'Off', 'No scheduling help')}
         ${opt('schedule', 'suggest', 'Find times for me to book', 'Keeper picks free slots; you confirm with one tap')}
